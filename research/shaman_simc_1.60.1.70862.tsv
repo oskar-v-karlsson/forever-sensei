@@ -1,0 +1,567 @@
+id	name	rank	level	passive	talent	cast	cooldown	resource	range	duration	labels	description
+107	Block	Passive	1	passive								Gives a chance to block enemy melee and ranged attacks.
+324	Lightning Shield	Rank 1	8					45 Base Mana (0) (id=169691)		600 seconds	24: Shaman Spells	The caster is surrounded by $n balls of lightning.  When a spell, melee or ranged attack hits the caster, the attacker will be struck for $26364s1 Nature damage.  This expends one lightning ball.  Only one ball will fire every few seconds.  Lasts $d.
+325	Lightning Shield	Rank 2	16					80 Base Mana (0) (id=175970)		600 seconds	24: Shaman Spells	The caster is surrounded by $n balls of lightning.  When a spell, melee or ranged attack hits the caster, the attacker will be struck for $26365s1 Nature damage.  This expends one lightning ball.  Only one ball will fire every few seconds.  Lasts $d.
+331	Healing Wave	Rank 1	1 (max 5)			1.5 seconds		25 Base Mana (0) (id=169692)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+332	Healing Wave	Rank 2	6 (max 11)			2 seconds		45 Base Mana (0) (id=169693)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+370	Purge	Rank 1	12					10% Base Mana (0) (id=169603)	30 yards		24: Shaman Spells	Purges the enemy target, removing $m1 magic $leffect:effects;.
+403	Lightning Bolt	Rank 1	1 (max 6)			1.5 seconds		15 Base Mana (0) (id=169133)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+421	Chain Lightning	Rank 1	32 (max 37)			2.5 seconds	6 seconds	245 Base Mana (0) (id=169329)	30 yards		24: Shaman Spells	Hurls a lightning bolt at the enemy, dealing $s1 Nature damage and then jumping to additional nearby enemies.  Each jump reduces the damage by $?a415096[20%][30%].  Affects $x1 total targets.
+526	Cure Poison		16					9% Base Mana (0) (id=169334)	30 yards		24: Shaman Spells	Cures $s1 poison $leffect:effects; on the target.
+529	Lightning Bolt	Rank 2	8 (max 13)			2 seconds		30 Base Mana (0) (id=169516)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+547	Healing Wave	Rank 3	12 (max 17)			2.5 seconds		80 Base Mana (0) (id=169227)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+548	Lightning Bolt	Rank 3	14 (max 19)			2.5 seconds		45 Base Mana (0) (id=169228)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+674	Dual Wield	Passive		passive								Allows one-hand and off-hand weapons to be equipped in the off-hand.
+905	Lightning Shield	Rank 3	24					125 Base Mana (0) (id=169687)		600 seconds	24: Shaman Spells	The caster is surrounded by $n balls of lightning.  When a spell, melee or ranged attack hits the caster, the attacker will be struck for $26366s1 Nature damage.  This expends one lightning ball.  Only one ball will fire every few seconds.  Lasts $d.
+913	Healing Wave	Rank 4	18 (max 23)			3 seconds		155 Base Mana (0) (id=169371)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+915	Lightning Bolt	Rank 4	20 (max 25)			2.5 seconds		60 Base Mana (0) (id=169467)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+930	Chain Lightning	Rank 2	40 (max 45)			2.5 seconds	6 seconds	360 Base Mana (0) (id=169436)	30 yards		24: Shaman Spells	Hurls a lightning bolt at the enemy, dealing $s1 Nature damage and then jumping to additional nearby enemies.  Each jump reduces the damage by $?a415096[20%][30%].  Affects $x1 total targets.
+939	Healing Wave	Rank 5	24 (max 29)			3 seconds		200 Base Mana (0) (id=169664)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+943	Lightning Bolt	Rank 5	26 (max 31)			2.5 seconds		85 Base Mana (0) (id=169525)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+945	Lightning Shield	Rank 4	32					180 Base Mana (0) (id=175642)		600 seconds	24: Shaman Spells	The caster is surrounded by $n balls of lightning.  When a spell, melee or ranged attack hits the caster, the attacker will be struck for $26367s1 Nature damage.  This expends one lightning ball.  Only one ball will fire every few seconds.  Lasts $d.
+959	Healing Wave	Rank 6	32 (max 37)			3 seconds		265 Base Mana (0) (id=169911)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+1064	Chain Heal	Rank 1	40 (max 45)			2.5 seconds		260 Base Mana (0) (id=170020)	40 yards		24: Shaman Spells	Heals the friendly target for $s1, then jumps to heal additional nearby targets.  If cast on a party member, the heal will only jump to other party members.  Each jump is $?a415096[65%][50%] as effective as the previous target.  Heals $x1 total targets.
+2008	Ancestral Spirit	Rank 1	12			10 seconds		90% Base Mana (0) (id=171026)	30 yards		24: Shaman Spells	Returns the spirit to the body, restoring a dead target to life with $s1 health and $q1 mana.  Cannot be cast when in combat.
+2484	Earthbind Totem		6				15 seconds	6% Base Mana (0) (id=171174)		45 seconds	24: Shaman Spells	Summons an Earthbind Totem with $s1 health at the feet of the caster for $d that slows the movement speed of enemies within $3600a1 yards.
+2645	Ghost Wolf		20			3 seconds		100 Base Mana (0) (id=171027)		Aura (infinite)	24: Shaman Spells	Turns the Shaman into a Ghost Wolf, increasing speed by $s2%.  Only useable outdoors.
+2860	Chain Lightning	Rank 3	48 (max 53)			2.5 seconds	6 seconds	425 Base Mana (0) (id=171263)	30 yards		24: Shaman Spells	Hurls a lightning bolt at the enemy, dealing $s1 Nature damage and then jumping to additional nearby enemies.  Each jump reduces the damage by $?a415096[20%][30%].  Affects $x1 total targets.
+2870	Cure Disease		22					9% Base Mana (0) (id=170576)	30 yards		24: Shaman Spells	Cures $s1 $ldisease:diseases; on the target.
+3599	Searing Totem	Rank 1	10					25 Base Mana (0) (id=171738)		30 seconds	24: Shaman Spells	Summons a Searing Totem with $s1 health at your feet for $d that repeatedly attacks an enemy within $3606r yards for $3606s1 Fire damage.
+3600	Earthbind		6							5 seconds	24: Shaman Spells	
+3606	Attack	Rank 1	10			2.2 seconds			20 yards		24: Shaman Spells	
+5394	Healing Stream Totem	Rank 1	20					40 Base Mana (0) (id=173294)		300 seconds	24: Shaman Spells	Summons a Healing Stream Totem with $s1 health at the feet of the caster for $d that heals group members within $5672a1 yards for $5672s1 every $5672t1 seconds.
+5672	Healing Stream	Rank 1	20								24: Shaman Spells	
+5675	Mana Spring Totem	Rank 1	26					40 Base Mana (0) (id=174631)		300 seconds	24: Shaman Spells	Summons a Mana Spring Totem with $s1 health at the feet of the caster for $d that restores $5677s1 mana every $5677t1 seconds to group members within $5677a1 yards.
+5677	Mana Spring	Rank 1	26								24: Shaman Spells	
+5729	Stoneclaw Totem Effect	Rank 1	8									
+5730	Stoneclaw Totem	Rank 1	8				30 seconds	15 Base Mana (0) (id=173115)		15 seconds	24: Shaman Spells	Summons a Stoneclaw Totem with $s1 health at the feet of the caster for $d that taunts creatures within $5729a1 yards to attack it.
+6041	Lightning Bolt	Rank 6	32 (max 37)			2.5 seconds		110 Base Mana (0) (id=173988)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+6196	Far Sight		26			2 seconds		80 Base Mana (0) (id=175785)	50000 yards	60 seconds		Changes the caster's viewpoint to the targeted location.  Lasts $d.  Only useable outdoors.
+6350	Attack	Rank 2	20			2.2 seconds			20 yards		24: Shaman Spells	
+6351	Attack	Rank 3	30			2.2 seconds			20 yards		24: Shaman Spells	
+6352	Attack	Rank 4	40			2.2 seconds			20 yards		24: Shaman Spells	
+6363	Searing Totem	Rank 2	20					45 Base Mana (0) (id=174249)		35 seconds	24: Shaman Spells	Summons a Searing Totem with $s1 health at your feet for $d that repeatedly attacks an enemy within $6350r yards for $6350s1 Fire damage.
+6364	Searing Totem	Rank 3	30					75 Base Mana (0) (id=174435)		40 seconds	24: Shaman Spells	Summons a Searing Totem with $s1 health at your feet for $d that repeatedly attacks an enemy within $6351r yards for $6351s1 Fire damage.
+6365	Searing Totem	Rank 4	40					110 Base Mana (0) (id=174272)		45 seconds	24: Shaman Spells	Summons a Searing Totem with $s1 health at your feet for $d that repeatedly attacks an enemy within $6352r yards for $6352s1 Fire damage.
+6371	Healing Stream	Rank 2	30								24: Shaman Spells	
+6372	Healing Stream	Rank 3	40								24: Shaman Spells	
+6375	Healing Stream Totem	Rank 2	30					50 Base Mana (0) (id=174712)		300 seconds	24: Shaman Spells	Summons a Healing Stream Totem with $s1 health at the feet of the caster for $d that heals group members within $6371a1 yards for $6371s1 every $6371t1 seconds.
+6377	Healing Stream Totem	Rank 3	40					60 Base Mana (0) (id=174727)		300 seconds	24: Shaman Spells	Summons a Healing Stream Totem with $s1 health at the feet of the caster for $d that heals group members within $6372a1 yards for $6372s1 every $6372t1 seconds.
+6390	Stoneclaw Totem	Rank 2	18				30 seconds	30 Base Mana (0) (id=174273)		15 seconds	24: Shaman Spells	Summons a Stoneclaw Totem with $s1 health at the feet of the caster for $d that taunts creatures within $6393a1 yards to attack it.
+6391	Stoneclaw Totem	Rank 3	28				30 seconds	55 Base Mana (0) (id=174289)		15 seconds	24: Shaman Spells	Summons a Stoneclaw Totem with $s1 health at the feet of the caster for $d that taunts creatures within $6394a1 yards to attack it.
+6392	Stoneclaw Totem	Rank 4	38				30 seconds	75 Base Mana (0) (id=174140)		15 seconds	24: Shaman Spells	Summons a Stoneclaw Totem with $s1 health at the feet of the caster for $d that taunts creatures within $6395a1 yards to attack it.
+6393	Stoneclaw Totem Effect	Rank 2	18									
+6394	Stoneclaw Totem Effect	Rank 3	28									
+6395	Stoneclaw Totem Effect	Rank 4	38								24: Shaman Spells	
+6495	Sentry Totem		34					65 Base Mana (0) (id=173909)		300 seconds	24: Shaman Spells	Summons an immobile Sentry Totem with $s1 health at your feet for $d that allows vision of nearby area and warns of enemies that attack it. Right-Click on buff to switch back and forth between totem sight and Shaman sight.
+8004	Lesser Healing Wave	Rank 1	20 (max 25)			1.5 seconds		105 Base Mana (0) (id=175091)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+8005	Healing Wave	Rank 7	40 (max 45)			3 seconds		340 Base Mana (0) (id=175092)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+8008	Lesser Healing Wave	Rank 2	28 (max 33)			1.5 seconds		145 Base Mana (0) (id=175826)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+8010	Lesser Healing Wave	Rank 3	36 (max 41)			1.5 seconds		185 Base Mana (0) (id=175147)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+8012	Purge	Rank 2	32					10% Base Mana (0) (id=175073)	30 yards		24: Shaman Spells	Purges the enemy target, removing $m1 beneficial magic $leffect:effects;.
+8017	Rockbiter Weapon	Rank 1	1					15 Base Mana (0) (id=175051)				Imbue the Shaman's weapon, increasing melee attack power by $10400s1 and allowing melee attacks to cause additional threat when using that weapon.  Lasts for 60 minutes.
+8018	Rockbiter Weapon	Rank 2	8					25 Base Mana (0) (id=174251)				Imbue the Shaman's weapon, increasing melee attack power by $15567s1 and allowing melee attacks to cause additional threat when using that weapon.  Lasts for 60 minutes.
+8019	Rockbiter Weapon	Rank 3	16					50 Base Mana (0) (id=176269)				Imbue the Shaman's weapon, increasing melee attack power by $15568s1 and allowing melee attacks to cause additional threat when using that weapon.  Lasts for 60 minutes.
+8024	Flametongue Weapon	Rank 1	10					30 Base Mana (0) (id=175208)				Imbue the Shaman's weapon with fire. Each hit causes ${$8026m1/77-1+($29469m1)} to ${$8026m1/25+($29469m1)} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. When applied to main hand, disables any benefit you personally receive from Flametongue Totem. Lasts for 60 minutes.
+8026	Flametongue Weapon Proc	Rank 1	10 (max 16)						100 yards		24: Shaman Spells	
+8027	Flametongue Weapon	Rank 2	18					55 Base Mana (0) (id=175101)				Imbue the Shaman's weapon with fire. Each hit causes ${$8028m1/77-1+($29470m1)} to ${$8028m1/25+($29470m1)} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. When applied to main hand, disables any benefit you personally receive from Flametongue Totem. Lasts for 60 minutes.
+8028	Flametongue Weapon Proc	Rank 2	18 (max 24)						100 yards		24: Shaman Spells	
+8029	Flametongue Weapon Proc	Rank 3	26 (max 34)						100 yards		24: Shaman Spells	
+8030	Flametongue Weapon	Rank 3	26					80 Base Mana (0) (id=175366)				Imbue the Shaman's weapon with fire. Each hit causes ${$8029m1/77-1+($10444m1)} to ${$8029m1/25+($10444m1)} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. When applied to main hand, disables any benefit you personally receive from Flametongue Totem. Lasts for 60 minutes.
+8033	Frostbrand Weapon	Rank 1	20					60 Base Mana (0) (id=175655)				Imbue the Shaman's weapon with frost.  Each hit has a chance of causing $8034s2 additional Frost damage and slowing the target's movement speed by $8034s1% for $8034d.  Lasts for 60 minutes.
+8034	Frostbrand Attack	Rank 1	20 (max 26)						100 yards	8 seconds	24: Shaman Spells	
+8037	Frostbrand Attack	Rank 2	28 (max 36)						100 yards	8 seconds	24: Shaman Spells	
+8038	Frostbrand Weapon	Rank 2	28					85 Base Mana (0) (id=175104)				Imbue the Shaman's weapon with frost.  Each hit has a chance of causing $8037s2 additional Frost damage and slowing the target's movement speed by $8037s1% for $8037d.  Lasts for 60 minutes.
+8042	Earth Shock	Rank 1	4 (max 9)				6 seconds	30 Base Mana (0) (id=175998)	20 yards	2 seconds	24: Shaman Spells	Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat.
+8044	Earth Shock	Rank 2	8 (max 13)				6 seconds	50 Base Mana (0) (id=174954)	20 yards	2 seconds	24: Shaman Spells	Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat.
+8045	Earth Shock	Rank 3	14 (max 19)				6 seconds	85 Base Mana (0) (id=175545)	20 yards	2 seconds	24: Shaman Spells	Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat.
+8046	Earth Shock	Rank 4	24 (max 29)				6 seconds	145 Base Mana (0) (id=175893)	20 yards	2 seconds	24: Shaman Spells	Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat.
+8050	Flame Shock	Rank 1	10 (max 15)				6 seconds	55 Base Mana (0) (id=176025)	20 yards	12 seconds	24: Shaman Spells	Instantly sears the target with fire, causing $s1 Fire damage immediately and $o2 Fire damage over $d.
+8052	Flame Shock	Rank 2	18 (max 23)				6 seconds	95 Base Mana (0) (id=174939)	20 yards	12 seconds	24: Shaman Spells	Instantly sears the target with fire, causing $s1 Fire damage immediately and $o2 Fire damage over $d.
+8053	Flame Shock	Rank 3	28 (max 33)				6 seconds	160 Base Mana (0) (id=175801)	20 yards	12 seconds	24: Shaman Spells	Instantly sears the target with fire, causing $s1 Fire damage immediately and $o2 Fire damage over $d.
+8056	Frost Shock	Rank 1	20 (max 25)				6 seconds	115 Base Mana (0) (id=175802)	20 yards	8 seconds	24: Shaman Spells	Instantly shocks the target with frost, causing $s2 Frost damage and slowing movement speed by $s1%.  Lasts $d.
+8058	Frost Shock	Rank 2	34 (max 39)				6 seconds	225 Base Mana (0) (id=176530)	20 yards	8 seconds	24: Shaman Spells	Instantly shocks the target with frost, causing $s2 Frost damage and slowing movement speed by $s1%.  Lasts $d.
+8071	Stoneskin Totem	Rank 1	4					30 Base Mana (0) (id=175994)		300 seconds	24: Shaman Spells	Summons a Stoneskin Totem with $s1 health at the feet of the caster.  The totem protects party members within $8072a1 yards, reducing Physical damage taken by $8072s1.  Lasts $d.
+8072	Stoneskin	Rank 1	4								24: Shaman Spells	
+8075	Strength of Earth Totem	Rank 1	10					25 Base Mana (0) (id=175575)		300 seconds	24: Shaman Spells	Summons a Strength of Earth Totem with $s1 health at the feet of the caster.  The totem increases the strength of party or raid members within $8076a1 yards by $8076s1.  Lasts $d.
+8076	Strength of Earth	Rank 1	10								24: Shaman Spells	
+8134	Lightning Shield	Rank 5	40					240 Base Mana (0) (id=176110)		600 seconds	24: Shaman Spells	The caster is surrounded by $n balls of lightning.  When a spell, melee or ranged attack hits the caster, the attacker will be struck for $26369s1 Nature damage.  This expends one lightning ball.  Only one ball will fire every few seconds.  Lasts $d.
+8143	Tremor Totem		18					60 Base Mana (0) (id=176649)		300 seconds	24: Shaman Spells	Summons a Tremor Totem with $s1 health at the feet of the caster that shakes the ground around it, removing Fear, Charm and Sleep effects from party members within $8146a1 yards.  Lasts $d.
+8146	Tremor Totem Effect		18								24: Shaman Spells	
+8154	Stoneskin Totem	Rank 2	14					60 Base Mana (0) (id=176695)		300 seconds	24: Shaman Spells	Summons a Stoneskin Totem with $s1 health at the feet of the caster.  The totem protects party members within $8156a1 yards, reducing Physical damage taken by $8156s1.  Lasts $d.
+8155	Stoneskin Totem	Rank 3	24					90 Base Mana (0) (id=175890)		300 seconds	24: Shaman Spells	Summons a Stoneskin Totem with $s1 health at the feet of the caster.  The totem protects party members within $8157a1 yards, reducing Physical damage taken by $8157s1.  Lasts $d.
+8156	Stoneskin	Rank 2	14								24: Shaman Spells	
+8157	Stoneskin	Rank 3	24								24: Shaman Spells	
+8160	Strength of Earth Totem	Rank 2	24					65 Base Mana (0) (id=175650)		300 seconds	24: Shaman Spells	Summons a Strength of Earth Totem with $s1 health at the feet of the caster.  The totem increases the strength of party or raid members within $8162a1 yards by $8162s1.  Lasts $d.
+8161	Strength of Earth Totem	Rank 3	38					125 Base Mana (0) (id=176010)		300 seconds	24: Shaman Spells	Summons a Strength of Earth Totem with $s1 health at the feet of the caster.  The totem increases the strength of party or raid members within $8163a1 yards by $8163s1.  Lasts $d.
+8162	Strength of Earth	Rank 2	24								24: Shaman Spells	
+8163	Strength of Earth	Rank 3	38								24: Shaman Spells	
+8166	Poison Cleansing Totem		22					10% Base Mana (0) (id=177066)		300 seconds	24: Shaman Spells	Summons a Poison Cleansing Totem with $s1 health at the feet of the caster that attempts to remove 1 poison effect from party members within $8168a1 yards every $8167t1 seconds.  Lasts $d.
+8167	Poison Cleansing Totem Passive		22	passive						Aura (infinite)		
+8168	Poison Cleansing Totem Effect		22								24: Shaman Spells	
+8170	Disease Cleansing Totem		38					10% Base Mana (0) (id=176112)		300 seconds	24: Shaman Spells	Summons a Disease Cleansing Totem with $s1 health at the feet of the caster that attempts to remove 1 disease effect from party members within $8171a1 yards every $8172t1 seconds.  Lasts $d.
+8171	Disease Cleansing Totem Effect		38								24: Shaman Spells	
+8172	Disease Cleansing Totem Passive		38	passive						Aura (infinite)		
+8177	Grounding Totem		30				15 seconds	6% Base Mana (0) (id=176233)		45 seconds	24: Shaman Spells	Summons a Grounding Totem with $s1 health at the feet of the caster that will redirect one harmful spell cast on a nearby party member to itself every $8179t1 seconds.  Will not redirect area of effect spells.  Lasts $d.
+8178	Grounding Totem	Rank 1	30							Aura (infinite)	24: Shaman Spells	
+8179	Grounding Totem Passive		30								24: Shaman Spells	
+8181	Frost Resistance Totem	Rank 1	24					75 Base Mana (0) (id=176525)		300 seconds	24: Shaman Spells	Summons a Frost Resistance Totem with $s1 health at the feet of the caster for $d.  The totem increases party and raid members' frost resistance by $8182s1, if within $8182a1 yards.
+8182	Frost Resistance	Rank 1	24								24: Shaman Spells	
+8184	Fire Resistance Totem	Rank 1	28					75 Base Mana (0) (id=176590)		300 seconds	24: Shaman Spells	Summons a Fire Resistance Totem with $s1 health at the feet of the caster for $d that increases the fire resistance of party or raid members within $8185a1 yards by $8185s1.
+8185	Fire Resistance	Rank 1	28								24: Shaman Spells	
+8187	Magma Totem	Rank 1	26								24: Shaman Spells	
+8188	Magma Totem Passive	Rank 1	26							Aura (infinite)		
+8190	Magma Totem	Rank 1	26					230 Base Mana (0) (id=175848)		20 seconds	24: Shaman Spells	Summons a Magma Totem with $s1 health at the feet of the caster for $d that causes $8187s1 Fire damage to creatures within $8187a1 yards every $8188t1 seconds.
+8227	Flametongue Totem	Rank 1	28					90 Base Mana (0) (id=176671)		300 seconds	24: Shaman Spells	Summons a Flametongue Totem with $s1 health at the feet of the caster. The totem enchants all party or raid members' main-hand weapons with fire if they are within $8230a1 yards. Each hit causes ${$8253m1/77*$<mult>-1} to ${$8253M1/25*$<mult>} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. Lasts $d.
+8230	Flametongue Totem	Rank 1	28 (max 36)								24: Shaman Spells	
+8232	Windfury Weapon	Rank 1	30					90 Base Mana (0) (id=175566)			24: Shaman Spells	Imbue the Shaman's weapon with wind.  Each hit has a 20% chance of granting you $8233s2 extra $lattack:attacks; with $8233s1 extra melee attack power. When applied to main hand, disables any benefit you personally receive from Windfury Totem. Lasts for 60 minutes.
+8233	Windfury Weapon	Rank 1	30 (max 38)						100 yards	1.5 seconds	24: Shaman Spells	
+8235	Windfury Weapon	Rank 2	40					115 Base Mana (0) (id=175585)			24: Shaman Spells	Imbue the Shaman's weapon with wind.  Each hit has a 20% chance of granting you $8236s2 extra $lattack:attacks; with $8236s1 extra melee attack power. When appied to main hand, disables any benefit you personally receive from Windfury Totem. Lasts for 60 minutes.
+8236	Windfury Weapon	Rank 2	40 (max 48)						100 yards	1.5 seconds	24: Shaman Spells	
+8248	Flametongue Totem Proc	Rank 2	38 (max 46)						100 yards		24: Shaman Spells	
+8249	Flametongue Totem	Rank 2	38					140 Base Mana (0) (id=176724)		300 seconds	24: Shaman Spells	Summons a Flametongue Totem with $s1 health at the feet of the caster. The totem enhances the melee attacks of all party or raid members within $8250a1 yards. Each main hand hit causes  ${$8248m1/77*$<mult>-1} to ${$8248M1/25*$<mult>} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. Lasts $d.
+8250	Flametongue Totem	Rank 2	38 (max 46)								24: Shaman Spells	
+8253	Flametongue Totem Proc	Rank 1	28 (max 36)						100 yards		24: Shaman Spells	
+8512	Windfury Totem	Rank 1	32					115 Base Mana (0) (id=175477)		300 seconds	24: Shaman Spells	Summons a Windfury Totem with $s1 health at the feet of the caster. The totem enhances the melee attacks of all party or raid members within $8515a1 yards.  Each main hand hit has a 20% chance of granting the attacker $8516s2 extra attack with ${$8516m1*$<mult>} extra melee attack power. Lasts $d.
+8515	Windfury Totem	Rank 1	32 (max 40)	passive								
+8516	Windfury Totem	Rank 1	32 (max 40)						100 yards	1 seconds	24: Shaman Spells	Attack Power increased by $s1. Granted $s2 Extra Attack.
+8835	Grace of Air Totem	Rank 1	42					155 Base Mana (0) (id=175867)		300 seconds	24: Shaman Spells	Summons a Grace of Air Totem with $s1 health at the feet of the caster.  The totem increases the agility of party or raid members within $8836a1 yards by $8836s1.  Lasts $d.
+8836	Grace of Air	Rank 1	42								24: Shaman Spells	
+10391	Lightning Bolt	Rank 7	38 (max 43)			2.5 seconds		135 Base Mana (0) (id=177218)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+10392	Lightning Bolt	Rank 8	44 (max 49)			2.5 seconds		160 Base Mana (0) (id=177219)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+10395	Healing Wave	Rank 8	48 (max 53)			3 seconds		440 Base Mana (0) (id=177379)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+10396	Healing Wave	Rank 9	56 (max 61)			3 seconds		560 Base Mana (0) (id=176745)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+10399	Rockbiter Weapon	Rank 4	24					75 Base Mana (0) (id=176983)				Imbue the Shaman's weapon, increasing melee attack power by $15569s1 and allowing melee attacks to cause additional threat when using that weapon.  Lasts for 60 minutes.
+10400	Rockbiter Weapon (Passive)	Rank 1	1 (max 6)								24: Shaman Spells	
+10403	Stoneskin	Rank 4	34								24: Shaman Spells	
+10404	Stoneskin	Rank 5	44								24: Shaman Spells	
+10405	Stoneskin	Rank 6	54								24: Shaman Spells	
+10406	Stoneskin Totem	Rank 4	34					115 Base Mana (0) (id=176975)		300 seconds	24: Shaman Spells	Summons a Stoneskin Totem with $s1 health at the feet of the caster.  The totem protects party members within $10403a1 yards, reducing Physical damage taken by $10403s1.  Lasts $d.
+10407	Stoneskin Totem	Rank 5	44					160 Base Mana (0) (id=177888)		300 seconds	24: Shaman Spells	Summons a Stoneskin Totem with $s1 health at the feet of the caster.  The totem protects party members within $10404a1 yards, reducing Physical damage taken by $10404s1.  Lasts $d.
+10408	Stoneskin Totem	Rank 6	54					210 Base Mana (0) (id=177952)		300 seconds	24: Shaman Spells	Summons a Stoneskin Totem with $s1 health at the feet of the caster.  The totem protects party members within $10405a1 yards, reducing Physical damage taken by $10405s1.  Lasts $d.
+10412	Earth Shock	Rank 5	36 (max 41)				6 seconds	240 Base Mana (0) (id=176887)	20 yards	2 seconds	24: Shaman Spells	Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat.
+10413	Earth Shock	Rank 6	48 (max 53)				6 seconds	345 Base Mana (0) (id=177092)	20 yards	2 seconds	24: Shaman Spells	Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat.
+10414	Earth Shock	Rank 7	60 (max 65)				6 seconds	450 Base Mana (0) (id=177429)	20 yards	2 seconds	24: Shaman Spells	Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat.
+10423	Stoneclaw Totem Effect	Rank 5	48									
+10424	Stoneclaw Totem Effect	Rank 6	58									
+10427	Stoneclaw Totem	Rank 5	48				30 seconds	105 Base Mana (0) (id=176883)		15 seconds	24: Shaman Spells	Summons a Stoneclaw Totem with $s1 health at the feet of the caster for $d that taunts creatures within $10423a1 yards to attack it.
+10428	Stoneclaw Totem	Rank 6	58				30 seconds	140 Base Mana (0) (id=177827)		15 seconds	24: Shaman Spells	Summons a Stoneclaw Totem with $s1 health at the feet of the caster for $d that taunts creatures within $10424a1 yards to attack it.
+10431	Lightning Shield	Rank 6	48					305 Base Mana (0) (id=176972)		600 seconds	24: Shaman Spells	The caster is surrounded by $n balls of lightning.  When a spell, melee or ranged attack hits the caster, the attacker will be struck for $26370s1 Nature damage.  This expends one lightning ball.  Only one ball will fire every few seconds.  Lasts $d.
+10432	Lightning Shield	Rank 7	56					370 Base Mana (0) (id=176911)		600 seconds	24: Shaman Spells	The caster is surrounded by $n balls of lightning.  When a spell, melee or ranged attack hits the caster, the attacker will be struck for $26363s1 Nature damage.  This expends one lightning ball.  Only one ball will fire every few seconds.  Lasts $d.
+10435	Attack	Rank 5	50			2.2 seconds			20 yards		24: Shaman Spells	
+10436	Attack	Rank 6	60			2.2 seconds			20 yards		24: Shaman Spells	
+10437	Searing Totem	Rank 5	50					145 Base Mana (0) (id=177828)		50 seconds	24: Shaman Spells	Summons a Searing Totem with $s1 health at your feet for $d that repeatedly attacks an enemy within $10435r yards for $10435s1 Fire damage.
+10438	Searing Totem	Rank 6	60					170 Base Mana (0) (id=177819)		55 seconds	24: Shaman Spells	Summons a Searing Totem with $s1 health at your feet for $d that repeatedly attacks an enemy within $10436r yards for $10436s1 Fire damage.
+10441	Strength of Earth	Rank 4	52								24: Shaman Spells	
+10442	Strength of Earth Totem	Rank 4	52					225 Base Mana (0) (id=177144)		300 seconds	24: Shaman Spells	Summons a Strength of Earth Totem with $s1 health at the feet of the caster.  The totem increases the strength of party or raid members within $10441a1 yards by $10441s1.  Lasts $d.
+10444	Flametongue Attack	Rank 3	1						50000 yards		24: Shaman Spells	
+10445	Flametongue Weapon Proc	Rank 4	36 (max 44)						100 yards		24: Shaman Spells	
+10447	Flame Shock	Rank 4	40 (max 45)				6 seconds	250 Base Mana (0) (id=177236)	20 yards	12 seconds	24: Shaman Spells	Instantly sears the target with fire, causing $s1 Fire damage immediately and $o2 Fire damage over $d.
+10448	Flame Shock	Rank 5	52 (max 57)				6 seconds	345 Base Mana (0) (id=177740)	20 yards	12 seconds	24: Shaman Spells	Instantly sears the target with fire, causing $s1 Fire damage immediately and $o2 Fire damage over $d.
+10456	Frostbrand Weapon	Rank 3	38					110 Base Mana (0) (id=177330)				Imbue the Shaman's weapon with frost.  Each hit has a chance of causing $10458s2 additional Frost damage and slowing the target's movement speed by $10458s1% for $10458d.  Lasts for 60 minutes.
+10458	Frostbrand Attack	Rank 3	38 (max 46)						100 yards	8 seconds	24: Shaman Spells	
+10460	Healing Stream	Rank 4	50								24: Shaman Spells	
+10461	Healing Stream	Rank 5	60								24: Shaman Spells	
+10462	Healing Stream Totem	Rank 4	50					70 Base Mana (0) (id=176738)		300 seconds	24: Shaman Spells	Summons a Healing Stream Totem with $s1 health at the feet of the caster for $d that heals group members within $10460a1 yards for $10460s1 every $10460t1 seconds.
+10463	Healing Stream Totem	Rank 5	60					80 Base Mana (0) (id=177861)		300 seconds	24: Shaman Spells	Summons a Healing Stream Totem with $s1 health at the feet of the caster for $d that heals group members within $10461a1 yards for $10461s1 every $10461t1 seconds.
+10466	Lesser Healing Wave	Rank 4	44 (max 49)			1.5 seconds		235 Base Mana (0) (id=177934)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+10467	Lesser Healing Wave	Rank 5	52 (max 57)			1.5 seconds		305 Base Mana (0) (id=177869)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+10468	Lesser Healing Wave	Rank 6	60 (max 65)			1.5 seconds		380 Base Mana (0) (id=177885)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+10472	Frost Shock	Rank 3	46 (max 51)				6 seconds	325 Base Mana (0) (id=177645)	20 yards	8 seconds	24: Shaman Spells	Instantly shocks the target with frost, causing $s2 Frost damage and slowing movement speed by $s1%.  Lasts $d.
+10473	Frost Shock	Rank 4	58 (max 63)				6 seconds	430 Base Mana (0) (id=176984)	20 yards	8 seconds	24: Shaman Spells	Instantly shocks the target with frost, causing $s2 Frost damage and slowing movement speed by $s1%.  Lasts $d.
+10476	Frost Resistance	Rank 2	38								24: Shaman Spells	
+10477	Frost Resistance	Rank 3	54								24: Shaman Spells	
+10478	Frost Resistance Totem	Rank 2	38					120 Base Mana (0) (id=176985)		300 seconds	24: Shaman Spells	Summons a Frost Resistance Totem with $s1 health at the feet of the caster for $d.  The totem increases party and raid members' frost resistance by $10476s1, if within $10476a1 yards.
+10479	Frost Resistance Totem	Rank 3	54					180 Base Mana (0) (id=177041)		300 seconds	24: Shaman Spells	Summons a Frost Resistance Totem with $s1 health at the feet of the caster for $d.  The totem increases party and raid members' frost resistance by $10477s1, if within $10477a1 yards.
+10484	Windfury Weapon	Rank 3	50 (max 58)						100 yards	1.5 seconds	24: Shaman Spells	
+10486	Windfury Weapon	Rank 3	50					140 Base Mana (0) (id=177764)			24: Shaman Spells	Imbue the Shaman's weapon with wind.  Each hit has a 20% chance of granting you $10484s2 extra $lattack:attacks; with $10484s1 extra melee attack power. When applied to main hand, disables any benefit you personally receive from Windfury Totem. Lasts for 60 minutes.
+10491	Mana Spring	Rank 2	36								24: Shaman Spells	
+10493	Mana Spring	Rank 3	46								24: Shaman Spells	
+10494	Mana Spring	Rank 4	56								24: Shaman Spells	
+10495	Mana Spring Totem	Rank 2	36					60 Base Mana (0) (id=177847)		300 seconds	24: Shaman Spells	Summons a Mana Spring Totem with $s1 health at the feet of the caster for $d that restores $10491s1 mana every $10491t1 seconds to group members within $10491a1 yards.
+10496	Mana Spring Totem	Rank 3	46					80 Base Mana (0) (id=176297)		300 seconds	24: Shaman Spells	Summons a Mana Spring Totem with $s1 health at the feet of the caster for $d that restores $10493s1 mana every $10493t1 seconds to group members within $10493a1 yards.
+10497	Mana Spring Totem	Rank 4	56					100 Base Mana (0) (id=177737)		300 seconds	24: Shaman Spells	Summons a Mana Spring Totem with $s1 health at the feet of the caster for $d that restores $10494s1 mana every $10494t1 seconds to group members within $10494a1 yards.
+10521	Flametongue Totem	Rank 3	48 (max 56)								24: Shaman Spells	
+10523	Flametongue Totem Proc	Rank 3	48 (max 56)						100 yards		24: Shaman Spells	
+10526	Flametongue Totem	Rank 3	48					200 Base Mana (0) (id=177474)		300 seconds	24: Shaman Spells	Summons a Flametongue Totem with $s1 health at the feet of the caster. The totem enhances the melee attacks of all party or raid members within $10521a1 yards. Each main hand hit causes  ${$10523m1/77*$<mult>-1} to ${$10523M1/25*$<mult>} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. Lasts $d.
+10534	Fire Resistance	Rank 2	42								24: Shaman Spells	
+10535	Fire Resistance	Rank 3	58								24: Shaman Spells	
+10537	Fire Resistance Totem	Rank 2	42					120 Base Mana (0) (id=178003)		300 seconds	24: Shaman Spells	Summons a Fire Resistance Totem with $s1 health at the feet of the caster for $d that increases the fire resistance of party or raid members within $10534a1 yards by $10534s1.
+10538	Fire Resistance Totem	Rank 3	58					180 Base Mana (0) (id=177039)		300 seconds	24: Shaman Spells	Summons a Fire Resistance Totem with $s1 health at the feet of the caster for $d that increases the fire resistance of party or raid members within $10535a1 yards by $10535s1.
+10579	Magma Totem	Rank 2	36								24: Shaman Spells	
+10580	Magma Totem	Rank 3	46								24: Shaman Spells	
+10581	Magma Totem	Rank 4	56								24: Shaman Spells	
+10582	Magma Totem Passive	Rank 2	36							Aura (infinite)		
+10583	Magma Totem Passive	Rank 3	46							Aura (infinite)		
+10584	Magma Totem Passive	Rank 4	56							Aura (infinite)		
+10585	Magma Totem	Rank 2	36					360 Base Mana (0) (id=176794)		20 seconds	24: Shaman Spells	Summons a Magma Totem with $s1 health at the feet of the caster for $d that causes $10579s1 Fire damage to creatures within $10579a1 yards every $10582t1 seconds.
+10586	Magma Totem	Rank 3	46					500 Base Mana (0) (id=177932)		20 seconds	24: Shaman Spells	Summons a Magma Totem with $s1 health at the feet of the caster for $d that causes $10580s1 Fire damage to creatures within $10580a1 yards every $10583t1 seconds.
+10587	Magma Totem	Rank 4	56					650 Base Mana (0) (id=176795)		20 seconds	24: Shaman Spells	Summons a Magma Totem with $s1 health at the feet of the caster for $d that causes $10581s1 Fire damage to creatures within $10581a1 yards every $10584t1 seconds.
+10595	Nature Resistance Totem	Rank 1	30					75 Base Mana (0) (id=177810)		300 seconds	24: Shaman Spells	Summons a Nature Resistance Totem with $s1 health at the feet of the caster for $d that increases the nature resistance of party and raid members within $10596a1 yards by $10596s1.
+10596	Nature Resistance	Rank 1	30								24: Shaman Spells	
+10598	Nature Resistance	Rank 2	44								24: Shaman Spells	
+10599	Nature Resistance	Rank 3	60								24: Shaman Spells	
+10600	Nature Resistance Totem	Rank 2	44					120 Base Mana (0) (id=176964)		300 seconds	24: Shaman Spells	Summons a Nature Resistance Totem with $s1 health at the feet of the caster for $d that increases the nature resistance of party and raid members within $10598a1 yards by $10598s1.
+10601	Nature Resistance Totem	Rank 3	60					180 Base Mana (0) (id=178009)		300 seconds	24: Shaman Spells	Summons a Nature Resistance Totem with $s1 health at the feet of the caster for $d that increases the nature resistance of party and raid members within $10599a1 yards by $10599s1.
+10605	Chain Lightning	Rank 4	56 (max 61)			2.5 seconds	6 seconds	495 Base Mana (0) (id=177727)	30 yards		24: Shaman Spells	Hurls a lightning bolt at the enemy, dealing $s1 Nature damage and then jumping to additional nearby enemies.  Each jump reduces the damage by $?a415096[20%][30%].  Affects $x1 total targets.
+10608	Windfury Totem	Rank 2	42 (max 50)						100 yards	1 seconds	24: Shaman Spells	Attack Power increased by $s1. Granted $s2 Extra Attack.
+10609	Windfury Totem	Rank 2	42 (max 50)	passive								
+10610	Windfury Totem	Rank 3	52 (max 60)						100 yards	1 seconds	24: Shaman Spells	Attack Power increased by $s1. Granted $s2 Extra Attack.
+10612	Windfury Totem	Rank 3	52 (max 60)	passive								
+10613	Windfury Totem	Rank 2	42					175 Base Mana (0) (id=177441)		300 seconds	24: Shaman Spells	Summons a Windfury Totem with $s1 health at the feet of the caster. The totem enhances the melee attacks of all party or raid members within $10609a1 yards. Each main hand hit has a 20% chance of granting the attacker $10608s2 extra attack with ${$10608m1*$<mult>} extra melee attack power. Lasts $d.
+10614	Windfury Totem	Rank 3	52					250 Base Mana (0) (id=177480)		300 seconds	24: Shaman Spells	Summons a Windfury Totem with $s1 health at the feet of the caster. The totem enhances the melee attacks of all party or raid members within $10612a1 yards. Each main hand hit has a 20% chance of granting the attacker $10610s2 extra attack with ${$10610m1*$<mult>} extra melee attack power. Lasts $d.
+10622	Chain Heal	Rank 2	46 (max 51)			2.5 seconds		315 Base Mana (0) (id=177180)	40 yards		24: Shaman Spells	Heals the friendly target for $s1, then jumps to heal additional nearby targets.  If cast on a party member, the heal will only jump to other party members.  Each jump is $?a415096[65%][50%] as effective as the previous target.  Heals $x1 total targets.
+10623	Chain Heal	Rank 3	54 (max 59)			2.5 seconds		405 Base Mana (0) (id=177924)	40 yards		24: Shaman Spells	Heals the friendly target for $s1, then jumps to heal additional nearby targets.  If cast on a party member, the heal will only jump to other party members.  Each jump is $?a415096[65%][50%] as effective as the previous target.  Heals $x1 total targets.
+10626	Grace of Air	Rank 2	56								24: Shaman Spells	
+10627	Grace of Air Totem	Rank 2	56					250 Base Mana (0) (id=177865)		300 seconds	24: Shaman Spells	Summons a Grace of Air Totem with $s1 health at the feet of the caster.  The totem increases the agility of party or raid members within $10626a1 yards by $10626s1.  Lasts $d.
+15036	Flametongue Totem	Rank 4	58 (max 66)								24: Shaman Spells	
+15107	Windwall Totem	Rank 1	36					115 Base Mana (0) (id=179666)		300 seconds	24: Shaman Spells	Summons a Windwall Totem with $s1 health at the feet of the caster.  The totem protects party members within $15108a1 yards, reducing ranged damage taken by $15108s1.  Lasts $d.
+15108	Windwall	Rank 1	36								24: Shaman Spells	
+15109	Windwall	Rank 2	46								24: Shaman Spells	
+15110	Windwall	Rank 3	56								24: Shaman Spells	
+15111	Windwall Totem	Rank 2	46					170 Base Mana (0) (id=180247)		300 seconds	24: Shaman Spells	Summons a Windwall Totem with $s1 health at the feet of the caster.  The totem protects party members within $15109a1 yards, reducing ranged damage taken by $15109s1.  Lasts $d.
+15112	Windwall Totem	Rank 3	56					225 Base Mana (0) (id=180180)		300 seconds	24: Shaman Spells	Summons a Windwall Totem with $s1 health at the feet of the caster.  The totem protects party members within $15110a1 yards, reducing ranged damage taken by $15110s1.  Lasts $d.
+15207	Lightning Bolt	Rank 9	50 (max 55)			2.5 seconds		190 Base Mana (0) (id=179529)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+15208	Lightning Bolt	Rank 10	56 (max 61)			2.5 seconds		220 Base Mana (0) (id=180138)	30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+15567	Rockbiter Weapon (Passive)	Rank 2	8 (max 14)								24: Shaman Spells	
+15568	Rockbiter Weapon (Passive)	Rank 3	16 (max 22)								24: Shaman Spells	
+15569	Rockbiter Weapon (Passive)	Rank 4	24 (max 32)								24: Shaman Spells	
+16035	Concussion				Generic [tree=class, row=1, col=3, max_rank=5, req_points=0]						24: Shaman Spells	Increases the damage done by your Lightning Bolt, Chain Lightning, and Earth Shock spells by $m1%.
+16038	Call of Flame				Generic [tree=class, row=2, col=4, max_rank=3, req_points=0]						24: Shaman Spells	Increases the damage done by your Fire Totems and by your Flame Shock and Fire Nova spells by $m1%, as well as increases the duration of your Flame Shock spell by ${$m3/1000} sec.
+16039	Convection				Generic [tree=class, row=1, col=2, max_rank=5, req_points=0]						24: Shaman Spells	Reduces the mana cost of your Shock, Lightning Bolt, and Chain Lightning spells by $m1%.
+16040	Reverberation				Generic [tree=class, row=2, col=2, max_rank=5, req_points=0]						24: Shaman Spells	Reduces the cooldown of your Shock spells by ${$m1/-1000}.1 sec.
+16043	Earth's Grasp				Generic [tree=class, row=1, col=5, max_rank=2, req_points=0]						24: Shaman Spells	Increases the health of your Stoneclaw Totem by $m1% and the radius of your Earthbind Totem by $m2%.
+16086	Trial by Fire				Generic [tree=class, row=4, col=1, max_rank=2, req_points=0]						24: Shaman Spells	Increases the damage done by your Fire Nova spell by $m1% and reduces its cooldown by ${$m2/-1000} sec, and increases the duration of your Magma Totem by ${$m3/1000} sec.
+16089	Elemental Fury				Generic [tree=class, row=6, col=3, max_rank=5, req_points=25]						24: Shaman Spells	Increases the critical strike damage bonus of your Searing and Magma Totems and your Fire, Frost, and Nature spells by $m1%.
+16120	Call of Thunder				Generic [tree=class, row=5, col=2, max_rank=1, req_points=0]						24: Shaman Spells	Increases the critical strike chance of your Lightning Bolt and Chain Lightning spells by $s1%.
+16164	Elemental Focus		1		Generic [tree=class, row=3, col=1, max_rank=1, req_points=0]						24: Shaman Spells	Gives you a $s1% chance to enter a Clearcasting state after casting any Fire, Frost, or Nature damage spell.  The Clearcasting state reduces the mana cost of your next damage spell by $16246s1%.
+16166	Lightning Mastery		1		Generic [tree=class, row=7, col=2, max_rank=1, req_points=30]		180 seconds			15 seconds		Gain mastery over Lightning, reducing the cast time of your Lightning Bolt spell by ${$m1/-1000}.1 sec, and removing the cooldown from your Chain Lightning spell. Lasts $d.
+16173	Totemic Focus				Generic [tree=class, row=2, col=11, max_rank=5, req_points=0]						24: Shaman Spells	Reduces the Mana cost of your totems and any spells that summon or move them by $m1%.
+16176	Ancestral Healing				Generic [tree=class, row=3, col=9, max_rank=3, req_points=0]						24: Shaman Spells	Increases your target's armor value by $m1% for $16177d after getting a critical effect from one of your healing spells.
+16177	Ancestral Fortitude								100 yards	15 seconds	24: Shaman Spells	Increases your armor value from items by $s1%.
+16178	Purification				Generic [tree=class, row=6, col=11, max_rank=5, req_points=25]						24: Shaman Spells	Increases the effectiveness of your healing spells by $m1%.
+16179	Tidal Focus				Generic [tree=class, row=1, col=11, max_rank=5, req_points=0]						24: Shaman Spells	Reduces the Mana cost of your healing spells by $m1% and improves your chance to hit by $m2%.
+16180	Nature's Guidance	Rank 1									24: Shaman Spells	Improves your chance to hit by $s1%.
+16181	Healing Focus				Generic [tree=class, row=3, col=10, max_rank=3, req_points=0]						24: Shaman Spells	Gives your healing spells a $m1% chance to not lose casting time when you take damage.
+16182	Improved Healing Wave				Generic [tree=class, row=1, col=10, max_rank=5, req_points=0]						24: Shaman Spells	Reduces the casting time of your Healing Wave spell by ${$m1/-1000}.1 sec.
+16184	Improved Reincarnation				Generic [tree=class, row=2, col=12, max_rank=2, req_points=0]						24: Shaman Spells	Reduces the cooldown of your Reincarnation spell by ${$m1/-60000} min, increases your maximum health by $m2%, and increases the amount of health and Mana you reincarnate with by an additional $m3%.
+16187	Restorative Totems				Generic [tree=class, row=4, col=10, max_rank=5, req_points=0]						24: Shaman Spells	Increases the effect of your Mana Spring Totem by $m1% and increases the effect of your Healing Stream Totem by $m2%.
+16188	Nature's Swiftness		1		Generic [tree=class, row=5, col=11, max_rank=1, req_points=0]		180 seconds			Aura (infinite)	24: Shaman Spells	When activated, your next Nature spell with a casting time less than 10 sec. becomes an instant cast spell.
+16189	Totemic Mastery		1								24: Shaman Spells	The radius of your totems that affect friendly targets is increased to 30 yd.
+16190	Mana Tide Totem	Rank 1	1		Generic [tree=class, row=4, col=11, max_rank=1, req_points=0]		300 seconds	10 Base Mana (0) (id=181616)		13 seconds	24: Shaman Spells	Summons a Mana Tide Totem with $s1 health at the feet of the caster for ${$d-1} sec that restores $16191s1 mana every $16191t1 seconds to group members within $16191a1 yards.
+16191	Mana Tide	Rank 1	1								24: Shaman Spells	$@spelldesc16190
+16194	Tidal Mastery				Generic [tree=class, row=4, col=9, max_rank=5, req_points=0]						24: Shaman Spells	Increases the critical effect chance of your healing spells by $m1%.
+16196	Nature's Guidance	Rank 2									24: Shaman Spells	Improves your chance to hit by $m1%.
+16198	Nature's Guidance	Rank 3									24: Shaman Spells	Improves your chance to hit by $s1%.
+16246	Clearcasting		10						100 yards	15 seconds	24: Shaman Spells	Your next elemental damage spell has its mana cost reduced by $s1%.
+16252	Toughness		1		Generic [tree=class, row=4, col=5, max_rank=5, req_points=0]						24: Shaman Spells	Increases your Stamina by $m1%.
+16253	Shield Specialization	Rank 1	1							Aura (infinite)		Increases your chance to block attacks with a shield by $s1% and increases the amount blocked by $s2%.
+16254	Anticipation		1		Generic [tree=class, row=3, col=8, max_rank=3, req_points=0]						24: Shaman Spells	Increases your chance to dodge by an additional $m1%.
+16255	Thundering Strikes		1		Generic [tree=class, row=1, col=6, max_rank=5, req_points=0]						24: Shaman Spells	Improves your chance to get a critical strike with all spells and attacks by $m1%.
+16256	Flurry		1		Generic [tree=class, row=4, col=6, max_rank=5, req_points=0]						24: Shaman Spells	Increases your attack speed by $m1% for your next $16257n swings after dealing a melee critical strike.
+16257	Flurry		1							15 seconds	24: Shaman Spells	
+16258	Guardian Totems				Generic [tree=class, row=2, col=5, max_rank=2, req_points=0]						24: Shaman Spells	Increases the amount of damage reduced by your Stoneskin Totem and Windwall Totem by $m1% and reduces the cooldown of your Grounding Totem by ${$m2/-1000} sec.
+16259	Enhancing Totems	Rank 1									24: Shaman Spells	Increases the effect of your Strength of Earth and Grace of Air Totems by $s1%.
+16261	Improved Lightning Shield				Generic [tree=class, row=2, col=7, max_rank=3, req_points=0]						24: Shaman Spells	Increases the damage done by your Lightning Shield orbs by $m1%.
+16262	Improved Ghost Wolf				Generic [tree=class, row=4, col=8, max_rank=2, req_points=0]						24: Shaman Spells	Reduces the cast time of your Ghost Wolf spell by ${$m1/-1000}.1 sec, and Ghost Wolf may be used indoors.
+16266	Elemental Weapons	Rank 1			Generic [tree=class, row=3, col=5, max_rank=3, req_points=0]						24: Shaman Spells	Increases the melee attack power bonus of your Rockbiter Weapon by $m1%, your Windfury Weapon effect by $m3% and increases the damage caused by your Flametongue Weapon and Frostbrand Weapon by $m2%.
+16268	Spirit Weapons		1		Generic [tree=class, row=5, col=5, max_rank=1, req_points=0]						24: Shaman Spells	Gives a chance to parry enemy melee attacks, reduces all threat generated by your attacks by $s1% while Rockbiter Weapon is not active, and increases all threat generated by $s3% while Rockbiter Weapon is active.
+16295	Enhancing Totems	Rank 2									24: Shaman Spells	Increases the effect of your Strength of Earth and Grace of Air Totems by $s1%.
+16298	Shield Specialization	Rank 2	1							Aura (infinite)		Increases your chance to block attacks with a shield by $s1% and increases the amount blocked by $s2%.
+16299	Shield Specialization	Rank 3	1							Aura (infinite)		Increases your chance to block attacks with a shield by $s1% and increases the amount blocked by $s2%.
+16300	Shield Specialization	Rank 4	1							Aura (infinite)		Increases your chance to block attacks with a shield by $s1% and increases the amount blocked by $s2%.
+16301	Shield Specialization	Rank 5	1							Aura (infinite)		Increases your chance to block attacks with a shield by $s1% and increases the amount blocked by $s2%.
+16311	Rockbiter Weapon (Passive)	Rank 5	34 (max 42)								24: Shaman Spells	
+16312	Rockbiter Weapon (Passive)	Rank 6	44 (max 52)								24: Shaman Spells	
+16313	Rockbiter Weapon (Passive)	Rank 7	54 (max 62)								24: Shaman Spells	
+16314	Rockbiter Weapon	Rank 5	34					100 Base Mana (0) (id=181421)				Imbue the Shaman's weapon, increasing melee attack power by $16311s1 and allowing melee attacks to cause additional threat when using that weapon.  Lasts for 60 minutes.
+16315	Rockbiter Weapon	Rank 6	44					125 Base Mana (0) (id=181307)				Imbue the Shaman's weapon, increasing melee attack power by $16312s1 and allowing melee attacks to cause additional threat when using that weapon.  Lasts for 60 minutes.
+16316	Rockbiter Weapon	Rank 7	54					150 Base Mana (0) (id=181563)				Imbue the Shaman's weapon, increasing melee attack power by $16313s1 and allowing melee attacks to cause additional threat when using that weapon.  Lasts for 60 minutes.
+16339	Flametongue Weapon	Rank 4	36					105 Base Mana (0) (id=182257)				Imbue the Shaman's weapon with fire. Each hit causes ${$10445m1/77-1+($10444m1)} to ${$10445m1/25+($10444m1)} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. When applied to main hand, disables any benefit you personally receive from Flametongue Totem. Lasts for 60 minutes.
+16341	Flametongue Weapon	Rank 5	46					130 Base Mana (0) (id=181672)				Imbue the Shaman's weapon with fire. Each hit causes ${$16343m1/77-1+($10444m1)} to ${$16343m1/25+($10444m1)} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. When applied to main hand, disables any benefit you personally receive from Flametongue Totem. Lasts for 60 minutes.
+16342	Flametongue Weapon	Rank 6	56					155 Base Mana (0) (id=181769)				Imbue the Shaman's weapon with fire.  Each hit causes ${$16344m1/77-1+($10444m1)} to ${$16344m1/25+($10444m1)} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. When applied to main hand, disables any benefit you personally receive from Flametongue Totem. Lasts for 60 minutes.
+16343	Flametongue Weapon Proc	Rank 5	46 (max 54)						100 yards		24: Shaman Spells	
+16344	Flametongue Weapon Proc	Rank 6	56 (max 64)						100 yards		24: Shaman Spells	
+16352	Frostbrand Attack	Rank 4	48 (max 56)						100 yards	8 seconds	24: Shaman Spells	
+16353	Frostbrand Attack	Rank 5	58 (max 66)						100 yards	8 seconds	24: Shaman Spells	
+16355	Frostbrand Weapon	Rank 4	48					135 Base Mana (0) (id=182462)				Imbue the Shaman's weapon with frost.  Each hit has a chance of causing $16352s2 additional Frost damage and slowing the target's movement speed by $16352s1% for $16352d.  Lasts for 60 minutes.
+16356	Frostbrand Weapon	Rank 5	58					160 Base Mana (0) (id=181713)				Imbue the Shaman's weapon with frost.  Each hit has a chance of causing $16353s2 additional Frost damage and slowing the target's movement speed by $16353s1% for $16353d.  Lasts for 60 minutes.
+16361	Windfury Weapon	Rank 4	60 (max 68)						100 yards	1.5 seconds	24: Shaman Spells	
+16362	Windfury Weapon	Rank 4	60					165 Base Mana (0) (id=181724)			24: Shaman Spells	Imbue the Shaman's weapon with wind.  Each hit has a 20% chance of granting you $16361s2 extra $lattack:attacks; with $16361s1 extra melee attack power. When applied to main hand, disables any benefit you personally receive from Windfury Totem. Lasts for 60 minutes.
+16387	Flametongue Totem	Rank 4	58					275 Base Mana (0) (id=182172)		300 seconds	24: Shaman Spells	Summons a Flametongue Totem with $s1 health at the feet of the caster. The totem enhances the melee attacks of all party or raid members within $15036a1 yards. Each main hand hit causes ${$16389m1/77*$<mult>-1} to ${$16389M1/25*$<mult>} additional Fire damage, based on the speed of the weapon. Slower weapons cause more fire damage per swing. Lasts $d.
+16389	Flametongue Totem Proc	Rank 4	58 (max 66)						100 yards		24: Shaman Spells	
+16578	Elemental Alacrity				Generic [tree=class, row=2, col=3, max_rank=3, req_points=0]						24: Shaman Spells	Reduces the cast time of your Lightning Bolt and Chain Lightning spells by ${$m1/-1000}.2 sec.
+16579	Lightning Mastery	Rank 2									24: Shaman Spells	Reduces the cast time of your Lightning Bolt and Chain Lightning spells by $/1000;S1 sec.
+16580	Lightning Mastery	Rank 3									24: Shaman Spells	Reduces the cast time of your Lightning Bolt and Chain Lightning spells by $/1000;S1 sec.
+16581	Lightning Mastery	Rank 4									24: Shaman Spells	Reduces the cast time of your Lightning Bolt and Chain Lightning spells by $/1000;S1 sec.
+16582	Lightning Mastery	Rank 5									24: Shaman Spells	Reduces the cast time of your Lightning Bolt and Chain Lightning spells by $/1000;S1 sec.
+17354	Mana Tide Totem	Rank 2	38				300 seconds	20 Base Mana (0) (id=182206)		13 seconds	24: Shaman Spells	Summons a Mana Tide Totem with $s1 health at the feet of the caster for ${$d-1} sec that restores $17355s1 mana every $17355t1 seconds to group members within $17355a1 yards.
+17355	Mana Tide	Rank 2	38								24: Shaman Spells	
+17359	Mana Tide Totem	Rank 3	48				300 seconds	30 Base Mana (0) (id=182160)		13 seconds	24: Shaman Spells	Summons a Mana Tide Totem with $s1 health at the feet of the caster for ${$d-1} sec that restores $17360s1 mana every $17360t1 seconds to group members within $17360a1 yards.
+17360	Mana Tide	Rank 3	48								24: Shaman Spells	
+17364	Stormstrike		40		Generic [tree=class, row=4, col=7, max_rank=1, req_points=0]		6 seconds	8% Base Mana (0) (id=182998)	5 yards	12 seconds	24: Shaman Spells	Instantly strike for $s3% weapon damage and increase the damage you deal to the target with your next Lightning Bolt, Chain Lightning, or Earth Shock spell by $s2% for $d.
+17485	Ancestral Knowledge				Generic [tree=class, row=1, col=7, max_rank=5, req_points=0]						24: Shaman Spells	Increases your Intellect by $m1%.
+18848	Parry	Passive	1	passive								Gives a chance to parry enemy melee attacks.
+20608	Reincarnation	Passive	30				3600 seconds				24: Shaman Spells	Allows you to resurrect yourself upon death with $21169s1% health and mana.
+20609	Ancestral Spirit	Rank 2	24			10 seconds		90% Base Mana (0) (id=184536)	30 yards		24: Shaman Spells	Returns the spirit to the body, restoring a dead target to life with $s1 health and $q1 mana.  Cannot be cast when in combat.
+20610	Ancestral Spirit	Rank 3	36			10 seconds		90% Base Mana (0) (id=185169)	30 yards		24: Shaman Spells	Returns the spirit to the body, restoring a dead target to life with $s1 health and $q1 mana.  Cannot be cast when in combat.
+20776	Ancestral Spirit	Rank 4	48			10 seconds		90% Base Mana (0) (id=184964)	30 yards		24: Shaman Spells	Returns the spirit to the body, restoring a dead target to life with $s1 health and $q1 mana.  Cannot be cast when in combat.
+20777	Ancestral Spirit	Rank 5	60			10 seconds		90% Base Mana (0) (id=184973)	30 yards		24: Shaman Spells	Returns the spirit to the body, restoring a dead target to life with $s1 health and $q1 mana.  Cannot be cast when in combat.
+22801	Ghost Wolf Speed	Rank 1								Aura (infinite)		Increases the speed of your Ghost Wolf ability by $s1%.
+24436	Copy of Improved Mana/Health Totems									Aura (infinite)		Decreases the mana cost of your Healing Stream and Mana Spring totems by $s1.
+24499	Energized Shield									20 seconds	24: Shaman Spells	Increases the damage dealt by your Lightning Shield spell by $s1% for $d.
+25357	Healing Wave	Rank 10	60 (max 65)			3 seconds		620 Base Mana (0) (id=188115)	40 yards		24: Shaman Spells	Heals a friendly target for $s1.
+25359	Grace of Air Totem	Rank 3	60					310 Base Mana (0) (id=188038)		300 seconds	24: Shaman Spells	Summons a Grace of Air Totem with $s1 health at the feet of the caster.  The totem increases the agility of party or raid members within $25360a1 yards by $25360s1.  Lasts $d.
+25360	Grace of Air	Rank 3	60								24: Shaman Spells	
+25361	Strength of Earth Totem	Rank 5	60					275 Base Mana (0) (id=188116)		300 seconds	24: Shaman Spells	Summons a Strength of Earth Totem with $s1 health at the feet of the caster.  The totem increases the strength of party or raid members within $25362a1 yards by $25362s1.  Lasts $d.
+25362	Strength of Earth	Rank 5	60								24: Shaman Spells	
+26363	Lightning Shield	Rank 7	56						100 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+26364	Lightning Shield	Rank 1	8						100 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+26365	Lightning Shield	Rank 2	16						100 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+26366	Lightning Shield	Rank 3	24						100 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+26367	Lightning Shield	Rank 4	32						100 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+26369	Lightning Shield	Rank 5	40						100 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+26370	Lightning Shield	Rank 6	48						100 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+26545	Lightning Shield								100 yards		24: Shaman Spells	
+27855	Increased Lesser Healing Wave										24: Shaman Spells	Increases healing done by Lesser Healing Wave by up to $s1.
+28849	Lesser Healing Wave										24: Shaman Spells	Regain up to $28850s1 mana each time you cast Lesser Healing Wave.
+28857	Increased Lightning Damage										24: Shaman Spells	Increases damage done by Chain Lightning and Lightning Bolt by up to $s1.
+28996	Elemental Warding				Generic [tree=class, row=3, col=2, max_rank=3, req_points=0]						24: Shaman Spells	Reduces damage taken from Fire, Frost, and Nature effects by $m1%.
+28999	Elemental Reach				Generic [tree=class, row=5, col=1, max_rank=2, req_points=0]						24: Shaman Spells	Increases the range of your Lightning Bolt, Chain Lightning, and Fire Nova spells by $m1 yards.
+29062	Eye of the Storm				Generic [tree=class, row=4, col=2, max_rank=3, req_points=0]						24: Shaman Spells	Gives your Lightning Bolt and Chain Lightning spells a $m1% chance to not lose casting time when you take damage.
+29082	Weapon Mastery	Rank 1	1							Aura (infinite)		Increases the damage you deal with all weapons by $s1%.
+29084	Weapon Mastery	Rank 2	1							Aura (infinite)		Increases the damage you deal with all weapons by $s1%.
+29086	Weapon Mastery	Rank 3	1							Aura (infinite)		Increases the damage you deal with all weapons by $s1%.
+29087	Weapon Mastery	Rank 4	1							Aura (infinite)		Increases the damage you deal with all weapons by $s1%.
+29088	Weapon Mastery	Rank 5	1							Aura (infinite)		Increases the damage you deal with all weapons by $s1%.
+29187	Natural Grace				Generic [tree=class, row=2, col=10, max_rank=3, req_points=0]						24: Shaman Spells	Reduces the threat generated by your spells by $m1%.
+29189	Healing Grace	Rank 2									24: Shaman Spells	Reduces the threat generated by your healing spells by $s1%.
+29191	Healing Grace	Rank 3									24: Shaman Spells	Reduces the threat generated by your healing spells by $s1%.
+29192	Improved Weapon Totems	Rank 1									24: Shaman Spells	Increases the melee attack power bonus of your Windfury Totem by $s1% and increases the damage caused by your Flametongue Totem by $s2%.
+29193	Improved Weapon Totems	Rank 2									24: Shaman Spells	Increases the melee attack power bonus of your Windfury Totem by $s1% and increases the damage caused by your Flametongue Totem by $s2%.
+29206	Healing Way	Rank 1			Generic [tree=class, row=5, col=10, max_rank=3, req_points=0]						24: Shaman Spells	Increases the amount healed by your Healing Wave spell by $m1%.
+29228	Flame Shock	Rank 6	60 (max 67)				6 seconds	410 Base Mana (0) (id=190740)	20 yards	12 seconds	24: Shaman Spells	Instantly sears the target with fire, causing $s1 Fire damage immediately and $o2 Fire damage over $d.
+29469	Flametongue Attack	Rank 1	1						50000 yards		24: Shaman Spells	
+29470	Flametongue Attack	Rank 2	1						50000 yards		24: Shaman Spells	
+30160	Elemental Devastation				Generic [tree=class, row=2, col=1, max_rank=3, req_points=0]						24: Shaman Spells	Your Critical Strikes with direct damage spells increase your chance to get a Critical Strike with melee attacks by $m1% for $30165d.
+30165	Elemental Devastation									10 seconds	24: Shaman Spells	
+30812	Mental Quickness				Generic [tree=class, row=5, col=6, max_rank=2, req_points=0]						24: Shaman Spells	Increases your spell damage and healing by up to $m2% of your Intellect.
+408339	Fire Nova										3096	Your Fire Nova Totem spell is replaced with Fire Nova, which causes your current Fire totem to emit damage at its location.
+408341	Fire Nova	Rank 1	12				10 seconds	65 Base Mana (0) (id=304786)	30 yards		24: Shaman Spells	Instantly inflicts $408423s1 fire damage to enemies within $408423a1 yd of your active Fire totem.
+408342	Fire Nova	Rank 2	22				10 seconds	120 Base Mana (0) (id=304787)	30 yards		24: Shaman Spells	Instantly inflicts $408424s1 fire damage to enemies within $408424a1 yd of your active Fire totem.
+408343	Fire Nova	Rank 3	32				10 seconds	210 Base Mana (0) (id=304788)	30 yards		24: Shaman Spells	Instantly inflicts $408426s1 fire damage to enemies within $408426a1 yd of your active Fire totem.
+408344	Fire Nova	Rank 4	42				10 seconds	290 Base Mana (0) (id=304789)	30 yards		24: Shaman Spells	Instantly inflicts $408427s1 fire damage to enemies within $408427a1 yd of your active Fire totem.
+408345	Fire Nova	Rank 5	52				10 seconds	375 Base Mana (0) (id=304790)	30 yards		24: Shaman Spells	Instantly inflicts $408428s1 fire damage to enemies within $408428a1 yd of your active Fire totem.
+408423	Fire Nova	Rank 1	12 (max 17)						36 yards		24: Shaman Spells	
+408424	Fire Nova	Rank 2	22 (max 27)						36 yards		24: Shaman Spells	
+408426	Fire Nova	Rank 3	32 (max 37)						36 yards		24: Shaman Spells	
+408427	Fire Nova	Rank 4	42 (max 47)						36 yards		24: Shaman Spells	
+408428	Fire Nova	Rank 5	52 (max 57)						36 yards		24: Shaman Spells	
+408438	Lightning Overload		1		Generic [tree=class, row=5, col=3, max_rank=3, req_points=0]						24: Shaman Spells	Gives your Lightning Bolt and Chain Lightning spells a $m1% chance to cast a second, similar spell on the same target at no additional cost that causes half damage and no threat.
+408439	Lightning Bolt	Rank 1	1 (max 6)						30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408440	Lightning Bolt	Rank 2	8 (max 13)						30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408441	Lightning Bolt	Rank 3	14 (max 19)						30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408442	Lightning Bolt	Rank 4	20 (max 25)						30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408443	Lightning Bolt	Rank 5	26 (max 31)						30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408472	Lightning Bolt	Rank 6	32 (max 37)						30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408473	Lightning Bolt	Rank 7	38 (max 43)						30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408474	Lightning Bolt	Rank 8	44 (max 49)			3 seconds			30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408475	Lightning Bolt	Rank 9	50 (max 55)						30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408477	Lightning Bolt	Rank 10	56 (max 61)						30 yards		24: Shaman Spells	Casts a bolt of lightning at the target for $s1 Nature damage.
+408479	Chain Lightning	Rank 1	32 (max 37)						30 yards		24: Shaman Spells	Hurls a lightning bolt at the enemy, dealing $s1 Nature damage and then jumping to additional nearby enemies.  Each jump reduces the damage by 30%.  Affects $x1 total targets.
+408481	Chain Lightning	Rank 2	40 (max 45)						30 yards		24: Shaman Spells	Hurls a lightning bolt at the enemy, dealing $s1 Nature damage and then jumping to additional nearby enemies.  Each jump reduces the damage by 30%.  Affects $x1 total targets.
+408482	Chain Lightning	Rank 3	48 (max 53)						30 yards		24: Shaman Spells	Hurls a lightning bolt at the enemy, dealing $s1 Nature damage and then jumping to additional nearby enemies.  Each jump reduces the damage by 30%.  Affects $x1 total targets.
+408484	Chain Lightning	Rank 4	56 (max 61)						30 yards		24: Shaman Spells	Hurls a lightning bolt at the enemy, dealing $s1 Nature damage and then jumping to additional nearby enemies.  Each jump reduces the damage by 30%.  Affects $x1 total targets.
+408490	Lava Burst	Rank 1	30 (max 38)			2.5 seconds	10 seconds	135 Base Mana (0) (id=304801)	30 yards		24: Shaman Spells	You hurl molten lava at the target, dealing $s1 Fire damage. If your Flame Shock is on the target, Lava Burst deals $s2% increased damage.
+408496	Dual Wield Specialization											Increases your chance to hit with both spells and melee attacks by $s1% while dual wielding, your Stormstrike ability now hits with both weapons while dual wielding, and increases the damage done by your offhand weapon by $s3%.
+408498	Maelstrom Weapon		1		Generic [tree=class, row=6, col=7, max_rank=5, req_points=0]						24: Shaman Spells	When you deal damage with a melee attack, you have a chance to reduce the cast time and Mana cost of your next Lightning Bolt spell by $m1%. Stacks up to $s3 times. Lasts $408505d.
+408505	Maelstrom Weapon		1							30 seconds	24: Shaman Spells	Reduces the cast time and Mana cost of your next Lightning Bolt spell.
+408507	Lava Lash		1				6 seconds	1% Base Mana (0) (id=304802)	5 yards			You charge your off-hand weapon with lava, instantly dealing $s1% off-hand Weapon damage. Damage is increased by $s2% if your off-hand weapon is enchanted with Flametongue.
+408510	Water Shield		20		Generic [tree=class, row=3, col=11, max_rank=1, req_points=0]					600 seconds	24: Shaman Spells	The caster is surrounded by $n globes of water. When a spell, melee, or ranged attack hits the caster or when one of the caster's spells gets a critical result, $408511s1% of maximum mana is restored to the caster, expending one water globe. Only one globe will activate every few seconds.  Lasts $d.
+408511	Water Shield		20								24: Shaman Spells	Gaining mana when hit while Water Shield is active.
+408514	Earth Shield		1					5% Base Mana (0) (id=304803)	40 yards	600 seconds		Protects the target with an earthen shield, reducing casting or channeling time lost when damaged by $s2%  and causing attacks to heal the shielded target for ${$m1*$<healpower>/100}.  This effect can only occur once every few seconds.  $n charges. Lasts $d.  Earth Shield can only be placed on one target at a time.
+408519	Earth Shield		1						50000 yards			Healed by Earth Shield.
+408521	Riptide	Rank 1	40 (max 48)		Generic [tree=class, row=7, col=10, max_rank=1, req_points=30]		12 seconds	150 Base Mana (0) (id=304804)	40 yards	15 seconds	24: Shaman Spells	Heals a friendly target for $o2 over $d, and increases the effectiveness of your Chain Heal casts directly on that target by $s3%.
+408524	Shield Mastery		1									Each time you Block, you regenerate mana equal to $408525s2% of your maximum mana and you gain Armor equal to $408525s1% of your shield's armor value, stacking up to $s3 times. You also always gain $s1% increased chance to Block and $s2% increased Block value.
+408525	Shield Mastery		1							15 seconds		Increases armor by $s1% of your shield's Armor value for $d, stacking up to $u times.
+408531	Way of Earth		1									While Rockbiter Weapon is active on your main hand weapon and you have a shield equipped, you deal $408680s1% increased threat, gain $408680s2% increased health, take $408680s4% reduced damage, gain $408680s5% reduced chance to be critically hit by melee attacks, and Earth Shock taunts targets to attack you and has a separate cooldown from other Shock spells but has its range reduced to melee range. However, the range of your Lightning Bolt, Chain Lightning, Chain Heal, Healing Wave, and Lava Burst spells is reduced by $408680s13 yards.
+408680	Way of Earth		1							10 seconds		While Rockbiter Weapon is active on your main hand weapon, you deal $s1% increased threat, gain $s2% increased health, take $s4% reduced damage, gain $s5% reduced chance to be critically hit by melee attacks, and Earth Shock taunts targets to attack you and has a separate cooldown from other Shock spells.
+408681	Earth Shock	Rank 1	4 (max 9)				6 seconds	30 Base Mana (0) (id=304808)	5 yards	2 seconds		Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat and taunts the target.
+408683	Earth Shock	Rank 2	8 (max 13)				6 seconds	50 Base Mana (0) (id=304809)	5 yards	2 seconds		Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat and taunts the target.
+408685	Earth Shock	Rank 3	14 (max 19)				6 seconds	85 Base Mana (0) (id=304810)	5 yards	2 seconds		Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat and taunts the target.
+408687	Earth Shock	Rank 4	24 (max 29)				6 seconds	145 Base Mana (0) (id=304811)	5 yards	2 seconds		Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat and taunts the target.
+408688	Earth Shock	Rank 5	36 (max 41)				6 seconds	240 Base Mana (0) (id=304812)	5 yards	2 seconds		Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat and taunts the target.
+408689	Earth Shock	Rank 6	48 (max 53)				6 seconds	345 Base Mana (0) (id=304813)	5 yards	2 seconds		Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat and taunts the target.
+408690	Earth Shock	Rank 7	60 (max 65)				6 seconds	450 Base Mana (0) (id=304814)	5 yards	2 seconds		Instantly shocks the target with concussive force, causing $s1 Nature damage.  It also interrupts spellcasting and prevents any spell in that school from being cast for $d.  Causes a high amount of threat and taunts the target.
+408696	Spirit of the Alpha		1					8% Base Mana (0) (id=304815)	30 yards	1800 seconds		Infuses the target with the spirit of an alpha wolf, increasing all threat generated by the target by $s1% for $d. Limit 1 target. If cast on a target other than self, the Shaman also gains Loyal Beta, increasing Physical damage done by $443320s1% and reducing all threat generated by $443320s2% for $d. A target cannot have both Spirit of the Alpha and Loyal Beta at the same time.
+409324	Ancestral Guidance		1				60 seconds			10 seconds		For the next $d, $s1% of your damage is converted to healing on up to 3 nearby party members, and $s2% of your healing is converted to damage on your most recent Flame Shock target.
+409333	Ancestral Guidance		1						40 yards			For the next $409324d, $409324s1% of your damage is converted to healing on up to 3 nearby party members, and $409324s2% of your healing is converted to damage on your most recent Flame Shock target.
+409337	Ancestral Guidance		1						40 yards			For the next $409324d, $409324s1% of your damage is converted to healing on up to 3 nearby party members, and $409324s2% of your healing is converted to damage on your most recent Flame Shock target.
+409938	Fire Nova		1								3096	Gain the Fire Nova ability, replacing your Fire Nova Totem:
+409940	Dual Wield Specialization		1									Gain the Dual Wield Specialization ability:
+409941	Water Shield		1									Gain the Water Shield ability:
+409943	Shield Mastery		1									Gain the Shield Mastery ability:
+409944	Ancestral Guidance		1									Gain the Ancestral Guidance ability:
+409945	Overload		1									Gain the Overload ability:
+409946	Maelstrom Weapon		1									Gain the Maelstrom Weapon ability:
+409947	Earth Shield		1									Gain the Earth Shield ability:
+409951	Spirit of the Alpha		1									Gain the Spirit of the Alpha ability:
+409952	Lava Burst		1									Gain the Lava Burst ability:
+409953	Lava Lash		1									Gain the Lava Lash ability:
+409954	Riptide		1								3096	Gain the Riptide ability:
+409955	Way of Earth		1									Gain the Way of Earth ability:
+410093	Engrave Belt - Fire Nova		1			3 seconds					3071	Engrave your belt with the Fire Nova rune:
+410094	Engrave Chest - Overload		1			3 seconds					3071	Engrave your chest or robe with the Overload rune:
+410095	Engrave Gloves - Lava Burst		1			3 seconds					3071	Engrave your gloves with the Lava Burst rune:
+410096	Engrave Chest - Dual Wield Specialization		1			3 seconds					3071	Engrave your chest or robe with the Dual Wield Specialization rune:
+410097	Engrave Gloves - Water Shield		1			3 seconds					3071	Engrave your gloves with the Water Shield rune:
+410098	Engrave Chest - Shield Mastery		1			3 seconds					3071	Engrave your chest or robe with the Shield Mastery rune:
+410099	Engrave Pants - Ancestral Guidance		1			3 seconds					3071	Engrave your pants with the Ancestral Guidance rune:
+410100	Engrave Belt - Maelstrom Weapon		1			3 seconds					3071	Engrave your belt with the Maelstrom Weapon rune:
+410101	Engrave Pants - Earth Shield		1			3 seconds					3071	Engrave your pants with the Earth Shield rune:
+410103	Engrave Boots - Spirit of the Alpha		1			3 seconds					3071	Engrave your boots with the Spirit of the Alpha rune:
+410104	Engrave Gloves - Lava Lash		1			3 seconds					3071	Engrave your gloves with the Lava Lash rune:
+410105	Engrave Bracers - Riptide		1			3 seconds					3071	Engrave your bracers with the Riptide
+410107	Engrave Pants - Way of Earth		1			3 seconds					3071	Engrave your pants with the Way of Earth rune:
+413338	Bulwark Icon										2600	
+413429	Dyadic Icon										2600	
+413432	Lithic Icon										2600	
+413839	Kajaric Icon										2600	
+415012	Clastic Icon										2600	
+415015	Galvanic Icon										2600	
+415096	Coherence		1									Causes your Chain heal effectiveness to only reduce by $s1% per jump, and Chain Lightning effectiveness to only reduce by $s2% per jump. Each also jumps to $s3 additional target.
+415100	Power Surge		1								3096	Each time Flame Shock deals damage, it has a $h% chance to reset the cooldown on Lava Burst and Chain Lightning and make your next Lava Burst or Chain Lightning within $415105d instant. Each time Riptide heals, it has a $h% chance to make your next Chain Heal within $468526d instant. Additionally, every $440285t sec you gain mana equal to $s2% of your Intellect.
+415105	Power Surge		1							10 seconds	3096	
+415140	Mental Dexterity				Generic [tree=class, row=2, col=6, max_rank=3, req_points=0]						24: Shaman Spells	Increases your Attack Power by an amount equal to $m1% of your Intellect.
+415231	Burn										3096	Your Flame Shock now strikes up to $s1 targets, gains ${$m5/1000} sec increased duration, and deals $s3% increased damage. In addition, while you have Flametongue Weapon imbued on your main hand equipped weapon, you gain increased spell damage equal to $s7% of your Intellect.
+415233	Ghost Wolf		20			3 seconds		100 Base Mana (0) (id=305087)		Aura (infinite)	6511	Turns the Shaman into a Ghost Wolf, increasing speed by $s2% and decreasing all damage taken by $s3%.
+415236	Healing Rain					2 seconds	10 seconds	21% Base Mana (0) (id=305089)	40 yards	10 seconds		Selects the area $415242a1 yards around target player, and heals all of target player's party members within that area for ${$<healpower>*$415242m1/100} every second.
+415242	Healing Rain		1						100 yards			Heals up to 5 friendly party or raid members within $a1 yards of the target for ${$<healpower>*$m1/100}.
+415712	Power Surge		1								3096	Gain the Power Surge ability:
+415813	Greater Ghost Wolf		1									Your Ghost Wolf ability can now be used indoors, and reduces all damage you take by $415233s3% while active.
+416054	Engrave Belt - Power Surge		1			3 seconds					3071	Engrave your belt with the Power Surge rune:
+416055	Engrave Helm - Mental Dexterity		1			3 seconds					3071	Engrave your helm with the Mental Dexterity rune:
+416057	Engrave Chest - Healing Rain		1			3 seconds					3071	Engrave your chest or robe with the Healing Rain rune:
+416062	Engrave Cloak - Coherence		1			3 seconds					3096	Engrave your cloak with the Coherence rune:
+416066	Engrave Helm - Burn		1			3 seconds					3071	Engrave your helm with the Burn rune:
+416081	Coherence		1									Gain the Coherence ability:
+420799	Tempest Icon										2600	
+425336	Rage of the Farseer		1		Generic [tree=class, row=7, col=6, max_rank=1, req_points=0]		180 seconds			25 seconds	24: Shaman Spells	Increases your attack speed by $s1% for $d.
+425339	Molten Blast		1				6 seconds	18% Base Mana (0) (id=305573)				Blast up to $i enemies in a cone in front of you for ${$<damagepower>*$m1/100+$m2/100*$AP} to ${$<damagepower>*$M1/100+$m2/100*$AP} Fire damage. This ability generates a high amount of threat. Flame Shock periodic damage has a $s3% chance to reset the cooldown on Molten Blast.
+425340	Molten Blast		1									Gain the Molten Blast ability:
+425341	Greater Ghost Wolf		1									Gain the Greater Ghost Wolf ability:
+425343	Engrave Pants - Greater Ghost Wolf		1			3 seconds					3071	Engrave your pants with the Greater Ghost Wolf rune:
+425344	Engrave Gloves - Molten Blast		1			3 seconds					3071	Engrave your gloves with the Molten Blast rune:
+425858	Ancestral Awakening		1									When you critically heal with your Healing Wave or Lesser Healing Wave you summon an Ancestral spirit to aid you, instantly healing the lowest percentage health party member within 40 yards for $s1% of the amount healed.
+425874	Decoy Totem		1				20 seconds	11% Base Mana (0) (id=305603)	30 yards	10 seconds		Summons a Decoy Totem for $d with $s1 health at the feet of the target that will redirect the next melee or ranged attack made against the target to the totem instead. The totem also grants the target immunity to movement impairing effects for $436391d.
+425879	Ancestral Awakening		1									Gain the Ancestral Awakening ability:
+425881	Decoy Totem		1									Gain the Decoy Totem ability:
+425882	Engrave Boots - Decoy Totem		1			3 seconds					3071	Engrave your boots with the Decoy Totem rune:
+425883	Engrave Boots - Ancestral Awakening		1			3 seconds					3071	Engrave your boots with the Ancestral Awakening rune:
+426257	Sulfurous Icon										2600	
+432041	Tidal Waves								50000 yards	20 seconds	3096	
+432042	Tidal Waves										3096	When you cast Chain Heal or Riptide you gain $s1 charges of Tidal Waves, which reduces the cast time of your Healing Wave by $432041s1%, reduces the cast time of your Chain Heal by $432041s3%, and increases the critical effect chance of your Lesser Healing Wave by $432041s2%.
+432056	Rolling Thunder										3096	Lightning Bolt and Chain Lightning have a $h% chance to add an additional charge to your active Lightning Shield, up to a maximum of $s1 Charges.
+432134	Static Shock										3096	Your Lightning Shield now has ${$m1+3} charges, and your melee attacks have a $h% chance (${$h/2}% chance while dual-wielding) to trigger one of those charges, immediately damaging your target.
+432140	Overcharged										3096	Your Lightning Shield never loses charges, now has a $m2 sec cooldown, and deals damage to all enemies within $432143a1 yards.
+432143	Lightning Shield	Rank 1	8						100 yards	3 seconds	3096	Casts a bolt of lightning at the target for $s1 Nature damage.
+432234	Engrave Helm - Tidal Waves		1			3 seconds					3071	Engrave your helm with the Tidal Waves rune:
+432235	Rolling Thunder		1								3096	Gain the Rolling Thunder ability:
+432236	Engrave Bracers - Rolling Thunder		1			3 seconds					3071	Engrave your bracers with the Rolling Thunder rune:
+432237	Static Shock		1								3096	Gain the Static Shock ability:
+432238	Engrave Bracers - Static Shock		1			3 seconds					3071	Engrave your bracers with the Static Shock rune:
+432240	Overcharged		1								3096	Gain the Overcharged ability:
+432241	Engrave Bracers - Overcharged		1			3 seconds					3071	Engrave your bracers with the Overcharged rune:
+436364	Two-Handed Mastery											Each time you strike an enemy with a two-handed weapon, you gain $436365s1% attack speed with two-handed weapons, $436365s2% increased Attack Power, and $436365s3% increased chance to hit with spells for $436365d. This effect is lost if you strike an enemy with a one-handed weapon.
+436365	Two-Handed Mastery		1							10 seconds		
+436367	Two-Handed Mastery		1									Gain the Two-Handed Mastery ability:
+436368	Engrave Chest - Two-Handed Mastery		1			3 seconds					3071	Engrave your chest or robe with the Two-Handed Mastery rune:
+436391	Decoy Totem		1						30 yards	10 seconds		
+436519	Flametongue Weapon		1									
+437009	Totemic Call		22				30 seconds	25% Base Mana (0) (id=314395)	30 yards	1 seconds	24: Shaman Spells	Relocates your active totems to your location.
+439431	Windfury Weapon	Rank 1	30 (max 38)								24: Shaman Spells	Imbue the Shaman's weapon with wind.  Each hit has a 20% chance of granting you $8233s2 extra $lattack:attacks; with $8233s1 extra melee attack power.  Lasts for 5 minutes.
+440285	Power Surge		1							15 seconds	3096	
+440569	Storm, Earth, and Fire										3096	Reduces the cooldown of your Chain Lightning by $s1%, causes your Earthbind Totem to root targets for $440574d when cast, and increases the periodic damage done by your Flame Shock by $s3%.
+440574	Earthgrab									5 seconds		
+440580	Feral Spirit		1				180 seconds	12% Base Mana (0) (id=306391)	30 yards	45 seconds		Summons two Spirit Wolves under the command of the Shaman, lasting $d.
+440630	Engrave Cloak - Feral Spirit		1			3 seconds						Engrave your cloak with the Feral Spirit rune:
+440634	Engrave Cloak - Storm, Earth, and Fire		1			3 seconds						Engrave your cloak with the Storm, Earth, and Fire rune:
+442894	Spell Specialization											Chance to hit with spells increased by $s1%. Not cumulative with other ring runes.
+442895	Spell Specialization											Chance to hit with spells increased by $s1%. Not cumulative with other ring runes.
+442896	Spell Specialization											Chance to hit with spells increased by $s1%. Not cumulative with other ring runes.
+443320	Loyal Beta		1							1800 seconds	3096	
+453593	S03 - PvP - Damage Reduction Aura		1									
+453688	Engrave Ring - Axe Specialization		1			3 seconds					3071	Engrave your ring with the Axe Specialization rune:
+453689	Engrave Ring - Mace Specialization		1			3 seconds					3071	Engrave your ring with the Mace Specialization rune:
+453690	Engrave Ring - Dagger Specialization		1			3 seconds					3071	Engrave your ring with the Dagger Specialization rune:
+453691	Engrave Ring - Fist Weapon Specialization		1			3 seconds					3071	Engrave your ring with the Fist Weapon Specialization rune:
+453694	Engrave Ring - Pole Weapon Specialization		1			3 seconds					3071	Engrave your ring with the Pole Weapon Specialization rune:
+453696	Engrave Ring - Fire Specialization		1			3 seconds					3071	Engrave your ring with the Fire Specialization rune:
+453697	Engrave Ring - Frost Specialization		1			3 seconds					3071	Engrave your ring with the Frost Specialization rune:
+453698	Engrave Ring - Nature Specialization		1			3 seconds					3071	Engrave your ring with the Nature Specialization rune:
+456223	Voltaic  Icon										2600	
+457475	S03 - Item - T1 - Shaman - Elemental/Enhancement/Restoration 2P Bonus											The radius of your totems that affect friendly targets is increased to ${$m1+20} yd.
+457478	S03 - Item - T1 - Shaman - Restoration 4P Bonus											After casting your Healing Wave, Lesser Healing Wave, or Riptide spell, gives you a $h% chance to gain Mana equal to $s1% of the base cost of the spell.
+457494	S03 - Item - T1 - Shaman - Restoration 6P Bonus											Your Healing Wave will now jump to additional nearby targets. Each jump reduces the effectiveness of the heal by $s2%, and the spell will jump to up to ${$m1-1} additional targets.
+457520	S03 - Item - T1 - Shaman - Elemental 4P Bonus		1								3096	Your Lightning Bolt critical strikes have a $h% chance to reset the cooldown on Lava Burst and Chain Lightning and make the next Lava Burst or Chain Lightning within $415105d instant.
+457524	S03 - Item - T1 - Shaman - Elemental 6P Bonus		1								3096	Lava Burst now also refreshes the duration of Flame Shock on your target back to $29228d.
+457532	S03 - Item - T1 - Shaman - Enhancement 6P Bonus											Your Flurry talent grants an additional $s1% increase to your attack speed.
+457544	S03 - Item - T1 - Shaman - Tank 6P Bonus		1									Your Stoneskin Totem also reduces Physical damage taken by $s1% and your Windwall Totem also reduces Magical damage taken by $s1%.
+459313	Engrave Ring - Defense Specialization		1			3 seconds					3071	Engrave your ring with the Defense Specialization rune:
+460171	Defender's Resolve									15 seconds		
+460200	Defender's Resolve									15 seconds		
+461295	Totem of Thunder										24: Shaman Spells	Increases the critical strike chance of Lightning Bolt by $s1%.
+467804	S03 - Item - T2 - Shaman - Restoration 2P Bonus											Your non-periodic damaging and healing critical strikes now have a $h% chance to trigger your Water Shield, but do not consume a charge or trigger its cooldown.
+467809	S03 - Item - T2 - Shaman - Restoration 4P Bonus											Your Chain Lightning now also heals the target of your most recent Earth Shield for $s1% of the damage done.
+467814	S03 - Item - T2 - Shaman - Restoration 6P Bonus											Increases the healing of Chain Heal and the damage of Chain Lightning by $s1%.
+467818	S03 - Item - T2 - Shaman - Elemental 2P Bonus											Your spell critical strikes now have a $h% chance trigger your Elemental Focus talent.
+467823	S03 - Item - T2 - Shaman - Elemental 4P Bonus											Loyal Beta from your Spirit of the Alpha ability now also increases Fire, Frost, and Nature damage by $s1%.
+467863	S03 - Item - T2 - Shaman - Elemental 6P Bonus											While Clearcasting is active, you deal $s2% more non-Physical damage.
+467877	S03 - Item - T2 - Shaman - Enhancement 2P Bonus											Your chance to trigger Static Shock is increased by $m1% (${$m1/2}% while dual-wielding).
+467879	S03 - Item - T2 - Shaman - Enhancement 4P Bonus											Increases the main hand damage done by your Stormstrike by $s1%.
+467882	S03 - Item - T2 - Shaman - Enhancement 6P Bonus											While Static Shock is engraved, your Lightning Shield now gains a charge each time you hit a target with Lightning Bolt or Chain Lightning, up to a maximum of ${$432134m1+3} charges. In addition, while Static Shock is engraved, your Lightning Shield can now deal critical damage.
+467889	S03 - Item - T2 - Shaman - Tank 2P Bonus											Your Flame Shock also grants $467891s1% increased chance to Block for $467891d or until you Block an attack.
+467891	Shield Block		1							5 seconds		
+467909	S03 - Item - T2 - Shaman - Tank 4P Bonus											Each time you Block, your Block amount is increased by $s1% of your Spell Damage for $467910d, stacking up to $467910u times.
+467910	Elemental Shield		1							6 seconds		
+467916	S03 - Item - T2 - Shaman - Tank 6P Bonus											Each time you Block an attack, you have a $h% chance to trigger your Maelstrom Weapon rune.
+468441	S03 - Item - ZG - Shaman - Tank 3P Bonus											Increases your chance to block attacks with a shield by $s1%.
+468445	S03 - Item - ZG - Shaman - Tank 5P Bonus											Increases the chance to trigger your Power Surge rune by an additional $s1%.
+468526	Power Surge		1							10 seconds	3096	
+468758	Healing Specialization											Increases healing done by spells and effects by up to $s1. This effect is not cumulative with other ring runes.
+468761	Engrave Ring - Healing Specialization		1			3 seconds					3071	Engrave your ring with the Healing Specialization rune:
+468762	Meditation Specialization											Restores $s1 mana per 5 sec. This effect is not cumulative with other ring runes.
+468763	Engrave Ring - Meditation Specialization		1			3 seconds					3071	Engrave your ring with the Meditation Specialization rune:
+1213810	S03 - Item - TAQ - Shaman - Restoration 2P Bonus		1									Your Riptide increases the amount healed by Chain Heal by an additional $s1%.
+1213894	S03 - Item - TAQ - Shaman - Restoration 4P Bonus		1									Reduces the cast time of Chain Heal by ${$m1/-1000}.1 sec.
+1213900	S03 - Item - TAQ - Shaman - Elemental 2P Bonus		1									You have a $s1% chance to avoid interruption caused by damage while casting Lightning Bolt, Chain Lightning, or Lava Burst, and a $s2% increased chance to trigger your Elemental Focus talent.
+1213902	S03 - Item - TAQ - Shaman - Elemental 4P Bonus		1									Increases the critical strike damage bonus of your Fire, Frost, and Nature spells by $s1%.
+1213910	S03 - Item - TAQ - Shaman - Enhancement 2P Bonus		1									Increases Stormstrike and Lava Lash damage by $s1%. This effect is increased to $s2% if using a two-handed weapon.
+1213918	S03 - Item - TAQ - Shaman - Enhancement 4P Bonus		1									Your Stormstrike, Lava Lash and Lava Burst critical strikes cause your target to burn for $s1% of the damage done over $1213915d.
+1213930	S03 - Item - TAQ - Shaman - Tank 2P Bonus		1									Damaging a target with Stormstrike, Lava Burst, or Molten Blast also reduces all damage you take by $1213934s1% for $1213934d.
+1213934	Stormbraced		1							10 seconds		
+1213937	S03 - Item - TAQ - Shaman - Tank 4P Bonus		1									When your Spirit of the Alpha is cast on yourself, it also increases your health by $1213939s1%, your threat generated by $1213939s2%, and all damage you deal by $1213939s3%.
+1213939	Pack Leader		1							Aura (infinite)		
+1213957	S03 - Item - RAQ - Shaman - Elemental 3P Bonus		1									Your Lava Burst damage is increased by a percentage equal to your spell critical strike chance.
+1219955	Soul Engraving		1									The Soul of a fallen warrior can be engraved into this slot.
+1222988	Earthbound		1		Generic [tree=class, row=4, col=4, max_rank=1, req_points=0]						24: Shaman Spells	Your Earthbind Totem Immobilizes nearby targets for $1238289d when cast.
+1223030	Shamanistic Focus		1		Generic [tree=class, row=3, col=7, max_rank=1, req_points=0]						24: Shaman Spells	Reduces the mana cost of your Shock and Lightning Shield spells by $s1%.
+1223031	Improved Stormstrike		1		Generic [tree=class, row=5, col=7, max_rank=2, req_points=0]						24: Shaman Spells	When you Stormstrike, you have a $m1% chance to gain $1238931s1% mana regeneration while casting spells for $1238931d, and Stormstrike's cooldown has a $m2% chance to reset each time you Dodge or Parry.
+1223033	Mindfulness				Generic [tree=class, row=2, col=9, max_rank=3, req_points=0]							Allows $m1% of your Mana regeneration to continue while casting.
+1238289	Earthbound		6							5 seconds	24: Shaman Spells	
+1238640	Ghost Wolf		20			3 seconds		100 Base Mana (0) (id=310847)		Aura (infinite)	24: Shaman Spells	Turns the Shaman into a Ghost Wolf, increasing speed by $s2%.
+1238931	Improved Stormstrike		1							15 seconds	24: Shaman Spells	
+1239242	Riptide	Rank 2	50 (max 58)				12 seconds	180 Base Mana (0) (id=310863)	40 yards	15 seconds	24: Shaman Spells	Heals a friendly target for $o2 over $d, and increases the effectiveness of your Chain Heal casts directly on that target by $s3%.
+1239243	Riptide	Rank 3	60 (max 68)				12 seconds	230 Base Mana (0) (id=310864)	40 yards	15 seconds	24: Shaman Spells	Heals a friendly target for $o2 over $d, and increases the effectiveness of your Chain Heal casts directly on that target by $s3%.
+1249011	Totem of Ancestral Protection										24: Shaman Spells	Reduces the cooldown of Grounding Totem by ${$s1/-1000} sec.
+1270478	Flame Charged										21: Druid Spells	Reduces the mana cost of Flame Shock and Lightning Bolt by $s1 Mana.
+1270492	Totem Affinity										21: Druid Spells	Reduces the mana cost of your totems by $s1%.
+1291076	Reduced Healing Wave Cost										24: Shaman Spells	Reduces the Mana cost of your Healing Wave ability by $s1%.
+1291077	Increased Flame Shock Duration										24: Shaman Spells	Increases the duration of your Flame Shock ability by ${$m1/1000} sec.
+1291078	Lightning Bolt Can Activate Maelstrom Weapon										24: Shaman Spells	Your Lightning Bolt ability can now also trigger the Maelstrom Weapon talent, but with a $s1% reduced chance.
+1306448	Lesser Healing Wave Crit Chance										26: Paladin Spells	Increases the critical strike chance of your Lesser Healing Wave spell by $s1%.
+1309422	Rage of Earth											Increases the damage dealt by your Stormstrike ability by $m1%.
+1309442	Storm's Grasp											Increases the critical strike chance of your Lightning Bolt spell by $m1%.
+1309539	Tidebringer's Claw											Increases the critical strike chance of your Healing Wave and Lesser Healing Wave spells by $m1%.
+1325256	Mana Tide Totem	Rank 4	58				300 seconds	60 Base Mana (0) (id=315044)		13 seconds	24: Shaman Spells	Summons a Mana Tide Totem with $s1 health at the feet of the caster for ${$d-1} sec that restores $1325257s1 mana every $1325257t1 seconds to group members within $1325257a1 yards.
+1325257	Mana Tide	Rank 4	58								24: Shaman Spells	
