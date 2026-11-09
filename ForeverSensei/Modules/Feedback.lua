@@ -1,4 +1,4 @@
--- Modules/Feedback.lua: translation reports. She marks a text, saves a reason and an optional better Japanese,
+-- Modules/Feedback.lua: translation reports. The player marks a text, saves a reason and an optional better Japanese,
 -- then sends all pending reports at once by copying them from a pre-selected box into a chat with him.
 -- The text format is parsed by tools/reports.py; keep both in sync.
 local _, ns = ...

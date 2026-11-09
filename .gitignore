@@ -3,3 +3,5 @@ dist/
 __pycache__/
 *.pyc
 .DS_Store
+# Translation reports from make reports: the player's own comments, kept local
+reports/

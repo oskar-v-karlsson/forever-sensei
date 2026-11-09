@@ -47,7 +47,7 @@ return function(ns, lang)
   end
   STUB.unspent = 0
 
-  -- Readable talent tree: she followed the path up to the point before this level → next is that level's step.
+  -- Readable talent tree: the player followed the path up to the point before this level → next is that level's step.
   local T = data.talents
   for _, lv in ipairs({ 10, 25, 40, 60 }) do
     local ranks = {}
@@ -277,7 +277,7 @@ return function(ns, lang)
     fail("card from list: the new-skill card did not come back")
   end
   try("card unknown from list", ns.NewSkill.ShowCard, ns.Spells.Get("chain_heal"), true)
-  if card.place:IsEnabled() then fail("card from list: Place it enabled for a skill she does not know") end
+  if card.place:IsEnabled() then fail("card from list: Place it enabled for a skill the player does not know") end
   card:Hide()
 
   -- Translation reports: save two, send, format.

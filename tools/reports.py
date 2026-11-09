@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """tools/reports.py: process translation reports pasted from the game (make reports).
 
-She saves reports in-game and copies them from the 報告を送る box into a chat. Copy that text, then run
+The player saves reports in-game and copies them from the 報告を送る box into a chat. Copy that text, then run
 `make reports` (reads the clipboard with pbpaste) or `python3 tools/reports.py --file reports.txt`.
 
 For every report:
@@ -10,6 +10,7 @@ For every report:
 - Everything else (no suggestion, a suggestion that breaks a rule, text changed since, unknown id) goes to
   reports/open.md with the English source and current Japanese, for a person or agent to handle.
 - Every report is appended to reports/log.md.
+reports/ is gitignored: it holds the player's own comments and stays local (never commit it).
 Then, when ja.lua changed, the patch version is bumped (TOC + Core/Init.lua) and dist/ForeverSensei-v<version>.zip
 is built (also built with --zip when nothing changed).
 
@@ -177,7 +178,7 @@ def process(text, dry_run=False):
             why.append("unknown id (renamed or removed?)")
         elif r["suggestion"]:
             if r["current"] and r["current"] != ja.get(rid):
-                why.append("the Japanese changed since she reported it; compare by hand")
+                why.append("the Japanese changed since it was reported; compare by hand")
             probs = textrules.ja_problems(rid, r["suggestion"], en[rid], all_names)
             if probs:
                 why.append("suggestion breaks rules: " + "; ".join(probs))
@@ -210,17 +211,17 @@ def process(text, dry_run=False):
             if new:
                 fh.write("# Open translation reports\n\nReports from the game that need a person or agent: write a "
                          "better Japanese text in ForeverSensei/Locales/ja.lua (follow README 'Processing translation "
-                         "reports'), run make check, then delete the entry here.\n")
+                         "reports'), run make check, then delete the entry here. This file is local (reports/ is gitignored); do not commit it.\n")
             for r, why, en_text, ja_text in open_items:
                 fh.write(f"\n## {r['id']} ({r['reason']}, {today}, v{parsed['version']})\n\n")
                 fh.write(f"- Why open: {'; '.join(why)}\n")
                 if r["note"]:
-                    fh.write(f"- Her note: {r['note']}\n")
+                    fh.write(f"- Player's note: {r['note']}\n")
                 fh.write(f"- English source:\n\n{md_block(en_text)}\n\n- Japanese now:\n\n{md_block(ja_text)}\n")
                 if r["current"] and r["current"] != ja_text:
-                    fh.write(f"\n- Japanese she saw:\n\n{md_block(r['current'])}\n")
+                    fh.write(f"\n- Japanese the player saw:\n\n{md_block(r['current'])}\n")
                 if r["suggestion"]:
-                    fh.write(f"\n- Her suggestion:\n\n{md_block(r['suggestion'])}\n")
+                    fh.write(f"\n- Player's suggestion:\n\n{md_block(r['suggestion'])}\n")
     with open(os.path.join(REPORTS_DIR, "log.md"), "a", encoding="utf-8") as fh:
         for r, status in log:
             extra = "".join(f" | {k}: {r[k]}" for k in ("suggestion", "note") if r[k])

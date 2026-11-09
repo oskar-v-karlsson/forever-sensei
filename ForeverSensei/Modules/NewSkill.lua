@@ -205,7 +205,7 @@ function NewSkill.Scan(atLogin)
   if #newRanks > 0 or atLogin then ns.Layout.ApplyNewRanks(newRanks) end
 end
 
--- Skills she can learn at her level but does not know yet (talents excluded).
+-- Skills the player can learn at their level but does not know yet (talents excluded).
 function NewSkill.Trainable(level)
   local list = {}
   for _, e in ipairs(Spells.List()) do

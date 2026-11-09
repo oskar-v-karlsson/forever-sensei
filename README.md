@@ -2,13 +2,13 @@
 
 A Japanese class coach addon for **World of Warcraft: Forever**. Version 1 covers the **Restoration Shaman** healer (made for a Skyborne / Horde player) from level 1 to 60.
 
-- **New skill cards (新しいスキル):** when she learns a skill, a card explains in Japanese what it does, when to use it, where it goes on her bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
-- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot, and only small-hand keys are used: `1-5`, `Q E R F`, `Z X C` and the same keys with Shift. Her current layout can be replaced in one step (**すべて配置**). She sees a preview first, her old bars and keys are backed up, and **元に戻す** restores them.
-- **New ranks:** the game does not put a new rank on the bars, so the addon upgrades bar buttons to the highest rank automatically (after combat if she is fighting), with a toast and **元に戻す** to keep the old rank. It can be turned off in the settings. Healing macros are checked to cast the highest rank too.
+- **New skill cards (新しいスキル):** when you learn a skill, a card explains in Japanese what it does, when to use it, where it goes on your bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
+- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot, and only small-hand keys are used: `1-5`, `Q E R F`, `Z X C` and the same keys with Shift. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them.
+- **New ranks:** the game does not put a new rank on the bars, so the addon upgrades bar buttons to the highest rank automatically (after combat if you are fighting), with a toast and **元に戻す** to keep the old rank. It can be turned off in the settings. Healing macros are checked to cast the highest rank too.
 - **Healing targeting:** mouseover healing macros, or plain spells for click-target healing. One setting switches between them.
-- **Talent advisor (タレント):** when she has an unspent point, it shows the next talent from her Mobalytics build with a short reason, plus the full order.
+- **Talent advisor (タレント):** when you have an unspent point, it shows the next talent from the Mobalytics build with a short reason, plus the full order.
 - **Guide (`/sensei`):** the healer role, healing tips, when to deal damage, totems, group manners, a skill list by level, the key layout, and the talent order.
-- **Translation reports (翻訳の報告):** every Japanese line can be reported in-game. She copies the reports to chat, and `make reports` applies them here.
+- **Translation reports (翻訳の報告):** every Japanese line can be reported in-game. The player copies the reports into a chat message to the maintainer, and `make reports` applies them here.
 
 All game facts come from World of Warcraft: Forever sources only (client spell data, Wowhead Forever, Mobalytics Forever), never Classic or Retail. See [SOURCES.md](SOURCES.md), which also lists what can only be checked in the game.
 
@@ -22,14 +22,14 @@ ForeverSensei works with or without WFJ installed. Without it, ForeverSensei use
 ## Install on Windows
 
 1. Get the addon:
-   - **Zip:** run `make zip` on the Mac and send her `dist/ForeverSensei-v<version>.zip`. She right-clicks it → **Extract All**.
+   - **Zip:** run `make zip` on the Mac and send the player `dist/ForeverSensei-v<version>.zip`. On Windows, right-click it → **Extract All**.
    - **Copy:** or copy the `ForeverSensei` folder from this repo.
 2. In the **Battle.net** app, choose **World of Warcraft**, then the **Forever** version in the version drop-down. Click the gear next to Play → **Show in Explorer**.
 3. Open the game folder for Forever (most likely `_classic_beta_`), then `Interface\AddOns`. If `AddOns` (or `Interface`) is missing, create it.
 4. Put the `ForeverSensei` folder there. The result must be `...\Interface\AddOns\ForeverSensei\ForeverSensei.toc`. The folder must be named exactly `ForeverSensei`, and not nested twice (`ForeverSensei\ForeverSensei\...`), which happens easily with Extract All.
 5. Start the game. At character select, open **AddOns** (bottom left), make sure **ForeverSensei** is ticked, and turn on **Load out of date AddOns** if the game asks.
 
-To update, delete the old `ForeverSensei` folder and put the new one in its place. Her settings and saved reports are kept, because they are stored in `WTF\Account\...\SavedVariables\ForeverSensei.lua`.
+To update, delete the old `ForeverSensei` folder and put the new one in its place. Your settings and saved reports are kept, because they are stored in `WTF\Account\...\SavedVariables\ForeverSensei.lua`.
 
 ## First steps in the game
 
@@ -51,7 +51,7 @@ The game's 12.x API hides health, cooldowns and auras from addons in combat, so 
 | `/sensei layout` | Key layout tab |
 | `/sensei apply` / `/sensei undo` | Apply the full layout (with preview) / restore the backup |
 | `/sensei talents` | Talent advice; `/sensei order` shows the full order |
-| `/sensei trainer` | Skills available at the trainer for her level |
+| `/sensei trainer` | Skills available at the trainer for your level |
 | `/sensei card <Spell>` | Show the card for a spell (English name, e.g. `/sensei card Chain Heal`) |
 | `/sensei review` | Translation check tab (mark each text OK or report it) |
 | `/sensei report` | Send translation reports (copy box) |
@@ -87,7 +87,7 @@ Each macro is:
 #showtooltip <Spell>
 /cast [@mouseover,help,nodead][help,nodead][@player] <Spell>
 ```
-It heals the friend under the mouse, otherwise the friendly target, otherwise herself.
+It heals the friend under the mouse, otherwise the friendly target, otherwise you.
 
 ## In-game test checklist
 
@@ -99,7 +99,7 @@ These cannot be tested outside the game. Please go through them once, then paste
 4. [ ] **配置する** on a card puts the skill in its slot and binds the key, and asks first if the slot is used.
 5. [ ] **すべて配置:** the preview is shown, **適用** changes the bars and keys, bars 2-4 become visible, and `/reload` keeps everything.
 6. [ ] **元に戻す** / `/sensei undo` restores the old bars and keys.
-7. [ ] Mouseover mode: hovering a party frame and pressing `1` heals that player. With no mouseover, it heals the target. With no friendly target, it heals herself.
+7. [ ] Mouseover mode: hovering a party frame and pressing `1` heals that player. With no mouseover, it heals the target. With no friendly target, it heals you.
 8. [ ] Switching to **ターゲットを回復** replaces the macros with plain spells in the same slots, and back again.
 9. [ ] Learning a higher rank (out of combat, or right after combat) changes the bar buttons to it and shows a toast. **元に戻す** on the toast puts the old rank back and keeps it. A mouseover macro (e.g. Healing Wave on `1`) casts the new rank: in `/sensei verify`, the macro lines under [Layout] show the same id after `casts` and `highest known`, and there is no `macro does not cast the highest rank` line. The game itself does not upgrade bar buttons (seen in game, v0.1.0).
 10. [ ] Long texts (talent hint, cards, trainer list, report window) stay inside their windows, and the skill list's **カード** button opens the card with a working **配置する**.
@@ -110,7 +110,7 @@ These cannot be tested outside the game. Please go through them once, then paste
 
 ## Translation reports
 
-### For her (日本語)
+### For the player (日本語)
 
 1. 変な日本語や、わかりにくい文を見つけたら、その文の横の **報告** ボタンを押す。
 2. どこがおかしいかを選ぶ（意味が違う／不自然／誤字／わかりにくい／その他）。よりよい日本語やメモは、書いても書かなくてもいい。**保存** を押す。
@@ -122,14 +122,16 @@ These cannot be tested outside the game. Please go through them once, then paste
 
 ### For the repo owner
 
-1. Copy her whole chat message, including the `[ForeverSensei v… 報告 N件]` header. Chat names and timestamps around it are ignored.
+1. Copy the player's whole chat message, including the `[ForeverSensei v… 報告 N件]` header. Chat names and timestamps around it are ignored.
 2. Run `make reports`. It reads the clipboard (`pbpaste`). You can also run `python3 tools/reports.py --file paste.txt`, or `make reports-dry` to only preview. For each report, it:
-   - applies her suggested Japanese (案) if the ID exists, the "今" text still matches, and the suggestion passes the text rules;
-   - writes everything else to `reports/open.md`, with the English source, the current Japanese and her note;
+   - applies the player's suggested Japanese (案) if the ID exists, the "今" text still matches, and the suggestion passes the text rules;
+   - writes everything else to `reports/open.md`, with the English source, the current Japanese and the player's note;
    - logs every report to `reports/log.md`.
 
+   `reports/` is in `.gitignore`: these files hold the player's own comments and stay local. Never commit them.
+
    If anything changed, it also bumps the patch version (TOC and `Core/Init.lua`), runs `make check`, and builds `dist/ForeverSensei-v<version>.zip`.
-3. Handle `reports/open.md` (or ask an agent to, see below). Then commit and send her the new zip.
+3. Handle `reports/open.md` (or ask an agent to, see below). Then commit the changed addon files (not `reports/`) and send the player the new zip.
 
 ### For agents: processing translation reports
 
@@ -146,10 +148,10 @@ When the user pastes a report block (starting `[ForeverSensei v`) or asks you to
    - **Punctuation:** use 、 and 。 No `/` (except in `/sensei` commands) and no `...`. Use `〜` for ranges (`1〜5`) and `・` between key names (`Q・E・R・F`).
    - **Placeholders:** keep every `{placeholder}` from the English text.
    - **Length:** keep it about as short as the current text. Card texts must fit the card.
-   - **Her note** says what was wrong; fix exactly that.
+   - **The player's note** says what was wrong; fix exactly that.
 3. Run `make check`. It checks the text rules, font glyphs, placeholders and length, and runs every screen in a fake client. Fix anything it reports.
 4. Delete the handled entries from `reports/open.md`. Bump the patch version in `ForeverSensei/ForeverSensei.toc` (`## Version`) and `ForeverSensei/Core/Init.lua` (`ns.VERSION`) if `reports.py` has not already done so. Run `make zip`.
-5. Commit, with no `Co-authored-by` trailer, and tell the user which zip to send.
+5. Commit the addon changes, with no `Co-authored-by` trailer. Do not commit `reports/` (it is gitignored and stays local). Tell the user which zip to send.
 
 ## Development
 

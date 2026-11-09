@@ -14,7 +14,7 @@ All entries were checked on **2026-11-09** against client **1.60.1.70862**. Each
 | `wh_abilities` | [Wowhead Forever: Restoration Shaman healer abilities](https://www.wowhead.com/forever/guide/classes/shaman/restoration/healer-abilities) | Ability use and priorities |
 | `wh_overview` | [Wowhead Forever: Restoration Shaman overview](https://www.wowhead.com/forever/guide/classes/shaman/restoration/overview-pve-healer) | The healer role, strengths and weaknesses |
 | `wh_talents` | [Wowhead Forever: Restoration Shaman talent builds](https://www.wowhead.com/forever/guide/classes/shaman/restoration/talent-builds-pve-healer) | Cross-check for the talent build |
-| `moba` | [Mobalytics: WoW Forever Restoration Shaman guide](https://mobalytics.gg/wow-forever/classes/restoration-shaman-guide) (her guide) | Talent order (leveling path, final 0/5/46); healing, damage, totem and group tips |
+| `moba` | [Mobalytics: WoW Forever Restoration Shaman guide](https://mobalytics.gg/wow-forever/classes/restoration-shaman-guide) (the guide this build follows) | Talent order (leveling path, final 0/5/46); healing, damage, totem and group tips |
 | `ui` | Blizzard UI code for Forever 1.60.1 ([reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode), folder `Forever`) | Action bar slot numbers, binding names, the talent frame, events and API names |
 
 Wowhead and Mobalytics pages block scripted downloads (HTTP 403), so they were read in a browser.

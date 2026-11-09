@@ -94,7 +94,7 @@ def rank_levels():
 
 
 def login(lua, ns, level=20):
-    """Fake character: every rank she can have at this level is known (the client gives ranks with the trainer)."""
+    """Fake character: every rank the player can have at this level is known (the client gives ranks with the trainer)."""
     stub = lua.globals().STUB
     data = ns.ClassData.SHAMAN
     ranks = rank_levels()

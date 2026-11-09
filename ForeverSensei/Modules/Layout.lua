@@ -40,7 +40,7 @@ local API = {
 }
 Layout.API = API
 
--- Action slots that can hold her spells: bars 1-6 (1-120; 73-120 are unused stance pages for a Shaman) and the
+-- Action slots that can hold the player's spells: bars 1-6 (1-120; 73-120 are unused stance pages for a Shaman) and the
 -- extra bars 6-8 of the 12.x UI (145-180). 121-144 are override/vehicle bars and are never touched.
 Layout.SLOTS = {}
 for i = 1, 120 do table.insert(Layout.SLOTS, i) end
@@ -100,7 +100,7 @@ function Layout.Desired(entry)
   return { kind = "spell", entry = entry, id = Spells.CurrentID(entry) }
 end
 
--- slot (optional): an older rank she kept there on purpose (undid its upgrade) counts as a match.
+-- slot (optional): an older rank the player kept there on purpose (undid its upgrade) counts as a match.
 function Layout.Matches(cur, d, slot)
   if not cur or not d then return false end
   if d.kind == "macro" then return cur.type == "macro" and cur.macroName == d.macro end
@@ -230,7 +230,7 @@ function Layout.BuildPlan(onlyKey)
     end
   end
 
-  -- Empty slots reserved for spells she does not know yet take displaced actions, bar 4 then bar 3, right to left.
+  -- Empty slots reserved for spells the player does not know yet take displaced actions, bar 4 then bar 3, right to left.
   local free = {}
   for _, barId in ipairs({ "bar4", "bar3" }) do
     for i = #layout.slots, 1, -1 do
@@ -269,7 +269,7 @@ function Layout.BuildPlan(onlyKey)
     end
   end
 
-  -- Copies of planned spells in slots reserved for spells she does not know yet would become duplicates.
+  -- Copies of planned spells in slots reserved for spells the player does not know yet would become duplicates.
   for _, s in ipairs(layout.slots) do
     if not targets[s.slot] and not Spells.IsKnown(Spells.Get(s.spell)) then
       local cur = Layout.Current(s.slot)
@@ -371,7 +371,7 @@ function Layout.Undo(record)
     else
       b = table.remove(ns.char.backups)
     end
-    -- Undoing a rank upgrade means she wants the older rank in those slots: do not upgrade them again.
+    -- Undoing a rank upgrade means the player wants the older rank in those slots: do not upgrade them again.
     if b.kind == "ranks" then
       for slot, saved in pairs(b.slots) do
         if saved and saved.type == "spell" then ns.char.keepRank[slot] = saved.id end
@@ -546,8 +546,8 @@ function Layout.PlaceOne(entry)
   end
 end
 
--- Slots holding an older rank than the highest one she knows, as a plain spell (macros are checked by
--- CheckMacroRank). Slots where she undid an upgrade keep their rank. → { { slot, entry, old, new } }
+-- Slots holding an older rank than the highest one the player knows, as a plain spell (macros are checked by
+-- CheckMacroRank). Slots where the player undid an upgrade keep their rank. → { { slot, entry, old, new } }
 function Layout.OutdatedRanks()
   local list = {}
   local keep = ns.char and ns.char.keepRank or {}
@@ -588,7 +588,7 @@ local function macroCasts(idx, id)
   return spell == id
 end
 
--- Make the spell's mouseover macro (if she has it) cast the highest known rank. "/cast <Name>" normally does;
+-- Make the spell's mouseover macro (if the player has it) cast the highest known rank. "/cast <Name>" normally does;
 -- if the client says it casts a lower rank, the macro names the rank instead ("Name(Rank N)"), and goes back to
 -- the plain name if that does not help either. Call only out of combat. → "ok" | "ranked" | "unknown" | "failed" | nil
 function Layout.CheckMacroRank(entry)

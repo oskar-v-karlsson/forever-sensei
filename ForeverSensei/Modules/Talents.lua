@@ -1,6 +1,6 @@
 -- Modules/Talents.lua: which talent to take next (Mobalytics Restoration path), with a Japanese reason.
 -- Talent ranks are read from the C_Traits tree (Forever 1.60.1 uses one class tree). If that fails, the advice
--- falls back to the planned point for her level. /sensei verify reports which way worked.
+-- falls back to the planned point for the player's level. /sensei verify reports which way worked.
 local _, ns = ...
 local Talents = {}
 ns.Talents = Talents
@@ -92,7 +92,7 @@ function Talents.State()
     end
     table.sort(state.offPlan)
   else
-    -- Cannot read the tree: follow the planned point for her level.
+    -- Cannot read the tree: follow the planned point for the player's level.
     state.unspent = nil
     local n = Talents.PointsAt(level)
     state.next = T.order[n] or nil
