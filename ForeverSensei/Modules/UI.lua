@@ -26,9 +26,32 @@ function UI.Text(parent, size, color, flags)
   fs:SetJustifyH("LEFT")
   fs:SetJustifyV("TOP")
   if fs.SetWordWrap then fs:SetWordWrap(true) end
+  -- Japanese has no spaces: allow line breaks between any two characters.
+  if fs.SetNonSpaceWrap then fs:SetNonSpaceWrap(true) end
   local c = UI.COLORS[color or "white"] or UI.COLORS.white
   fs:SetTextColor(c[1], c[2], c[3])
   return fs
+end
+
+-- Popups size themselves from their text. fn(frame) does the layout; it runs on every show, and once more on the
+-- next frame because a font applied this frame can change text heights after the first measurement.
+function UI.AutoFit(frame, fn)
+  frame.fit = fn
+  frame:HookScript("OnShow", function(self) UI.Refit(self) end)
+end
+
+function UI.Refit(frame)
+  if not frame.fit then return end
+  frame.fit(frame)
+  C_Timer.After(0, function()
+    if frame:IsShown() then frame.fit(frame) end
+  end)
+end
+
+-- Height of a text, 0 when empty.
+function UI.H(fs)
+  if not fs:IsShown() or (fs:GetText() or "") == "" then return 0 end
+  return math.ceil(fs:GetStringHeight())
 end
 
 function UI.Backdrop(f, alpha)
@@ -87,12 +110,14 @@ function UI.ShowHint(owner, text)
     hint.text = UI.Text(hint, 12)
     hint.text:SetPoint("TOPLEFT", 8, -8)
     hint.text:SetWidth(260)
+    hint:SetClampedToScreen(true)
+    UI.AutoFit(hint, function(self) self:SetSize(276, UI.H(self.text) + 16) end)
   end
   hint.text:SetText(text)
-  hint:SetSize(276, hint.text:GetStringHeight() + 16)
   hint:ClearAllPoints()
   hint:SetPoint("BOTTOMLEFT", owner, "TOPRIGHT", 4, 4)
   hint:Show()
+  UI.Refit(hint)
 end
 
 function UI.HideHint()
@@ -135,7 +160,7 @@ end
 
 -- Small "報告" button that opens the translation report dialog for a text id.
 function UI.ReportButton(parent, idOrFn)
-  local b = UI.Button(parent, ns.T("ui.report.button"), 46, 18, function(self)
+  local b = UI.Button(parent, ns.T("ui.report.button"), 56, 18, function(self)
     local id = type(idOrFn) == "function" and idOrFn(self) or idOrFn
     if id then ns.Feedback.Open(id) end
   end)
@@ -160,9 +185,11 @@ function UI.Toast(text, seconds, buttonText, onButton)
     toast.button:SetPoint("BOTTOMRIGHT", -10, 8)
     toast:EnableMouse(true)
     toast:SetScript("OnMouseUp", function(self) self:Hide() end)
+    UI.AutoFit(toast, function(self)
+      self:SetSize(360, UI.H(self.text) + 22 + (self.button:IsShown() and 28 or 0))
+    end)
   end
   toast.text:SetText(text)
-  local h = toast.text:GetStringHeight() + 22
   if buttonText then
     toast.button:SetLabel(buttonText)
     toast.button:SetScript("OnClick", function()
@@ -170,12 +197,11 @@ function UI.Toast(text, seconds, buttonText, onButton)
       onButton()
     end)
     toast.button:Show()
-    h = h + 28
   else
     toast.button:Hide()
   end
-  toast:SetSize(360, h)
   toast:Show()
+  UI.Refit(toast)
   if toast.timer then toast.timer:Cancel() end
   toast.timer = C_Timer.NewTimer(seconds or 8, function() toast:Hide() end)
 end
@@ -193,15 +219,16 @@ function UI.Confirm(text, yesText, onYes)
     confirm.yes:SetPoint("BOTTOMRIGHT", confirm, "BOTTOM", -6, 14)
     confirm.no = UI.Button(confirm, ns.T("ui.btn.cancel"), 140, 24, function() confirm:Hide() end)
     confirm.no:SetPoint("BOTTOMLEFT", confirm, "BOTTOM", 6, 14)
+    UI.AutoFit(confirm, function(self) self:SetHeight(math.max(140, UI.H(self.text) + 96)) end)
   end
   confirm.text:SetText(text)
-  confirm:SetHeight(math.max(140, confirm.text:GetStringHeight() + 96))
   confirm.yes:SetLabel(yesText or ns.T("ui.btn.ok"))
   confirm.yes:SetScript("OnClick", function()
     confirm:Hide()
     onYes()
   end)
   confirm:Show()
+  UI.Refit(confirm)
 end
 
 -- Vertical scroll area. → scrollFrame, content (set content height after filling)
@@ -223,8 +250,7 @@ function UI.CopyBox(title, intro, text, extraButtonText, onExtra)
     copy.intro:SetPoint("TOPLEFT", 16, -40)
     copy.intro:SetWidth(528)
     local sf = CreateFrame("ScrollFrame", nil, copy, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT", 16, -96)
-    sf:SetPoint("BOTTOMRIGHT", -36, 50)
+    copy.scroll = sf
     local eb = CreateFrame("EditBox", nil, sf)
     eb:SetMultiLine(true)
     eb:SetAutoFocus(false)
@@ -244,6 +270,14 @@ function UI.CopyBox(title, intro, text, extraButtonText, onExtra)
     copy.extra:SetPoint("BOTTOMLEFT", 16, 14)
     copy.closeButton = UI.Button(copy, ns.T("ui.btn.close"), 120, 24, function() copy:Hide() end)
     copy.closeButton:SetPoint("BOTTOMRIGHT", -16, 14)
+    -- The text box starts below the intro, however many lines it has; the window grows to keep it usable.
+    UI.AutoFit(copy, function(self)
+      local introH = UI.H(self.intro)
+      self:SetHeight(math.max(420, 40 + introH + 12 + 200 + 50))
+      self.scroll:ClearAllPoints()
+      self.scroll:SetPoint("TOPLEFT", 16, -(40 + introH + 12))
+      self.scroll:SetPoint("BOTTOMRIGHT", -36, 50)
+    end)
   end
   copy.title:SetText(title)
   copy.intro:SetText(intro or "")
@@ -260,6 +294,7 @@ function UI.CopyBox(title, intro, text, extraButtonText, onExtra)
     copy.extra:Hide()
   end
   copy:Show()
+  UI.Refit(copy)
   copy.edit:SetFocus()
   copy.edit:HighlightText()
   return copy

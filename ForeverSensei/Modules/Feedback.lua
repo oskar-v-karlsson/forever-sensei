@@ -61,32 +61,39 @@ end
 
 -- Report dialog.
 local dlg
+local fitDialog, layoutDialog
 local function build()
-  dlg = ns.UI.Window("ForeverSenseiReport", 480, 470, ns.T("ui.report.title"))
+  dlg = ns.UI.Window("ForeverSenseiReport", 540, 470, ns.T("ui.report.title"))
   dlg:SetFrameStrata("FULLSCREEN_DIALOG")
   local UI = ns.UI
   dlg.idText = UI.Text(dlg, 10, "grey")
   dlg.idText:SetPoint("TOPLEFT", 16, -36)
+  dlg.idText:SetWidth(508)
 
   local nowLabel = UI.Text(dlg, 12, "gold")
-  nowLabel:SetPoint("TOPLEFT", 16, -54)
+  nowLabel:SetPoint("TOPLEFT", dlg.idText, "BOTTOMLEFT", 0, -6)
+  nowLabel:SetWidth(508)
   nowLabel:SetText(ns.T("ui.report.now"))
+  dlg.nowLabel = nowLabel
   dlg.now = UI.Text(dlg, 13)
   dlg.now:SetPoint("TOPLEFT", nowLabel, "BOTTOMLEFT", 0, -4)
-  dlg.now:SetWidth(448)
+  dlg.now:SetWidth(508)
 
   dlg.enLabel = UI.Text(dlg, 11, "gold")
+  dlg.enLabel:SetWidth(508)
   dlg.enLabel:SetText(ns.T("ui.report.english"))
   dlg.en = UI.Text(dlg, 11, "grey")
-  dlg.en:SetWidth(448)
+  dlg.en:SetWidth(508)
 
   dlg.reasonLabel = UI.Text(dlg, 12, "gold")
+  dlg.reasonLabel:SetWidth(508)
   dlg.reasonLabel:SetText(ns.T("ui.report.reason"))
   dlg.reasonButtons = {}
   for i, code in ipairs(Feedback.REASONS) do
-    local b = UI.Button(dlg, "", 88, 22, function()
+    local b = UI.Button(dlg, "", 100, 22, function()
       dlg.reason = code
       for _, other in ipairs(dlg.reasonButtons) do other:Refresh() end
+      layoutDialog()
     end)
     b.code = code
     function b:Refresh()
@@ -97,11 +104,13 @@ local function build()
   end
 
   dlg.suggestLabel = UI.Text(dlg, 12, "gold")
+  dlg.suggestLabel:SetWidth(508)
   dlg.suggestLabel:SetText(ns.T("ui.report.suggestion"))
-  dlg.suggest = UI.Input(dlg, 448, 60, true)
+  dlg.suggest = UI.Input(dlg, 508, 60, true)
   dlg.noteLabel = UI.Text(dlg, 12, "gold")
+  dlg.noteLabel:SetWidth(508)
   dlg.noteLabel:SetText(ns.T("ui.report.note"))
-  dlg.note = UI.Input(dlg, 448, 44, true)
+  dlg.note = UI.Input(dlg, 508, 44, true)
 
   dlg.save = UI.Button(dlg, ns.T("ui.btn.save"), 140, 24, function()
     Feedback.Save(dlg.id, dlg.reason, dlg.suggest.edit:GetText(), dlg.note.edit:GetText())
@@ -111,33 +120,44 @@ local function build()
   dlg.save:SetPoint("BOTTOMRIGHT", dlg, "BOTTOM", -6, 14)
   dlg.cancel = UI.Button(dlg, ns.T("ui.btn.cancel"), 140, 24, function() dlg:Hide() end)
   dlg.cancel:SetPoint("BOTTOMLEFT", dlg, "BOTTOM", 6, 14)
+  UI.AutoFit(dlg, fitDialog)
 end
 
-local function layoutDialog()
+function layoutDialog()
   dlg.enLabel:ClearAllPoints()
   dlg.enLabel:SetPoint("TOPLEFT", dlg.now, "BOTTOMLEFT", 0, -10)
   dlg.en:ClearAllPoints()
   dlg.en:SetPoint("TOPLEFT", dlg.enLabel, "BOTTOMLEFT", 0, -3)
   dlg.reasonLabel:ClearAllPoints()
   dlg.reasonLabel:SetPoint("TOPLEFT", dlg.en, "BOTTOMLEFT", 0, -12)
-  for i, b in ipairs(dlg.reasonButtons) do
+  -- Each reason button is as wide as its label; they flow into a new row when the line is full.
+  local x, row = 0, 0
+  for _, b in ipairs(dlg.reasonButtons) do
+    local fs = b:GetFontString()
+    local w = math.max(80, math.ceil((fs and fs:GetStringWidth() or 60) + 20))
+    b:SetWidth(w)
+    if x > 0 and x + w > 508 then x, row = 0, row + 1 end
     b:ClearAllPoints()
-    if i == 1 then
-      b:SetPoint("TOPLEFT", dlg.reasonLabel, "BOTTOMLEFT", 0, -4)
-    else
-      b:SetPoint("LEFT", dlg.reasonButtons[i - 1], "RIGHT", 2, 0)
-    end
+    b:SetPoint("TOPLEFT", dlg.reasonLabel, "BOTTOMLEFT", x, -4 - row * 26)
+    x = x + w + 4
   end
+  dlg.reasonRows = row + 1
   dlg.suggestLabel:ClearAllPoints()
-  dlg.suggestLabel:SetPoint("TOPLEFT", dlg.reasonButtons[1], "BOTTOMLEFT", 0, -12)
+  dlg.suggestLabel:SetPoint("TOPLEFT", dlg.reasonLabel, "BOTTOMLEFT", 0, -4 - dlg.reasonRows * 26 - 8)
   dlg.suggest:ClearAllPoints()
   dlg.suggest:SetPoint("TOPLEFT", dlg.suggestLabel, "BOTTOMLEFT", 0, -4)
   dlg.noteLabel:ClearAllPoints()
   dlg.noteLabel:SetPoint("TOPLEFT", dlg.suggest, "BOTTOMLEFT", 0, -10)
   dlg.note:ClearAllPoints()
   dlg.note:SetPoint("TOPLEFT", dlg.noteLabel, "BOTTOMLEFT", 0, -4)
-  local h = 54 + dlg.now:GetStringHeight() + dlg.en:GetStringHeight() + 300
-  dlg:SetHeight(math.max(420, h))
+end
+
+function fitDialog(self)
+  local H = ns.UI.H
+  local h = 36 + H(self.idText) + 6 + H(self.nowLabel) + 4 + H(self.now) + 10 + H(self.enLabel) + 3 + H(self.en)
+    + 12 + H(self.reasonLabel) + 4 + (self.reasonRows or 1) * 26 + 8 + H(self.suggestLabel) + 4 + 60 + 10 + H(self.noteLabel) + 4 + 44
+    + 14 + 38
+  self:SetHeight(h)
 end
 
 function Feedback.Open(id)
@@ -153,6 +173,7 @@ function Feedback.Open(id)
   dlg.note.edit:SetText(old and old.note or "")
   layoutDialog()
   dlg:Show()
+  ns.UI.Refit(dlg)
 end
 
 -- Send window: every pending report, already selected for Ctrl+C.

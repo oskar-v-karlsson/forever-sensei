@@ -195,7 +195,7 @@ ns.Locales.ja = {
   ["ui.btn.prev"] = "戻る",
   ["ui.btn.save"] = "保存",
   ["ui.btn.undo"] = "元に戻す",
-  ["ui.btn.update"] = "更新",
+  ["ui.btn.card"] = "カード",
   ["ui.btn.unchecked"] = "次の未確認",
   ["ui.btn.talents"] = "タレントを開く",
   ["ui.btn.trainer"] = "トレーナーで覚えるスキル",
@@ -203,11 +203,14 @@ ns.Locales.ja = {
   ["ui.btn.send"] = "報告を送る（{n}）",
 
   ["ui.card.title"] = "新しいスキル",
+  ["ui.card.view"] = "スキル",
   ["ui.card.what"] = "何ができる？",
   ["ui.card.when"] = "いつ使う？",
   ["ui.card.where"] = "おすすめの場所",
   ["ui.card.level"] = "レベル{level}",
   ["ui.card.more"] = "ほかに{n}件",
+  ["ui.card.placed"] = "もうおすすめの場所に置いてあって、キーも設定済み。",
+  ["ui.card.notplaced"] = "まだおすすめの場所に置いていない。「配置する」を押すと置ける。",
 
   ["ui.role.heal"] = "回復",
   ["ui.role.damage"] = "ダメージ",
@@ -269,8 +272,7 @@ ns.Locales.ja = {
   ["ui.targeting.click.done"] = "ターゲット回復に切り替えた（{n}個のボタンを変更）。",
 
   ["ui.rank.learned"] = "新しいランク：{names}",
-  ["ui.rank.old"] = "古いランクがまだバーにある。",
-  ["ui.rank.updated"] = "バーの{name}を新しいランクにした。",
+  ["ui.rank.upgraded"] = "バーのボタン{n}個を新しいランクに入れ替えた。古いランクのままにしたい時は「元に戻す」を押そう。",
 
   ["ui.trainer.title"] = "シャーマントレーナーで覚えられるスキル",
   ["ui.trainer.intro"] = "今シャーマントレーナーで覚えられるスキル。トレーナーにない場合は、クラスクエストで手に入るかもしれない。",
@@ -302,7 +304,7 @@ ns.Locales.ja = {
   ["ui.tab.review"] = "翻訳チェック",
   ["ui.tab.settings"] = "設定",
 
-  ["ui.skills.intro"] = "レベル1〜60のすべてのスキルと、覚えるレベル、バーの場所。",
+  ["ui.skills.intro"] = "レベル1〜60のすべてのスキルと、覚えるレベル、バーの場所。アイコンか「カード」を押すと、そのスキルのカードが開く。覚えたスキルはそこから配置できる。",
   ["ui.skills.known"] = "習得済み",
   ["ui.skills.trainer"] = "トレーナーで習得可",
   ["ui.skills.talent"] = "タレント",
@@ -340,6 +342,7 @@ ns.Locales.ja = {
   ["ui.settings.show"] = "表示",
   ["ui.settings.cards"] = "新しいスキルのカード",
   ["ui.settings.talents"] = "タレントのヒント",
+  ["ui.settings.ranks"] = "新しいランクを自動でバーに入れる",
   ["ui.settings.minimap"] = "ミニマップボタン",
   ["ui.settings.more"] = "もう一度開く：",
 

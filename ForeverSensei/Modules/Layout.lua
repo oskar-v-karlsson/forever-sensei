@@ -33,11 +33,18 @@ local API = {
   macroInfo = { "GetMacroInfo" },
   createMacro = { "CreateMacro" },
   editMacro = { "EditMacro" },
+  macroSpell = { "GetMacroSpell" },
   itemName = { "C_Item.GetItemNameByID", "GetItemInfo" },
   getSetting = { "Settings.GetValue" },
   setSetting = { "Settings.SetValue" },
 }
 Layout.API = API
+
+-- Action slots that can hold her spells: bars 1-6 (1-120; 73-120 are unused stance pages for a Shaman) and the
+-- extra bars 6-8 of the 12.x UI (145-180). 121-144 are override/vehicle bars and are never touched.
+Layout.SLOTS = {}
+for i = 1, 120 do table.insert(Layout.SLOTS, i) end
+for i = 145, 180 do table.insert(Layout.SLOTS, i) end
 
 local macroKeys -- macro name → spell key
 local function macroKeyOf(name)
@@ -93,10 +100,14 @@ function Layout.Desired(entry)
   return { kind = "spell", entry = entry, id = Spells.CurrentID(entry) }
 end
 
-function Layout.Matches(cur, d)
+-- slot (optional): an older rank she kept there on purpose (undid its upgrade) counts as a match.
+function Layout.Matches(cur, d, slot)
   if not cur or not d then return false end
   if d.kind == "macro" then return cur.type == "macro" and cur.macroName == d.macro end
-  return cur.type == "spell" and cur.planKey == d.entry.key and cur.id == d.id
+  if cur.type ~= "spell" or cur.planKey ~= d.entry.key then return false end
+  if cur.id == d.id then return true end
+  local keep = slot and ns.char and ns.char.keepRank
+  return keep ~= nil and keep[slot] == cur.id
 end
 
 function Layout.DesiredLabel(d)
@@ -104,8 +115,17 @@ function Layout.DesiredLabel(d)
   return d.entry.name
 end
 
+-- The spell as the macro names it: the plain name (the client casts the highest rank), or "Name(Rank N)" when
+-- CheckMacroRank found that the plain name does not cast the highest rank.
+function Layout.MacroSpellName(entry)
+  local rank = ns.char and ns.char.macroRank and ns.char.macroRank[entry.key]
+  if rank then return entry.name .. "(" .. rank .. ")" end
+  return entry.name
+end
+
 function Layout.MacroBody(entry)
-  return (L().macroBody:gsub("{spell}", entry.name))
+  local name = Layout.MacroSpellName(entry)
+  return (L().macroBody:gsub("{spell}", function() return name end))
 end
 
 -- Create or update the character macro for a spell. → macro index or nil
@@ -227,7 +247,7 @@ function Layout.BuildPlan(onlyKey)
     local d = targets[s.slot]
     if d then
       local cur = Layout.Current(s.slot)
-      if not Layout.Matches(cur, d) then
+      if not Layout.Matches(cur, d, s.slot) then
         if cur and not cur.planKey then
           local dest = table.remove(free, 1)
           if dest then
@@ -272,6 +292,12 @@ end
 
 function Layout.IsEmptyPlan(plan)
   return #plan.place == 0 and #plan.moves == 0 and #plan.clears == 0 and #plan.binds == 0 and #plan.bars == 0
+end
+
+-- Is a known spell in its planned slot, with its key bound and its bar shown? nil when it has no slot or is unknown.
+function Layout.IsPlaced(entry)
+  if not Spells.LayoutSlot(entry) or not Spells.IsKnown(entry) then return nil end
+  return Layout.IsEmptyPlan(Layout.BuildPlan(entry.key))
 end
 
 local function pushBackup(b)
@@ -326,13 +352,31 @@ function Layout.CanUndo()
   return ns.char and ns.char.backups and #ns.char.backups > 0
 end
 
-function Layout.Undo()
+-- Undo the newest change, or the given backup record (the rank toast's 元に戻す button).
+function Layout.Undo(record)
   if not Layout.CanUndo() then
     ns.UI.Toast(ns.T("ui.layout.noundo"))
     return
   end
   ns.OutOfCombat("layout", function()
-    local b = table.remove(ns.char.backups)
+    local b
+    if record then
+      for i, r in ipairs(ns.char.backups) do
+        if r == record then b = table.remove(ns.char.backups, i) end
+      end
+      if not b then
+        ns.UI.Toast(ns.T("ui.layout.noundo"))
+        return
+      end
+    else
+      b = table.remove(ns.char.backups)
+    end
+    -- Undoing a rank upgrade means she wants the older rank in those slots: do not upgrade them again.
+    if b.kind == "ranks" then
+      for slot, saved in pairs(b.slots) do
+        if saved and saved.type == "spell" then ns.char.keepRank[slot] = saved.id end
+      end
+    end
     local skip = {}
     for i = #b.moves, 1, -1 do
       local m = b.moves[i]
@@ -426,7 +470,7 @@ function Layout.Preview()
     preview.report = UI.ReportButton(preview, "ui.preview.intro")
     preview.report:SetPoint("TOPRIGHT", -36, -10)
     preview.sf, preview.content = UI.Scroll(preview, 548, 340)
-    preview.sf:SetPoint("TOPLEFT", 16, -110)
+    preview.sf:SetPoint("TOPLEFT", preview.intro, "BOTTOMLEFT", 0, -12)
     preview.body = UI.Text(preview.content, 12)
     preview.body:SetPoint("TOPLEFT", 0, 0)
     preview.body:SetWidth(540)
@@ -434,6 +478,7 @@ function Layout.Preview()
     preview.apply:SetPoint("BOTTOMRIGHT", preview, "BOTTOM", -6, 14)
     preview.cancel = UI.Button(preview, ns.T("ui.btn.cancel"), 160, 24, function() preview:Hide() end)
     preview.cancel:SetPoint("BOTTOMLEFT", preview, "BOTTOM", 6, 14)
+    UI.AutoFit(preview, function(self) self:SetHeight(40 + UI.H(self.intro) + 12 + 340 + 52) end)
   end
   preview.body:SetText(table.concat(Layout.Describe(plan), "\n"))
   preview.content:SetHeight(preview.body:GetStringHeight() + 10)
@@ -446,6 +491,7 @@ function Layout.Preview()
     end)
   end)
   preview:Show()
+  ns.UI.Refit(preview)
 end
 
 -- The card's 配置する button: one spell, asks before replacing something else.
@@ -500,25 +546,103 @@ function Layout.PlaceOne(entry)
   end
 end
 
--- Slots (1-120) that hold an older rank of this spell as a plain spell. Macros cast by name and need no update.
-function Layout.OldRankSlots(entry)
+-- Slots holding an older rank than the highest one she knows, as a plain spell (macros are checked by
+-- CheckMacroRank). Slots where she undid an upgrade keep their rank. → { { slot, entry, old, new } }
+function Layout.OutdatedRanks()
   local list = {}
-  local id = Spells.CurrentID(entry)
-  for slot = 1, 120 do
+  local keep = ns.char and ns.char.keepRank or {}
+  for _, slot in ipairs(Layout.SLOTS) do
     local cur = Layout.Current(slot)
-    if cur and cur.type == "spell" and cur.planKey == entry.key and cur.id ~= id then table.insert(list, slot) end
+    if cur and cur.type == "spell" and cur.planKey then
+      if keep[slot] and keep[slot] ~= cur.id then keep[slot] = nil end
+      local e = Spells.Get(cur.planKey)
+      local have = Spells.RankOf(e, cur.id)
+      local best, bestId = Spells.KnownRank(e)
+      if have and best and have < best and keep[slot] ~= cur.id then
+        table.insert(list, { slot = slot, entry = e, old = cur.id, new = bestId })
+      end
+    end
   end
   return list
 end
 
-function Layout.UpdateRank(entry)
-  ns.OutOfCombat("rank-" .. entry.key, function()
-    local id = Spells.CurrentID(entry)
-    for _, slot in ipairs(Layout.OldRankSlots(entry)) do
-      call(API.pickupSpell, id)
-      put(slot)
+-- Put the highest known rank in every outdated slot (call only out of combat). One undo record.
+-- → number of buttons changed, backup record (nil when nothing changed)
+function Layout.UpgradeRanks()
+  local list = Layout.OutdatedRanks()
+  if #list == 0 then return 0, nil end
+  local backup = { kind = "ranks", time = time and time() or 0, moves = {}, slots = {}, binds = {}, bars = {} }
+  for _, u in ipairs(list) do
+    backup.slots[u.slot] = info(Layout.Current(u.slot))
+    call(API.pickupSpell, u.new)
+    put(u.slot)
+  end
+  pushBackup(backup)
+  return #list, backup
+end
+
+-- Does the macro cast this rank? → true, false, or nil when the client cannot tell (GetMacroSpell missing/empty)
+local function macroCasts(idx, id)
+  local ok, spell = call(API.macroSpell, idx)
+  if not ok or not spell then return nil end
+  return spell == id
+end
+
+-- Make the spell's mouseover macro (if she has it) cast the highest known rank. "/cast <Name>" normally does;
+-- if the client says it casts a lower rank, the macro names the rank instead ("Name(Rank N)"), and goes back to
+-- the plain name if that does not help either. Call only out of combat. → "ok" | "ranked" | "unknown" | "failed" | nil
+function Layout.CheckMacroRank(entry)
+  local name = L().macros[entry.key]
+  if not name or #Spells.Ranks(entry) < 2 then return nil end
+  local ok, idx = call(API.macroIndex, name)
+  if not ok or type(idx) ~= "number" or idx == 0 then return nil end
+  local _, best = Spells.KnownRank(entry)
+  if not best then return nil end
+  local casts = macroCasts(idx, best)
+  if casts == nil then return "unknown" end
+  if casts then return ns.char.macroRank[entry.key] and "ranked" or "ok" end
+  -- Candidates: the plain name (if the macro names a rank now), then the highest rank by name.
+  local candidates = {}
+  if ns.char.macroRank[entry.key] then table.insert(candidates, false) end
+  local okS, sub = ns.Call("C_Spell.GetSpellSubtext", best)
+  if okS and type(sub) == "string" and sub:match("%d") then table.insert(candidates, sub) end
+  for _, rank in ipairs(candidates) do
+    ns.char.macroRank[entry.key] = rank or nil
+    local newIdx = Layout.EnsureMacro(entry)
+    if newIdx and macroCasts(newIdx, best) then return rank and "ranked" or "ok" end
+  end
+  ns.char.macroRank[entry.key] = nil
+  Layout.EnsureMacro(entry)
+  ns.Debug("macro " .. name .. " does not cast " .. tostring(best))
+  return "failed"
+end
+
+-- After learning a rank (and at login): upgrade the bar buttons and the macros, then confirm with a toast.
+-- learned = entries with a new rank (nil at login: only a toast when buttons changed). Queued in combat.
+function Layout.ApplyNewRanks(learned)
+  ns.OutOfCombat("ranks", function()
+    local n, backup = 0, nil
+    if ns.settings.autoRanks then n, backup = Layout.UpgradeRanks() end
+    for _, e in ipairs(Spells.List()) do
+      if Spells.IsKnown(e) then Layout.CheckMacroRank(e) end
     end
-    ns.UI.Toast(ns.T("ui.rank.updated", { name = entry.name }))
+    local lines = {}
+    if learned and #learned > 0 then
+      local names = {}
+      for _, e in ipairs(learned) do
+        local rank = Spells.KnownRank(e)
+        table.insert(names, rank and (e.name .. " (Rank " .. rank .. ")") or e.name)
+      end
+      table.insert(lines, ns.T("ui.rank.learned", { names = table.concat(names, ", ") }))
+    end
+    if n > 0 then table.insert(lines, ns.T("ui.rank.upgraded", { n = n })) end
+    if #lines == 0 then return end
+    if backup then
+      ns.UI.Toast(table.concat(lines, "\n"), 15, ns.T("ui.btn.undo"), function() Layout.Undo(backup) end)
+    else
+      ns.UI.Toast(table.concat(lines, "\n"), 8)
+    end
+    if ns.Guide and ns.Guide.Refresh then ns.Guide.Refresh() end
   end)
 end
 
@@ -527,11 +651,11 @@ function Layout.SetTargeting(mode)
   ns.settings.targeting = mode
   ns.OutOfCombat("targeting", function()
     local n, fallback = 0, false
-    for slot = 1, 120 do
+    for _, slot in ipairs(Layout.SLOTS) do
       local cur = Layout.Current(slot)
       if cur and cur.planKey and L().macros[cur.planKey] then
         local d = Layout.Desired(Spells.Get(cur.planKey))
-        if d and not Layout.Matches(cur, d) then
+        if d and not Layout.Matches(cur, d, slot) then
           local _, fb = placeDesired(slot, d)
           fallback = fallback or fb
           n = n + 1

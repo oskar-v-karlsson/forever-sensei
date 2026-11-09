@@ -63,21 +63,68 @@ function methods:IsShown() return self.__shown end
 function methods:IsVisible() return self.__shown end
 function methods:SetText(t)
   self.__text = t
+  if self.__fs then self.__fs.__text = t end  -- a button's label lives in its font string
   if t ~= nil then table.insert(STUB.shown, tostring(t)) end
 end
 function methods:SetFormattedText(fmt, ...) self:SetText(string.format(fmt, ...)) end
 function methods:GetText() return self.__text end
-function methods:SetWidth(w) self.__w = w end
-function methods:SetHeight(h) self.__h = h end
-function methods:SetSize(w, h) self.__w, self.__h = w, h end
+function methods:SetWidth(w) self.__w, self.__wset = w, true end
+function methods:SetHeight(h) self.__h, self.__hset = h, true end
+function methods:SetSize(w, h) self.__w, self.__h, self.__wset, self.__hset = w, h, true, true end
+function methods:SetNonSpaceWrap(v) self.__nsw = v end
+function methods:SetWordWrap(v) self.__wrap = v end
+function methods:SetJustifyH(v) self.__justifyH = v end
+-- Anchors are recorded so STUB.checkLayout can work out where things are.
+function methods:SetPoint(point, a, b, c, d)
+  local rel, relPoint, x, y
+  if type(a) == "number" or a == nil then
+    rel, relPoint, x, y = self.__parent, point, a or 0, b or 0
+  else
+    if type(a) == "string" then a = _G[a] end
+    rel = a
+    if type(b) == "number" then relPoint, x, y = point, b, c or 0 else relPoint, x, y = b or point, c or 0, d or 0 end
+  end
+  self.__points = self.__points or {}
+  table.insert(self.__points, { point, rel, relPoint, x, y })
+end
+function methods:SetAllPoints(rel)
+  rel = rel or self.__parent
+  self.__points = { { "TOPLEFT", rel, "TOPLEFT", 0, 0 }, { "BOTTOMRIGHT", rel, "BOTTOMRIGHT", 0, 0 } }
+end
+function methods:ClearAllPoints() self.__points = nil end
 function methods:GetWidth() return self.__w end
 function methods:GetHeight() return self.__h end
 function methods:GetSize() return self.__w, self.__h end
-function methods:GetStringWidth() return #tostring(self.__text or "") * 6 end
-function methods:GetStringHeight() return 14 * (1 + math.floor(#tostring(self.__text or "") * 6 / (self.__w > 0 and self.__w or 100))) end
+-- Text size estimate: Latin 0.6 em, Japanese 1 em per character, line height 1.25 em, colour codes ignored.
+local function plain(t)
+  return (tostring(t or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|T.-|t", ""))
+end
+local function lineWidth(line, size)
+  local w = 0
+  for ch in line:gmatch("[%z\1-\127\194-\244][\128-\191]*") do w = w + (#ch == 1 and 0.6 or 1) * size end
+  return w
+end
+function STUB.textWidth(text, size)
+  local best = 0
+  for line in (plain(text) .. "\n"):gmatch("(.-)\n") do best = math.max(best, lineWidth(line, size or 12)) end
+  return best
+end
+function STUB.textHeight(fs, width)
+  local text = plain(fs.__text)
+  if text == "" then return 0 end
+  local size = fs.__fontSize or 12
+  local lines = 0
+  for line in (text .. "\n"):gmatch("(.-)\n") do
+    local w = lineWidth(line, size) * 1.08 -- word wrap leaves some room at line ends
+    lines = lines + ((width and width > 0) and math.max(1, math.ceil(w / width)) or 1)
+  end
+  return lines * math.ceil(size * 1.25)
+end
+function methods:GetStringWidth() return STUB.textWidth(self.__text, self.__fontSize) end
+function methods:GetStringHeight() return STUB.textHeight(self, self.__wset and self.__w or nil) end
 function methods:GetUnboundedStringWidth() return self:GetStringWidth() end
 function methods:GetLineHeight() return 14 end
-function methods:GetNumLines() return 1 end
+function methods:GetNumLines() return math.max(1, math.floor(STUB.textHeight(self, self.__wset and self.__w or nil) / math.ceil((self.__fontSize or 12) * 1.25))) end
 function methods:CreateFontString(name) return new("FontString", name, self) end
 function methods:CreateTexture(name) return new("Texture", name, self) end
 function methods:CreateMaskTexture(name) return new("MaskTexture", name, self) end
@@ -93,7 +140,10 @@ function methods:GetFont() return self.__font or "Fonts\\FRIZQT__.TTF", self.__f
 function methods:SetFont(path, size) self.__font, self.__fontSize = path, size; return true end
 function methods:GetFontObject() return nil end
 function methods:GetFontString()
-  self.__fs = self.__fs or new("FontString", nil, self)
+  if not self.__fs then
+    self.__fs = new("FontString", nil, self)
+    self.__fs.__text = self.__text
+  end
   return self.__fs
 end
 function methods:GetChildren() end
@@ -137,12 +187,14 @@ function methods:SetTexture(t) self.__texture = t end
 function CreateFrame(kind, name, parent, template)
   local o = new(kind, name, parent)
   o.__template = template
+  if template == "UIPanelCloseButton" then o.__w, o.__h = 32, 32 end
   if name then _G[name] = o end
   return o
 end
 function CreateFont(name) local o = new("Font", name); if name then _G[name] = o end; return o end
 
 UIParent = new("Frame", "UIParent")
+UIParent.__w, UIParent.__h = 1024, 768
 Minimap = new("Frame", "Minimap")
 GameTooltip = new("GameTooltip", "GameTooltip")
 DEFAULT_CHAT_FRAME = { AddMessage = function(_, m) table.insert(STUB.prints, tostring(m)) end }
@@ -177,11 +229,18 @@ SOUNDKIT = setmetatable({}, { __index = function() return 0 end })
 -- Timers run when the harness calls STUB.runTimers().
 C_Timer = {}
 function C_Timer.After(_, fn) table.insert(STUB.timers, fn) end
+-- Cancellable timers (the toast's auto-hide) wait for STUB.runLongTimers, so tests can still see the toast.
+STUB.longTimers = {}
 function C_Timer.NewTimer(_, fn)
   local h = { cancelled = false }
   function h:Cancel() self.cancelled = true end
-  table.insert(STUB.timers, function() if not h.cancelled then fn(h) end end)
+  table.insert(STUB.longTimers, function() if not h.cancelled then fn(h) end end)
   return h
+end
+function STUB.runLongTimers()
+  local list = STUB.longTimers
+  STUB.longTimers = {}
+  for _, fn in ipairs(list) do fn() end
 end
 function C_Timer.NewTicker(s, fn, n)
   local h = C_Timer.NewTimer(s, fn)
@@ -214,11 +273,21 @@ function C_AddOns.GetAddOnMetadata(_, field) return STUB.meta[field] end
 function C_AddOns.IsAddOnLoaded() return false end
 
 -- Spells ------------------------------------------------------------------------------------------
+-- A name means its highest known rank (highest learn level), else its first rank.
 local function spellId(x)
   if type(x) == "number" then return x end
-  for id, n in pairs(STUB.names) do if n == x then return id end end
-  return nil
+  local best, bestKnown
+  for id, n in pairs(STUB.names) do
+    if n == x then
+      local lv = STUB.levels[id] or 0
+      if STUB.known[id] and (not bestKnown or lv > (STUB.levels[bestKnown] or 0)) then bestKnown = id end
+      if not best or lv < (STUB.levels[best] or 0) then best = id end
+    end
+  end
+  return bestKnown or best
 end
+STUB.spellId = spellId
+STUB.subtext = {} -- spell id → "Rank N"
 C_Spell = {}
 function C_Spell.GetSpellInfo(x)
   local id = spellId(x)
@@ -227,7 +296,7 @@ function C_Spell.GetSpellInfo(x)
 end
 function C_Spell.GetSpellName(x) local id = spellId(x); return id and STUB.names[id] end
 function C_Spell.GetSpellTexture(x) local id = spellId(x); return id and STUB.names[id] and 136000 end
-function C_Spell.GetSpellSubtext() return "Rank 1" end
+function C_Spell.GetSpellSubtext(x) local id = spellId(x); return id and STUB.subtext[id] or "" end
 function C_Spell.GetSpellLevelLearned(x) local id = spellId(x); return id and STUB.levels[id] or 0 end
 function C_Spell.PickupSpell(x) local id = spellId(x); if id then STUB.cursor = { "spell", id } end end
 C_SpellBook = {}
@@ -279,6 +348,28 @@ function EditMacro(i, name, icon, body)
   STUB.macros[i] = { name = name, icon = icon, body = body }
   return i
 end
+-- Which spell id a macro casts: "Name(Rank N)" is that rank; a plain name is the highest known rank, or rank 1
+-- when STUB.macroPlainRank1 is set (to test the fallback).
+function GetMacroSpell(i)
+  local m = STUB.macros[i]
+  if not m then return nil end
+  local spell = m.body:match("/cast [^\n]*%] *([^\n]+)") or m.body:match("/cast ([^\n]+)")
+  if not spell then return nil end
+  local name, rank = spell:match("^(.-)%((Rank %d+)%)$")
+  if name then
+    for id, n in pairs(STUB.names) do
+      if n == name and STUB.subtext[id] == rank and STUB.known[id] then return id end
+    end
+    return nil
+  end
+  if STUB.macroPlainRank1 then
+    for id, n in pairs(STUB.names) do
+      if n == spell and STUB.subtext[id] == "Rank 1" then return id end
+    end
+  end
+  local id = spellId(spell)
+  return id and STUB.known[id] and id or nil
+end
 
 -- Bindings and settings -----------------------------------------------------------------------------
 function GetBindingAction(key) return STUB.bindings[key] or "" end
@@ -309,3 +400,121 @@ function C_Traits.GetDefinitionInfo(d) return { spellID = STUB.traits.nodes[d].s
 function C_Traits.GetTreeCurrencyInfo() return { { quantity = STUB.traits.unspent } } end
 PlayerSpellsUtil = { ToggleClassTalentOrSpecFrame = function() end }
 function ToggleTalentFrame() end
+
+-- Layout check ------------------------------------------------------------------------------------------
+-- Works out every region's rectangle from its anchors (y grows upwards, UIParent is 0..1024 x 0..768) and reports
+-- text or buttons outside the window, text without a width that does not fit, labels wider than their button,
+-- and overlapping texts/buttons. Regions inside a ScrollFrame are skipped (they scroll).
+local H = { LEFT = "min", RIGHT = "max" }
+local V = { TOP = "max", BOTTOM = "min" }
+local function part(point, map)
+  for k, v in pairs(map) do if point:find(k) then return v end end
+  return "mid"
+end
+
+local function isText(f) return f.__kind == "FontString" end
+
+function STUB.rect(f, cache)
+  cache = cache or {}
+  if f == UIParent then return { 0, 0, 1024, 768 } end
+  if cache[f] ~= nil then return cache[f] or nil end
+  cache[f] = false -- cycle guard
+  local pts = f.__points
+  if not pts or #pts == 0 then return nil end
+  local function axis(map, lo, hi)
+    local cons = {}
+    for _, p in ipairs(pts) do
+      local mine, theirs = part(p[1], map), part(p[3], map)
+      local r = STUB.rect(p[2] or f.__parent, cache)
+      if not r then return nil end
+      local off = (map == H) and p[4] or p[5]
+      local c = (theirs == "min" and r[lo]) or (theirs == "max" and r[hi]) or (r[lo] + r[hi]) / 2
+      cons[mine] = c + off
+    end
+    return cons
+  end
+  local hc, vc = axis(H, 1, 3), axis(V, 2, 4)
+  if not hc or not vc then return nil end
+  local x1, x2
+  if hc.min and hc.max then
+    x1, x2 = hc.min, hc.max
+  else
+    local w = f.__w
+    if isText(f) then w = f.__wset and f.__w or STUB.textWidth(f.__text, f.__fontSize) end
+    if hc.min then x1, x2 = hc.min, hc.min + w
+    elseif hc.max then x1, x2 = hc.max - w, hc.max
+    elseif hc.mid then x1, x2 = hc.mid - w / 2, hc.mid + w / 2
+    else return nil end
+  end
+  local y1, y2
+  if vc.min and vc.max then
+    y1, y2 = vc.min, vc.max
+  else
+    local h = f.__h
+    if isText(f) then h = STUB.textHeight(f, x2 - x1) end
+    if vc.max then y1, y2 = vc.max - h, vc.max
+    elseif vc.min then y1, y2 = vc.min, vc.min + h
+    elseif vc.mid then y1, y2 = vc.mid - h / 2, vc.mid + h / 2
+    else return nil end
+  end
+  cache[f] = { x1, y1, x2, y2 }
+  return cache[f]
+end
+
+function STUB.checkLayout(root)
+  local problems, regions, cache = {}, {}, {}
+  local rr = STUB.rect(root, cache)
+  if not rr then return { "window has no position" } end
+  local function inside(f)
+    local p = f.__parent
+    while p and p ~= root do
+      if not p.__shown or p.__kind == "ScrollFrame" then return false end
+      p = p.__parent
+    end
+    return p == root and f.__shown
+  end
+  local function name(f) return (f.__kind .. " '" .. plain(f.__text):sub(1, 40) .. "'") end
+  for _, f in ipairs(STUB.frames) do
+    if f ~= root and inside(f) then
+      local text = plain(f.__text)
+      if isText(f) and text ~= "" and not (f.__parent.__kind == "Button" and f.__parent.__fs == f) then
+        if not f.__nsw then table.insert(problems, name(f) .. ": no SetNonSpaceWrap") end
+        local r = STUB.rect(f, cache)
+        if r then
+          -- the text's own extent (left-aligned), not its whole box
+          local w = math.min(r[3] - r[1], STUB.textWidth(f.__text, f.__fontSize))
+          if f.__justifyH == "CENTER" then
+            local m = (r[1] + r[3]) / 2
+            r = { m - w / 2, r[2], m + w / 2, r[4] }
+          elseif f.__justifyH ~= "RIGHT" then
+            r = { r[1], r[2], r[1] + w, r[4] }
+          end
+          table.insert(regions, { f = f, r = r })
+        end
+      elseif f.__kind == "Button" and text ~= "" and f.__template == "UIPanelButtonTemplate" then
+        if STUB.textWidth(f.__text, 12) > f.__w - 8 then
+          table.insert(problems, name(f) .. string.format(": label %d px in a %d px button", STUB.textWidth(f.__text, 12), f.__w))
+        end
+        local r = STUB.rect(f, cache)
+        if r then table.insert(regions, { f = f, r = r }) end
+      elseif f.__kind == "ScrollFrame" or f.__kind == "EditBox" and f.__parent == root then
+        local r = STUB.rect(f, cache)
+        if r then table.insert(regions, { f = f, r = r }) end
+      end
+    end
+  end
+  for i, a in ipairs(regions) do
+    local r = a.r
+    if r[1] < rr[1] - 1 or r[3] > rr[3] + 1 or r[2] < rr[2] - 1 or r[4] > rr[4] + 1 then
+      table.insert(problems, name(a.f) .. string.format(": outside the window (%d,%d)-(%d,%d) vs (%d,%d)-(%d,%d)",
+        r[1], r[2], r[3], r[4], rr[1], rr[2], rr[3], rr[4]))
+    end
+    for j = i + 1, #regions do
+      local b = regions[j].r
+      if r[1] < b[3] - 1 and b[1] < r[3] - 1 and r[2] < b[4] - 1 and b[2] < r[4] - 1 then
+        table.insert(problems, name(a.f) .. " overlaps " .. name(regions[j].f))
+      end
+    end
+  end
+  return problems
+end

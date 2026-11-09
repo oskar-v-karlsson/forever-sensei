@@ -1,7 +1,7 @@
 -- Core/Init.lua: namespace, safe event bus, combat queue, saved variables and the /sensei command.
 local ADDON, ns = ...
 ns.ADDON = ADDON
-ns.VERSION = "0.1.0"
+ns.VERSION = "0.2.0"
 do
   local getMeta = C_AddOns and C_AddOns.GetAddOnMetadata
   if getMeta then
@@ -103,6 +103,7 @@ local DEFAULTS = {
     targeting = "mouseover",  -- "mouseover" (macros) or "click" (plain spells)
     showCards = true,
     showTalentHints = true,
+    autoRanks = true,         -- put a newly learned rank on the bars in place of the older rank
     minimap = true,
     minimapAngle = 200,
     debug = false,
@@ -117,6 +118,8 @@ local CHAR_DEFAULTS = {
   initialised = false,
   postponed = {},   -- spell key → true (card closed with あとで)
   lastLevel = 0,
+  keepRank = {},    -- action slot → spell id of an older rank she chose to keep there (undo of a rank upgrade)
+  macroRank = {},   -- spell key → "Rank N" when the macro has to name the rank (/cast <name> did not cast the highest)
   -- backup = { slots = {...}, bindings = {...}, time = ... } once the full layout was applied
 }
 

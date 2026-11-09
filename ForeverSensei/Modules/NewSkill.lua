@@ -16,36 +16,64 @@ local function charRanks()
   return ns.char.ranks
 end
 
-local function section(parent, labelId, width)
+local WIDTH = 460
+local TEXT_W = WIDTH - 32
+
+-- Label with a report button right after it, and the text below.
+local function section(parent, labelId, reportId)
   local label = UI.Text(parent, 12, "gold")
+  label:SetWidth(TEXT_W - 66)
   label:SetText(ns.T(labelId))
   local text = UI.Text(parent, 13)
-  text:SetWidth(width)
+  text:SetWidth(TEXT_W)
   text:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -3)
-  return label, text
+  local report
+  if reportId then
+    report = UI.ReportButton(parent, function() return "spell." .. card.entry.key .. "." .. reportId end)
+    report:SetPoint("TOPLEFT", label, "TOPRIGHT", 8, 2)
+  end
+  return label, text, report
+end
+
+-- Height follows the texts: icon/name block, three sections, placement line, "more" line, button row.
+local function fitCard(self)
+  local head = math.max(48, 2 + UI.H(self.name) + 6 + UI.H(self.tags))
+  self.whatLabel:ClearAllPoints()
+  self.whatLabel:SetPoint("TOPLEFT", 16, -(40 + head + 12))
+  local h = 40 + head + 12
+  h = h + UI.H(self.whatLabel) + 3 + UI.H(self.what) + 10
+  h = h + UI.H(self.whenLabel) + 3 + UI.H(self.when) + 10
+  h = h + UI.H(self.whereLabel) + 3 + UI.H(self.where)
+  local status = UI.H(self.status)
+  if status > 0 then h = h + 6 + status end
+  local more = UI.H(self.more)
+  h = h + 12 + (more > 0 and more + 6 or 0) + 44
+  self:SetHeight(h)
 end
 
 local function buildCard()
-  card = UI.Window("ForeverSenseiCard", 460, 380, ns.T("ui.card.title"))
+  card = UI.Window("ForeverSenseiCard", WIDTH, 380, ns.T("ui.card.title"))
+  -- Above the guide window (DIALOG), below the report and confirm dialogs (FULLSCREEN_DIALOG).
+  card:SetFrameStrata("FULLSCREEN")
   card:ClearAllPoints()
   card:SetPoint("RIGHT", UIParent, "RIGHT", -120, 40)
   card.icon = UI.SpellIcon(card, 48)
   card.icon:SetPoint("TOPLEFT", 16, -40)
   card.name = UI.Text(card, 17, "gold")
   card.name:SetPoint("TOPLEFT", card.icon, "TOPRIGHT", 10, -2)
+  card.name:SetWidth(WIDTH - 90)
   card.tags = UI.Text(card, 12)
   card.tags:SetPoint("TOPLEFT", card.name, "BOTTOMLEFT", 0, -6)
-  card.tags:SetWidth(360)
+  card.tags:SetWidth(WIDTH - 90)
 
-  card.whatLabel, card.what = section(card, "ui.card.what", 400)
-  card.whatLabel:SetPoint("TOPLEFT", card.icon, "BOTTOMLEFT", 0, -12)
-  card.whatReport = UI.ReportButton(card, function() return "spell." .. card.entry.key .. ".what" end)
-  card.whatReport:SetPoint("TOPRIGHT", card, "TOPRIGHT", -14, 0)
-
-  card.whenLabel, card.when = section(card, "ui.card.when", 400)
-  card.whenReport = UI.ReportButton(card, function() return "spell." .. card.entry.key .. ".when" end)
-
-  card.whereLabel, card.where = section(card, "ui.card.where", 400)
+  card.whatLabel, card.what, card.whatReport = section(card, "ui.card.what", "what")
+  card.whenLabel, card.when, card.whenReport = section(card, "ui.card.when", "when")
+  card.whenLabel:SetPoint("TOPLEFT", card.what, "BOTTOMLEFT", 0, -10)
+  card.whereLabel, card.where = section(card, "ui.card.where")
+  card.whereLabel:SetPoint("TOPLEFT", card.when, "BOTTOMLEFT", 0, -10)
+  card.status = UI.Text(card, 12)
+  card.status:SetWidth(TEXT_W)
+  card.status:SetPoint("TOPLEFT", card.where, "BOTTOMLEFT", 0, -6)
 
   card.place = UI.Button(card, ns.T("ui.btn.place"), 130, 24, function()
     local e = card.entry
@@ -62,36 +90,46 @@ local function buildCard()
   card.guide = UI.Button(card, ns.T("ui.btn.guide"), 150, 24, function()
     if ns.Guide then ns.Guide.Open("skills") end
   end)
-  card.guide:SetPoint("LEFT", card.later, "RIGHT", 8, 0)
   card.more = UI.Text(card, 11, "grey")
-  card.more:SetPoint("BOTTOMRIGHT", card.guide, "TOPRIGHT", 0, 6)
+  card.more:SetWidth(TEXT_W)
+  card.more:SetJustifyH("RIGHT")
+  card.more:SetPoint("BOTTOMRIGHT", card, "BOTTOMRIGHT", -16, 44)
   card.close:HookScript("OnClick", function()
-    if card.entry then ns.char.postponed[card.entry.key] = nil end
+    if card.entry and not card.fromList then ns.char.postponed[card.entry.key] = nil end
     NewSkill.Next()
   end)
+  UI.AutoFit(card, fitCard)
 end
 
-local function layoutCard()
-  -- Report buttons sit at the right edge of their label row.
-  card.whatReport:ClearAllPoints()
-  card.whatReport:SetPoint("RIGHT", card, "RIGHT", -14, 0)
-  card.whatReport:SetPoint("TOP", card.whatLabel, "TOP", 0, 2)
-  card.whenLabel:ClearAllPoints()
-  card.whenLabel:SetPoint("TOPLEFT", card.what, "BOTTOMLEFT", 0, -10)
-  card.whenReport:ClearAllPoints()
-  card.whenReport:SetPoint("RIGHT", card, "RIGHT", -14, 0)
-  card.whenReport:SetPoint("TOP", card.whenLabel, "TOP", 0, 2)
-  card.whereLabel:ClearAllPoints()
-  card.whereLabel:SetPoint("TOPLEFT", card.when, "BOTTOMLEFT", 0, -10)
-  local h = 40 + 48 + 12 + 3 * 20 + card.what:GetStringHeight() + card.when:GetStringHeight()
-    + card.where:GetStringHeight() + 20 + 60
-  card:SetHeight(math.max(300, h))
+-- Parts that change when bars change: icon rank, placement line, place button, queue count.
+local function fillState()
+  local e = card.entry
+  card.icon:SetSpell(e)
+  card.where:SetText(Spells.WhereText(e))
+  local placed = ns.Layout.IsPlaced(e)
+  if card.place.SetEnabled then card.place:SetEnabled(placed ~= nil) end
+  if placed == true then
+    card.status:SetText(ns.T("ui.card.placed"))
+    card.status:SetTextColor(unpack(UI.COLORS.heal))
+  elseif placed == false then
+    card.status:SetText(ns.T("ui.card.notplaced"))
+    card.status:SetTextColor(unpack(UI.COLORS.gold))
+  else
+    card.status:SetText("")
+  end
+  card.more:SetText(#queue > 0 and ns.T("ui.card.more", { n = #queue }) or "")
 end
 
-function NewSkill.ShowCard(entry)
+-- fromList: opened from the skill list or /sensei card to look at a skill again. It does not touch the queue of
+-- new skills or the "later" list; a new-skill card that was open comes back when this one is closed.
+function NewSkill.ShowCard(entry, fromList)
   if not card then buildCard() end
-  card.entry = entry
-  card.icon:SetSpell(entry)
+  fromList = fromList and true or false
+  if fromList and card:IsShown() and card.entry and not card.fromList and card.entry.key ~= entry.key then
+    table.insert(queue, 1, card.entry)
+  end
+  card.entry, card.fromList = entry, fromList
+  card.title:SetText(ns.T(fromList and "ui.card.view" or "ui.card.title"))
   card.name:SetText(entry.name)
   local c = UI.COLORS[entry.role]
   local color = string.format("|cff%02x%02x%02x", c[1] * 255, c[2] * 255, c[3] * 255)
@@ -99,16 +137,23 @@ function NewSkill.ShowCard(entry)
     .. "   " .. ns.T("ui.card.level", { level = entry.level }))
   card.what:SetText(ns.T("spell." .. entry.key .. ".what"))
   card.when:SetText(ns.T("spell." .. entry.key .. ".when"))
-  card.where:SetText(Spells.WhereText(entry))
-  local hasSlot = Spells.LayoutSlot(entry) ~= nil
-  if card.place.SetEnabled then card.place:SetEnabled(hasSlot and Spells.IsKnown(entry)) end
-  card.more:SetText(#queue > 0 and ns.T("ui.card.more", { n = #queue }) or "")
-  layoutCard()
+  card.later:SetShown(not fromList)
+  card.guide:ClearAllPoints()
+  card.guide:SetPoint("LEFT", fromList and card.place or card.later, "RIGHT", 8, 0)
+  fillState()
   if ns.InCombat() then
     hiddenForCombat.card = true
   else
     card:Show()
+    if card.Raise then card:Raise() end
+    UI.Refit(card)
   end
+end
+
+function NewSkill.RefreshCard()
+  if not card or not card.entry or not card:IsShown() then return end
+  fillState()
+  UI.Refit(card)
 end
 
 function NewSkill.Next()
@@ -127,14 +172,14 @@ end
 local function showQueued()
   if not ns.settings.showCards then return end
   if card and card:IsShown() then
-    card.more:SetText(#queue > 0 and ns.T("ui.card.more", { n = #queue }) or "")
+    NewSkill.RefreshCard()
     return
   end
   NewSkill.Next()
 end
 
--- Compare known spells and ranks with the saved state.
-function NewSkill.Scan()
+-- Compare known spells and ranks with the saved state. atLogin: also catch up on old ranks still on the bars.
+function NewSkill.Scan(atLogin)
   if not ns.char or not ns.IsShaman() then return end
   local known, ranks = ns.char.known, charRanks()
   local first = not ns.char.initialised
@@ -157,25 +202,7 @@ function NewSkill.Scan()
     return
   end
   showQueued()
-  if #newRanks > 0 then NewSkill.RankToast(newRanks) end
-end
-
-function NewSkill.RankToast(list)
-  local names, outdated = {}, {}
-  for _, e in ipairs(list) do
-    local ok, sub = ns.Call("C_Spell.GetSpellSubtext", Spells.CurrentID(e))
-    local rank = ok and sub and sub ~= "" and (" (" .. sub .. ")") or ""
-    table.insert(names, e.name .. rank)
-    if #ns.Layout.OldRankSlots(e) > 0 then table.insert(outdated, e) end
-  end
-  local text = ns.T("ui.rank.learned", { names = table.concat(names, ", ") })
-  if #outdated > 0 then
-    ns.UI.Toast(text .. "\n" .. ns.T("ui.rank.old"), 20, ns.T("ui.btn.update"), function()
-      for _, e in ipairs(outdated) do ns.Layout.UpdateRank(e) end
-    end)
-  else
-    ns.UI.Toast(text, 8)
-  end
+  if #newRanks > 0 or atLogin then ns.Layout.ApplyNewRanks(newRanks) end
 end
 
 -- Skills she can learn at her level but does not know yet (talents excluded).
@@ -201,6 +228,19 @@ local function buildTrainer()
   trainer.report = UI.ReportButton(trainer, "ui.trainer.intro")
   trainer.report:SetPoint("TOPRIGHT", -36, -10)
   trainer.rows = {}
+  trainer.count = 0
+  UI.AutoFit(trainer, function(self)
+    local y = 40 + UI.H(self.intro) + 8
+    for i = 1, self.count do
+      local row = self.rows[i]
+      local h = math.max(24, UI.H(row.text) + 6)
+      row:SetHeight(h)
+      row:ClearAllPoints()
+      row:SetPoint("TOPLEFT", 16, -y)
+      y = y + h + 2
+    end
+    self:SetHeight(y + 14)
+  end)
 end
 
 function NewSkill.ShowTrainer(level)
@@ -211,28 +251,30 @@ function NewSkill.ShowTrainer(level)
   end
   if not trainer then buildTrainer() end
   trainer.intro:SetText(ns.T("ui.trainer.intro"))
-  local top = 48 + trainer.intro:GetStringHeight()
   for i, e in ipairs(list) do
     local row = trainer.rows[i]
     if not row then
       row = CreateFrame("Frame", nil, trainer)
       row:SetSize(368, 24)
       row.icon = UI.SpellIcon(row, 22)
-      row.icon:SetPoint("LEFT")
+      row.icon:SetPoint("TOPLEFT")
       row.text = UI.Text(row, 12)
-      row.text:SetPoint("LEFT", row.icon, "RIGHT", 6, 0)
-      row.text:SetWidth(330)
+      row.text:SetPoint("TOPLEFT", row.icon, "TOPRIGHT", 6, -4)
+      row.text:SetWidth(340)
       trainer.rows[i] = row
     end
-    row:ClearAllPoints()
-    row:SetPoint("TOPLEFT", 16, -(top + (i - 1) * 26))
     row.icon:SetSpell(e)
     row.text:SetText(string.format("Lv%d  %s  |cffaaaaaa%s|r", e.level, e.name, ns.T("ui.role." .. e.role)))
     row:Show()
   end
   for i = #list + 1, #trainer.rows do trainer.rows[i]:Hide() end
-  trainer:SetHeight(top + #list * 26 + 20)
-  if ns.InCombat() then hiddenForCombat.trainer = true else trainer:Show() end
+  trainer.count = #list
+  if ns.InCombat() then
+    hiddenForCombat.trainer = true
+  else
+    trainer:Show()
+    UI.Refit(trainer)
+  end
 end
 
 -- Events.
@@ -253,7 +295,7 @@ ns.OnLogin(function()
     if e then enqueue(e) end
   end
   C_Timer.After(3, function()
-    NewSkill.Scan()
+    NewSkill.Scan(true)
     if ns.char.initialised then showQueued() end
   end)
 end)
@@ -288,6 +330,6 @@ ns.Command("card", function(rest)
     ns.Print("unknown spell: " .. tostring(rest) .. " (use the English name, e.g. /sensei card Chain Heal)")
     return
   end
-  NewSkill.ShowCard(e)
+  NewSkill.ShowCard(e, true)
 end)
 ns.Command("trainer", function() NewSkill.ShowTrainer() end)

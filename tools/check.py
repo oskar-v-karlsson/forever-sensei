@@ -13,6 +13,7 @@ Usage: python3 tools/check.py      (exit code 1 on any problem)
 import csv
 import os
 import re
+import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -81,14 +82,30 @@ def new_runtime():
     return lua, ns
 
 
+def rank_levels():
+    """Data/Shaman/Ranks.lua → {key: [(id, level), ...]} (levels from the generated comments)."""
+    out = {}
+    for m in re.finditer(r"^R\.(\w+) = \{ ([\d, ]+) \} -- Lv ([\d ]+)$",
+                         read(os.path.join(ADDON, "Data", "Shaman", "Ranks.lua")), re.M):
+        ids = [int(x) for x in m.group(2).split(",")]
+        lvls = [int(x) for x in m.group(3).split()]
+        out[m.group(1)] = list(zip(ids, lvls))
+    return out
+
+
 def login(lua, ns, level=20):
+    """Fake character: every rank she can have at this level is known (the client gives ranks with the trainer)."""
     stub = lua.globals().STUB
     data = ns.ClassData.SHAMAN
+    ranks = rank_levels()
     for e in data.spells.values():
-        stub.names[e.id] = e.name
-        stub.levels[e.id] = e.level
-        if e.level <= level and not e.talent:
-            stub.known[e.id] = True
+        for r, (rid, lv) in enumerate(ranks.get(e.key, [(e.id, e.level)]), 1):
+            stub.names[rid] = e.name
+            stub.levels[rid] = lv
+            if e.key in ranks:
+                stub.subtext[rid] = f"Rank {r}"
+            if lv <= level and not e.talent:
+                stub.known[rid] = True
     for t in data.talents.list.values():
         stub.names[t.id] = t.name
     stub.names[99999] = "Convection"  # a talent off the planned path
@@ -278,6 +295,25 @@ def check_static():
                 problem(f"talent {t['key']}: id {t['id']} not in the Forever client dump")
             elif r["name"] != t["name"]:
                 problem(f"talent {t['key']}: name {t['name']!r} but client has {r['name']!r}")
+        # Ranks.lua is generated from the same dump: it must be up to date, and every rank id must be in the dump
+        # with the spell's name and "Rank N".
+        gen = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "research", "gen_ranks.py"), "--check"],
+                             capture_output=True, text=True)
+        if gen.returncode != 0:
+            problem("ranks: " + (gen.stdout + gen.stderr).strip())
+        by_key = {s["key"]: s for s in spells}
+        for key, lst in rank_levels().items():
+            if key not in by_key:
+                problem(f"ranks: {key} is not a spell in Spells.lua")
+                continue
+            if lst[0][0] != int(by_key[key]["id"]):
+                problem(f"ranks: {key} rank 1 is {lst[0][0]}, Spells.lua has {by_key[key]['id']}")
+            for n, (rid, lv) in enumerate(lst, 1):
+                r = rows.get(rid)
+                if not r or r["name"] != by_key[key]["name"] or r.get("rank") != f"Rank {n}":
+                    problem(f"ranks: {key} rank {n} id {rid} does not match the client dump")
+            if [lv for _, lv in lst] != sorted(lv for _, lv in lst):
+                problem(f"ranks: {key} levels not ascending")
     else:
         problem("research TSV missing: cannot cross-check spells")
 

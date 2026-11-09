@@ -8,7 +8,7 @@ local Spells = ns.Spells
 
 local TABS = { "role", "healing", "damage", "totems", "manners", "skills", "layout", "talents", "review", "settings" }
 local TEXT_TABS = { role = true, healing = true, damage = true, totems = true, manners = true }
-local WIDTH = 560
+local WIDTH = 548 -- the scroll area is 550 wide (760 - 176 - 34)
 local REVIEW_PAGE = 5
 
 local win, current
@@ -79,7 +79,7 @@ end
 local function icon(frame, i, x, y, size, entry)
   local b = pool(frame, "icon", i, function()
     local ic = UI.SpellIcon(frame, size)
-    ic:SetScript("OnClick", function(self) if self.entry then ns.NewSkill.ShowCard(self.entry) end end)
+    ic:SetScript("OnClick", function(self) if self.entry then ns.NewSkill.ShowCard(self.entry, true) end end)
     return ic
   end)
   b:SetSize(size, size)
@@ -148,10 +148,11 @@ renderers.skills = function(frame)
     local fs = pool(frame, "label", i, function() return UI.Text(frame, 12) end)
     ns.Font.Apply(fs, 12)
     fs:SetTextColor(1, 1, 1)
-    fs:SetWidth(WIDTH - 34)
+    fs:SetWidth(WIDTH - 34 - 90)
     fs:ClearAllPoints()
     fs:SetPoint("TOPLEFT", 34, -y)
     fs:SetText(text)
+    button(frame, i, WIDTH - 80, y + 2, ns.T("ui.btn.card"), 80, function() ns.NewSkill.ShowCard(e, true) end)
     y = y + math.max(30, fs:GetStringHeight()) + 6
   end
   return y
@@ -317,6 +318,7 @@ renderers.settings = function(frame)
   y = y + label(frame, li, y, ns.T("ui.settings.show"), 13, "gold") + 6
   toggle("ui.settings.cards", s.showCards, function() s.showCards = not s.showCards end)
   toggle("ui.settings.talents", s.showTalentHints, function() s.showTalentHints = not s.showTalentHints end)
+  toggle("ui.settings.ranks", s.autoRanks, function() s.autoRanks = not s.autoRanks end)
   toggle("ui.settings.minimap", s.minimap, function()
     s.minimap = not s.minimap
     if ns.Minimap then ns.Minimap.Update() end
@@ -358,6 +360,8 @@ function Guide.RefreshFooter()
 end
 
 function Guide.Refresh()
+  -- Bar changes call this, so an open skill card updates its "already placed" line too.
+  if ns.NewSkill and ns.NewSkill.RefreshCard then ns.NewSkill.RefreshCard() end
   if not win or not win:IsShown() or not current then return end
   local frame = tabFrames[current]
   if not frame then

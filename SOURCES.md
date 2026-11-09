@@ -9,6 +9,7 @@ All entries were checked on **2026-11-09** against client **1.60.1.70862**. Each
 | Key | Source | Used for |
 |---|---|---|
 | `simc` | [simc-forever SpellDataDump/shaman.txt](https://github.com/simulationcraft/simc-forever/blob/HEAD/SpellDataDump/shaman.txt), header "World of Warcraft 1.60.1.70862 Live". Parsed copy: `research/shaman_simc_1.60.1.70862.tsv` (made by `tools/research/parse_simc.py`) | 46 of the 53 spells: ID, English name, level, cooldown and cast-time facts; every talent (ID, row, column, max rank). `make check` cross-checks the data against the TSV. |
+| `simc` ranks | Same dump, through `tools/research/gen_ranks.py` → `Data/Shaman/Ranks.lua` (2026-11-09) | Every rank's spell ID and trainer level, used for automatic rank upgrades. `make check` fails if the file is out of date or a rank does not match the dump (name and "Rank N"). |
 | `wh_spell` | `https://www.wowhead.com/forever/spell=<id>` | 7 spells missing from the simc dump (see below) |
 | `wh_abilities` | [Wowhead Forever: Restoration Shaman healer abilities](https://www.wowhead.com/forever/guide/classes/shaman/restoration/healer-abilities) | Ability use and priorities |
 | `wh_overview` | [Wowhead Forever: Restoration Shaman overview](https://www.wowhead.com/forever/guide/classes/shaman/restoration/overview-pve-healer) | The healer role, strengths and weaknesses |
@@ -58,7 +59,7 @@ These depend on the live Forever client. They are handled defensively in the cod
 2. The binding functions exist: `SetBinding`, `SaveBindings`, `GetBindingAction`, `GetCurrentBindingSet`. `SetBinding(key)` with no action unbinds the key.
 3. Extra action bars turn on through `Settings.SetValue("PROXY_SHOW_ACTIONBAR_2..4")`.
 4. Totem Bar behaviour: the resistance totems and Windwall are left there.
-5. When she learns a new rank, the bar button upgrades to it, and `/cast <Name>` in a macro uses the highest rank.
+5. **Verified in game (v0.1.0, 2026-11):** learning a new rank does **not** upgrade the bar button, so the addon does it (Layout.ApplyNewRanks). Still to check: `/cast <Name>` in a macro uses the highest rank. `/sensei verify` prints what each macro casts. If a macro casts a lower rank, the addon writes `Name(Rank N)` into it instead.
 6. Talent reading through `C_Traits` (Forever's single class tree), opening the talent frame through `PlayerSpellsUtil`, and `IsSpellKnown` for talents with one rank.
 7. `C_Spell.GetSpellLevelLearned` returns the trainer levels.
 8. The `LEARNED_SPELL_IN_SKILL_LINE` event fires. The `SPELLS_CHANGED` spellbook diff is the fallback.

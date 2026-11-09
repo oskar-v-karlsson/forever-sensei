@@ -2,8 +2,9 @@
 
 A Japanese class coach addon for **World of Warcraft: Forever**. Version 1 covers the **Restoration Shaman** healer (made for a Skyborne / Horde player) from level 1 to 60.
 
-- **New skill cards (新しいスキル):** when she learns a skill, a card explains in Japanese what it does, when to use it, where it goes on her bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip.
+- **New skill cards (新しいスキル):** when she learns a skill, a card explains in Japanese what it does, when to use it, where it goes on her bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
 - **Fixed bar layout and keys (キー配置):** every skill has a fixed slot, and only small-hand keys are used: `1-5`, `Q E R F`, `Z X C` and the same keys with Shift. Her current layout can be replaced in one step (**すべて配置**). She sees a preview first, her old bars and keys are backed up, and **元に戻す** restores them.
+- **New ranks:** the game does not put a new rank on the bars, so the addon upgrades bar buttons to the highest rank automatically (after combat if she is fighting), with a toast and **元に戻す** to keep the old rank. It can be turned off in the settings. Healing macros are checked to cast the highest rank too.
 - **Healing targeting:** mouseover healing macros, or plain spells for click-target healing. One setting switches between them.
 - **Talent advisor (タレント):** when she has an unspent point, it shows the next talent from her Mobalytics build with a short reason, plus the full order.
 - **Guide (`/sensei`):** the healer role, healing tips, when to deal damage, totems, group manners, a skill list by level, the key layout, and the talent order.
@@ -46,7 +47,7 @@ The game's 12.x API hides health, cooldowns and auras from addons in combat, so 
 | Command | What it does |
 |---|---|
 | `/sensei` | Open the guide (`/foreversensei` also works) |
-| `/sensei skills` | Skill list by level: learned, not learned, and slot |
+| `/sensei skills` | Skill list by level: learned, not learned, and slot. **カード** opens the skill's card. |
 | `/sensei layout` | Key layout tab |
 | `/sensei apply` / `/sensei undo` | Apply the full layout (with preview) / restore the backup |
 | `/sensei talents` | Talent advice; `/sensei order` shows the full order |
@@ -100,11 +101,12 @@ These cannot be tested outside the game. Please go through them once, then paste
 6. [ ] **元に戻す** / `/sensei undo` restores the old bars and keys.
 7. [ ] Mouseover mode: hovering a party frame and pressing `1` heals that player. With no mouseover, it heals the target. With no friendly target, it heals herself.
 8. [ ] Switching to **ターゲットを回復** replaces the macros with plain spells in the same slots, and back again.
-9. [ ] Learning a higher rank: the bar button and macros use the new rank (no need to place it again).
-10. [ ] At level 10 and later, an unspent talent point shows the next talent hint. **タレントを開く** opens the talent window, and the advice matches what is already spent.
-11. [ ] Entering combat hides an open skill card, trainer list and talent hint. They come back after combat. A layout change started in combat is applied after combat.
-12. [ ] Translation report flow (below) works: save, send, copy, mark as sent.
-13. [ ] The minimap button can be dragged and hidden in settings, and the addon compartment entry works.
+9. [ ] Learning a higher rank (out of combat, or right after combat) changes the bar buttons to it and shows a toast. **元に戻す** on the toast puts the old rank back and keeps it. A mouseover macro (e.g. Healing Wave on `1`) casts the new rank: in `/sensei verify`, the macro lines under [Layout] show the same id after `casts` and `highest known`, and there is no `macro does not cast the highest rank` line. The game itself does not upgrade bar buttons (seen in game, v0.1.0).
+10. [ ] Long texts (talent hint, cards, trainer list, report window) stay inside their windows, and the skill list's **カード** button opens the card with a working **配置する**.
+11. [ ] At level 10 and later, an unspent talent point shows the next talent hint. **タレントを開く** opens the talent window, and the advice matches what is already spent.
+12. [ ] Entering combat hides an open skill card, trainer list and talent hint. They come back after combat. A layout change started in combat is applied after combat.
+13. [ ] Translation report flow (below) works: save, send, copy, mark as sent.
+14. [ ] The minimap button can be dragged and hidden in settings, and the addon compartment entry works.
 
 ## Translation reports
 

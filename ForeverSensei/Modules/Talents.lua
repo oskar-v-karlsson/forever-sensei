@@ -122,6 +122,7 @@ local function buildHint()
   hint.head:SetPoint("TOPLEFT", 16, -40)
   hint.head:SetWidth(388)
   hint.step = UI.Text(hint, 15, "gold")
+  hint.step:SetWidth(388)
   hint.why = UI.Text(hint, 13)
   hint.why:SetWidth(388)
   hint.report = UI.ReportButton(hint, function() return hint.stepKey and ("talent." .. hint.stepKey .. ".why") end)
@@ -133,6 +134,14 @@ local function buildHint()
     if ns.Guide then ns.Guide.Open("talents") end
   end)
   hint.all:SetPoint("LEFT", hint.open, "RIGHT", 8, 0)
+  hint.step:SetPoint("TOPLEFT", hint.head, "BOTTOMLEFT", 0, -10)
+  hint.why:SetPoint("TOPLEFT", hint.step, "BOTTOMLEFT", 0, -6)
+  hint.extra:SetPoint("TOPLEFT", hint.why, "BOTTOMLEFT", 0, -8)
+  hint.report:SetPoint("TOPRIGHT", hint, "TOPRIGHT", -36, -10)
+  UI.AutoFit(hint, function(self)
+    -- title area + texts and their gaps + button row
+    self:SetHeight(40 + UI.H(self.head) + 10 + UI.H(self.step) + 6 + UI.H(self.why) + 8 + UI.H(self.extra) + 52)
+  end)
 end
 
 function Talents.ShowHint(force)
@@ -148,12 +157,6 @@ function Talents.ShowHint(force)
   else
     hint.head:SetText(ns.T("ui.talent.unreadable"))
   end
-  hint.step:ClearAllPoints()
-  hint.step:SetPoint("TOPLEFT", hint.head, "BOTTOMLEFT", 0, -10)
-  hint.why:ClearAllPoints()
-  hint.why:SetPoint("TOPLEFT", hint.step, "BOTTOMLEFT", 0, -6)
-  hint.report:ClearAllPoints()
-  hint.report:SetPoint("TOPRIGHT", hint, "TOPRIGHT", -36, -10)
   if s.next then
     hint.stepKey = s.next.key
     hint.step:SetText(Talents.StepText(s.next))
@@ -165,15 +168,15 @@ function Talents.ShowHint(force)
     hint.why:SetText("")
     hint.report:Hide()
   end
-  hint.extra:ClearAllPoints()
-  hint.extra:SetPoint("TOPLEFT", hint.why, "BOTTOMLEFT", 0, -8)
   if s.offPlan and #s.offPlan > 0 then
     hint.extra:SetText(ns.T("ui.talent.offplan", { names = table.concat(s.offPlan, ", ") }))
   else
     hint.extra:SetText("")
   end
-  hint:SetHeight(40 + hint.head:GetStringHeight() + 30 + hint.why:GetStringHeight() + hint.extra:GetStringHeight() + 70)
-  if not ns.InCombat() then hint:Show() end
+  if not ns.InCombat() then
+    hint:Show()
+    UI.Refit(hint)
+  end
 end
 
 local function refresh()

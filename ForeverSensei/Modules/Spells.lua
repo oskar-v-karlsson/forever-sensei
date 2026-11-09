@@ -40,19 +40,46 @@ local function spellName(id)
 end
 Spells.Name = spellName
 
--- Known by the player (any rank)?
-function Spells.IsKnown(entry)
-  local ok, known = ns.Call("C_SpellBook.IsSpellKnown", entry.id)
-  if ok and known then return true end
-  ok, known = ns.Call("IsPlayerSpell", entry.id)
-  if ok and known then return true end
-  local ok2, slot = ns.Call("C_SpellBook.FindSpellBookSlotForSpell", entry.name)
-  if ok2 and slot then return true end
-  return false
+-- Every rank's spell id, rank 1 first (Data/Shaman/Ranks.lua; one id for single-rank spells).
+function Spells.Ranks(entry)
+  return ns.ClassData.SHAMAN.ranks[entry.key] or { entry.id }
 end
 
--- Highest known rank's spell id (by English name), else the rank 1 id.
+-- Rank number of a spell id of this entry, or nil when the id is not one of its ranks.
+function Spells.RankOf(entry, id)
+  for i, r in ipairs(Spells.Ranks(entry)) do
+    if r == id then return i end
+  end
+  return nil
+end
+
+local function knownId(id)
+  local ok, known = ns.Call("C_SpellBook.IsSpellKnown", id)
+  if ok and known then return true end
+  ok, known = ns.Call("IsPlayerSpell", id)
+  return ok and known and true or false
+end
+
+-- Highest known rank. → rank number, spell id (nil when no rank is known)
+function Spells.KnownRank(entry)
+  local list = Spells.Ranks(entry)
+  for i = #list, 1, -1 do
+    if knownId(list[i]) then return i, list[i] end
+  end
+  return nil
+end
+
+-- Known by the player (any rank)?
+function Spells.IsKnown(entry)
+  if Spells.KnownRank(entry) then return true end
+  local ok, slot = ns.Call("C_SpellBook.FindSpellBookSlotForSpell", entry.name)
+  return ok and slot and true or false
+end
+
+-- Highest known rank's spell id; else what the client resolves for the English name; else the rank 1 id.
 function Spells.CurrentID(entry)
+  local _, id = Spells.KnownRank(entry)
+  if id then return id end
   local ok, info = ns.Call("C_Spell.GetSpellInfo", entry.name)
   if ok and type(info) == "table" and info.spellID and info.name == entry.name then return info.spellID end
   return entry.id

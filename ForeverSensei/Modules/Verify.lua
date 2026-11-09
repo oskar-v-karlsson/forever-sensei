@@ -9,7 +9,7 @@ local APIS = {
   "C_Spell.PickupSpell", "C_Spell.GetSpellLevelLearned", "C_SpellBook.IsSpellKnown",
   "C_SpellBook.FindSpellBookSlotForSpell", "IsPlayerSpell",
   "GetActionInfo", "GetActionText", "PickupAction", "PlaceAction", "ClearCursor",
-  "PickupMacro", "GetMacroIndexByName", "GetMacroInfo", "CreateMacro", "EditMacro",
+  "PickupMacro", "GetMacroIndexByName", "GetMacroInfo", "GetMacroSpell", "CreateMacro", "EditMacro",
   "C_Item.PickupItem", "C_Item.GetItemNameByID",
   "GetBindingAction", "SetBinding", "SaveBindings", "GetCurrentBindingSet",
   "Settings.GetValue", "Settings.SetValue",
@@ -62,6 +62,27 @@ function Verify.Run()
   end
 
   add("")
+  add("[Ranks]  every rank id in Data/Shaman/Ranks.lua: name and 'Rank N' checked against the client")
+  local rankIds = 0
+  for _, e in ipairs(ns.Spells.List()) do
+    local ranks = ns.Spells.Ranks(e)
+    if #ranks > 1 then
+      for r, id in ipairs(ranks) do
+        rankIds = rankIds + 1
+        local name = ns.Spells.Name(id)
+        local okS, sub = ns.Call("C_Spell.GetSpellSubtext", id)
+        if name ~= e.name then bad(string.format("%s rank %d: id %d is '%s' in the client", e.name, r, id, tostring(name))) end
+        if okS and type(sub) == "string" and sub ~= "" and sub ~= "Rank " .. r and sub:match("%d") then
+          bad(string.format("%s rank %d: id %d subtext '%s'", e.name, r, id, sub))
+        end
+      end
+      local best, bestId = ns.Spells.KnownRank(e)
+      if best then add(string.format("  %-24s highest known rank %d (id %d) of %d", e.name, best, bestId, #ranks)) end
+    end
+  end
+  add(string.format("  %d rank ids checked", rankIds))
+
+  add("")
   add("[Talents]")
   local ranks, unspent, source, maxRanks = ns.Talents.Read()
   if not ranks then
@@ -98,10 +119,27 @@ function Verify.Run()
       add(string.format("  %s %s = %s", bar.id, bar.setting, ok and tostring(v) or ("error " .. tostring(v))))
     end
   end
+  -- In-game question: does "/cast Name" in a macro cast the highest rank? GetMacroSpell tells which id it casts.
   for key, name in pairs(layout.macros) do
     local ok, idx = ns.Call("GetMacroIndexByName", name)
-    add(string.format("  macro %s (%s): %s", name, key, ok and tostring(idx) or "error"))
+    local line = string.format("  macro %s (%s): %s", name, key, ok and tostring(idx) or "error")
+    if ok and type(idx) == "number" and idx > 0 then
+      local e = ns.Spells.Get(key)
+      local _, bestId = ns.Spells.KnownRank(e)
+      local okM, casts = ns.Call("GetMacroSpell", idx)
+      line = line .. string.format("  casts %s  highest known %s  named rank %s", okM and tostring(casts) or "?",
+        tostring(bestId), tostring(ns.char.macroRank[key] or "-"))
+      if okM and casts and bestId and casts ~= bestId then
+        bad(line .. "  (macro does not cast the highest rank)")
+        line = nil
+      end
+    end
+    if line then add(line) end
   end
+  local outdated = ns.Layout.OutdatedRanks()
+  add(string.format("  bar buttons with an older rank: %d  (auto ranks %s)", #outdated, tostring(ns.settings.autoRanks)))
+  for _, u in ipairs(outdated) do add(string.format("    slot %d %s id %d -> %d", u.slot, u.entry.name, u.old, u.new)) end
+  for slot, id in pairs(ns.char.keepRank or {}) do add(string.format("    slot %d keeps id %d (undone upgrade)", slot, id)) end
   add("  undo records: " .. tostring(ns.char and ns.char.backups and #ns.char.backups or 0))
 
   add("")
