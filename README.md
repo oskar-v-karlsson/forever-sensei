@@ -19,10 +19,15 @@ Japanese style follows the [WoW Forever Japanese](https://github.com/zyaga/wow-f
 
 ForeverSensei works with or without WFJ installed. Without it, ForeverSensei uses its own bundled Japanese font.
 
+## Releases
+
+Download the newest zip from [Releases](https://github.com/oskar-v-karlsson/forever-sensei/releases/latest) (the asset `ForeverSensei-v<version>-<commit>.zip`). Every push to `main` makes a release automatically (`.github/workflows/release.yml`). The workflow runs `make check`, builds the zip and publishes it, tagged `v<version>-<short commit>`, e.g. `v0.2.0-5f1a87c`. The newest release is marked **Latest**. If the checks fail, no release is made.
+
 ## Install on Windows
 
 1. Get the addon:
-   - **Zip:** run `make zip` on the Mac and send the player `dist/ForeverSensei-v<version>.zip`. On Windows, right-click it → **Extract All**.
+   - **Release:** download the zip from [the latest release](https://github.com/oskar-v-karlsson/forever-sensei/releases/latest). On Windows, right-click it → **Extract All**.
+   - **Zip:** or run `make zip` and use `dist/ForeverSensei-v<version>.zip`.
    - **Copy:** or copy the `ForeverSensei` folder from this repo.
 2. In the **Battle.net** app, choose **World of Warcraft**, then the **Forever** version in the version drop-down. Click the gear next to Play → **Show in Explorer**.
 3. Open the game folder for Forever (most likely `_classic_beta_`), then `Interface\AddOns`. If `AddOns` (or `Interface`) is missing, create it.
