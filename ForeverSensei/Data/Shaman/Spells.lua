@@ -11,6 +11,7 @@ ns.Sources = {
   wh_overview = "https://www.wowhead.com/forever/guide/classes/shaman/restoration/overview-pve-healer",
   wh_talents = "https://www.wowhead.com/forever/guide/classes/shaman/restoration/talent-builds-pve-healer",
   wh_spell = "https://www.wowhead.com/forever/spell=",
+  wh_item = "https://www.wowhead.com/forever/item=",
   moba = "https://mobalytics.gg/wow-forever/classes/restoration-shaman-guide",
   ui = "Blizzard UI code for Forever 1.60.1 (github.com/reckhou/WoWBlzCode, folder Forever)",
 }

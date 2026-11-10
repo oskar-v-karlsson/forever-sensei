@@ -88,10 +88,16 @@ return function(ns, lang)
 
   local function checkLayout(mode)
     for _, s in ipairs(L.slots) do
-      local entry = ns.Spells.Get(s.spell)
+      local entry = s.spell and ns.Spells.Get(s.spell)
       local a = STUB.actions[s.slot]
       if not a then
-        fail(mode .. ": slot " .. s.slot .. " empty, expected " .. s.spell)
+        fail(mode .. ": slot " .. s.slot .. " empty, expected " .. (s.spell or ("@" .. s.item)))
+      elseif s.item then
+        local m = a[1] == "macro" and STUB.macros[a[2]]
+        local want = ns.ItemData.kinds[s.item].macro
+        if not m or m.name ~= want or not m.body:find("/use item:", 1, true) then
+          fail(mode .. ": slot " .. s.slot .. " should hold item macro " .. want)
+        end
       elseif mode == "mouseover" and L.macros[s.spell] then
         local m = STUB.macros[a[2]]
         if a[1] ~= "macro" or not m or m.name ~= L.macros[s.spell] then
@@ -145,18 +151,31 @@ return function(ns, lang)
   if STUB.cursor then fail("cursor not empty after undo") end
   table.insert(notes, "undo steps: " .. undos)
 
+  -- The Hearthstone was on main button 2 (now Lightning Shield): it moved to a spare button of Action Bar 5.
+  -- (Checked on the applied layout above through the undo: here only the destination rule.)
+  STUB.actions = { [2] = { "item", 6948 } }
+  local movePlan = ns.Layout.BuildPlan()
+  local mv = movePlan.moves[1]
+  if not mv or mv.from ~= 2 or mv.toSlot.bar ~= "bar5" or mv.to ~= L.spare[1].slot then
+    fail("layout: a displaced action should move to the first spare button of Action Bar 5")
+  end
+  local needs5 = false
+  for _, bar in ipairs(movePlan.bars) do needs5 = needs5 or bar.id == "bar5" end
+  if not needs5 then fail("layout: Action Bar 5 not shown although something moves there") end
+
   -- Place one spell (card button), with something else in its slot → asks first.
-  STUB.actions = { [3] = { "spell", 403 } }
   local ch = ns.Spells.Get("chain_heal")
+  local chSlot, chKey = L.bySpell.chain_heal.slot, L.bySpell.chain_heal.key
+  STUB.actions = { [chSlot] = { "spell", 403 } }
   try("place one", ns.Layout.PlaceOne, ch)
   local confirm = _G.ForeverSenseiConfirm
   fits("confirm", confirm)
   if confirm and confirm:IsShown() and confirm.yes then try("place confirm", function() confirm.yes:Click() end) end
-  local a = STUB.actions[3]
+  local a = STUB.actions[chSlot]
   if not a or not ((a[1] == "macro" and STUB.macros[a[2]].name == "FS_CH") or (a[1] == "spell" and STUB.names[a[2]] == "Chain Heal")) then
-    fail("place one: Chain Heal not in slot 3")
+    fail("place one: Chain Heal not in slot " .. chSlot)
   end
-  if STUB.bindings["3"] ~= "ACTIONBUTTON3" then fail("place one: key 3 not bound") end
+  if STUB.bindings[chKey] ~= L.bySpell.chain_heal.binding then fail("place one: key " .. chKey .. " not bound") end
 
   -- Combat: nothing changes, actions are queued and run after combat.
   STUB.combat = true
@@ -197,6 +216,7 @@ return function(ns, lang)
   if ns.Spells.CurrentID(hw) ~= hwR[4] then fail("ranks: CurrentID is not rank 4") end
   STUB.actions = { [hwSlot] = { "spell", hwR[2] }, [other] = { "spell", hwR[4] } }
   ns.char.keepRank = {}
+  STUB.bindings[L.bySpell.healing_wave.key] = L.bySpell.healing_wave.binding
   local function holds(slot, id) return STUB.actions[slot] and STUB.actions[slot][2] == id end
   STUB.combat = true
   STUB.known[hwR[5]] = true
@@ -279,6 +299,121 @@ return function(ns, lang)
   try("card unknown from list", ns.NewSkill.ShowCard, ns.Spells.Get("chain_heal"), true)
   if card.place:IsEnabled() then fail("card from list: Place it enabled for a skill the player does not know") end
   card:Hide()
+
+  -- Login bug (0.2.0): a totem closed with "Later" and then placed (Apply full layout or by hand) got its card back
+  -- at every login. Now a placed skill leaves the "later" list, and at login no card opens for a "later" skill.
+  local function relogin()
+    if _G.ForeverSenseiToast then _G.ForeverSenseiToast:Hide() end
+    if _G.ForeverSenseiConfirm then _G.ForeverSenseiConfirm:Hide() end
+    -- A reload starts with an empty card queue (cards re-queued by the list cards above are session state).
+    for _ = 1, 30 do ns.NewSkill.Next() end
+    card:Hide()
+    STUB.fire("PLAYER_LOGIN")
+    STUB.runTimers()
+  end
+  local stoneskin = ns.Spells.Get("stoneskin_totem")
+  local ss = L.bySpell.stoneskin_totem
+  STUB.known[stoneskin.id] = true
+  ns.char.known.stoneskin_totem = true
+  ns.char.ranks = ns.char.ranks or {}
+  ns.char.ranks.stoneskin_totem = ns.Spells.CurrentID(stoneskin)
+  STUB.actions = { [ss.slot] = { "spell", ns.Spells.CurrentID(stoneskin) } }
+  STUB.bindings[ss.key] = ss.binding
+  STUB.settings.PROXY_SHOW_ACTIONBAR_2 = true
+  ns.char.postponed = { stoneskin_totem = true }
+  ns.char.layoutVersion = L.version
+  if ns.Layout.IsPlaced(stoneskin) ~= true then fail("login: Stoneskin Totem setup is not placed") end
+  relogin()
+  if card:IsShown() then fail("login: a card opened for a skill that is already in its slot (" .. tostring(card.entry and card.entry.key) .. ")") end
+  if ns.char.postponed.stoneskin_totem then fail("login: a placed skill stayed on the 'later' list") end
+  -- A "later" skill that is not placed: no card at login, a toast with a button that opens it.
+  local purge = ns.Spells.Get("purge")
+  STUB.known[purge.id] = true
+  ns.char.known.purge = true
+  ns.char.postponed = { purge = true }
+  relogin()
+  toast = _G.ForeverSenseiToast
+  if card:IsShown() then fail("login: a card opened at login for a 'later' skill") end
+  if not toast or not toast:IsShown() or toast.text:GetText() ~= ns.T("ui.card.postponed", { n = 1 }) then
+    fail("login: no toast for the 'later' skills")
+  else
+    fits("later toast", toast)
+    try("later toast show", function() toast.button:Click() end)
+    if not card:IsShown() or card.entry.key ~= "purge" then fail("login: the toast button did not open the 'later' card") end
+  end
+  card:Hide()
+  ns.char.postponed = {}
+  -- Apply full layout takes placed skills off the "later" list too.
+  ns.char.postponed = { stoneskin_totem = true }
+  STUB.actions = {}
+  try("later apply", function() ns.Layout.Execute(ns.Layout.BuildPlan("stoneskin_totem")) end)
+  if ns.char.postponed.stoneskin_totem then fail("login: Apply did not take the placed skill off the 'later' list") end
+
+  -- Players who had the old layout get one notice that offers the preview; nothing moves by itself.
+  STUB.actions = { [1] = { "spell", ns.Spells.CurrentID(ns.Spells.Get("healing_wave")) } }
+  local before = STUB.actions[1][2]
+  ns.char.layoutVersion = nil
+  relogin()
+  confirm = _G.ForeverSenseiConfirm
+  if not confirm or not confirm:IsShown() or confirm.text:GetText() ~= ns.T("ui.layout.changed") then
+    fail("layout notice: not shown to a player with the old layout")
+  else
+    fits("layout notice", confirm)
+    try("layout notice preview", function() confirm.yes:Click() end)
+    if not _G.ForeverSenseiPreview or not _G.ForeverSenseiPreview:IsShown() then fail("layout notice: button did not open the preview") end
+    _G.ForeverSenseiPreview:Hide()
+  end
+  if not STUB.actions[1] or STUB.actions[1][2] ~= before or STUB.actions[2] then fail("layout notice: bars changed by themselves") end
+  if ns.char.layoutVersion ~= L.version then fail("layout notice: version not saved") end
+  relogin()
+  if confirm and confirm:IsShown() then fail("layout notice: shown twice") end
+  ns.char.layoutVersion = nil
+  ns.char.initialised = false
+  STUB.fire("PLAYER_LOGIN")
+  if ns.char.layoutVersion ~= L.version then fail("layout notice: new character did not get the current version") end
+  ns.char.initialised = true
+  STUB.runTimers()
+  if confirm and confirm:IsShown() then fail("layout notice: shown to a new character") end
+  if _G.ForeverSenseiToast then _G.ForeverSenseiToast:Hide() end
+
+  -- Item macros: the best potion in the bags the level allows; silent update after combat; fixed icon with none.
+  STUB.level = 20
+  STUB.bags, STUB.itemLevels = {}, {}
+  local I = ns.Items
+  local body, icon = I.MacroBody("mana")
+  if body ~= "/use item:3385" or icon ~= ns.ItemData.kinds.mana.icon then
+    fail("items: empty bags should give '/use item:3385' and the fixed icon, got " .. body .. " / " .. tostring(icon))
+  end
+  STUB.bags = { [2455] = 3, [3385] = 1, [3827] = 2 }
+  if not I.Best("mana") or I.Best("mana").id ~= 3385 then fail("items: best mana potion at level 20 should be 3385") end
+  STUB.itemLevels[3385] = 25
+  if not I.Best("mana") or I.Best("mana").id ~= 2455 then fail("items: the client's required level should count") end
+  STUB.itemLevels = {}
+  STUB.macros = {}
+  try("items macro", I.EnsureMacro, "mana")
+  local mi = GetMacroIndexByName("FS_MANA")
+  if mi == 0 or STUB.macros[mi].body ~= "#showtooltip\n/use item:3385" then fail("items: FS_MANA body wrong") end
+  if toast then toast:Hide() end
+  STUB.combat = true
+  STUB.bags[3385] = nil
+  STUB.fire("BAG_UPDATE_DELAYED")
+  STUB.runTimers()
+  if STUB.macros[mi].body ~= "#showtooltip\n/use item:3385" then fail("items: macro edited in combat") end
+  if toast and toast:IsShown() then fail("items: a toast in combat for a bag change") end
+  STUB.combat = false
+  STUB.fire("PLAYER_REGEN_ENABLED")
+  STUB.runTimers()
+  if STUB.macros[mi].body ~= "#showtooltip\n/use item:2455" then fail("items: macro not updated after combat: " .. STUB.macros[mi].body) end
+  STUB.bags = {}
+  STUB.fire("BAG_UPDATE_DELAYED")
+  if STUB.macros[mi].body ~= "/use item:3385" or STUB.macros[mi].icon ~= ns.ItemData.kinds.mana.icon then
+    fail("items: no potions should give the fixed icon")
+  end
+  if GetMacroIndexByName("FS_HEALPOT") ~= 0 then fail("items: Refresh created a macro the player did not place") end
+  -- A potion placed by hand belongs to the plan: it is replaced by the macro, not moved.
+  STUB.actions = { [L.byItem.healpot.slot] = { "item", 929 } }
+  local itemPlan = ns.Layout.BuildPlan()
+  if #itemPlan.moves > 0 then fail("items: a healing potion on its own slot was moved instead of replaced") end
 
   -- Translation reports: save two, send, format.
   ns.db.reports = {}

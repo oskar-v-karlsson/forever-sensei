@@ -288,15 +288,44 @@ local function scheduleScan()
   end)
 end
 
-ns.OnLogin(function()
-  if not ns.IsShaman() then return end
+-- Drop "later" skills that are in their slot now (placed by Apply full layout or by hand): nothing left to do there.
+function NewSkill.PrunePostponed()
+  if not ns.char or not ns.char.postponed then return 0 end
+  local n = 0
   for key in pairs(ns.char.postponed) do
     local e = Spells.Get(key)
-    if e then enqueue(e) end
+    if not e or ns.Layout.IsPlaced(e) == true then
+      ns.char.postponed[key] = nil
+    else
+      n = n + 1
+    end
   end
+  return n
+end
+
+function NewSkill.ShowPostponed()
+  NewSkill.PrunePostponed()
+  local list = {}
+  for key in pairs(ns.char.postponed) do table.insert(list, Spells.Get(key)) end
+  table.sort(list, function(a, b) return a.level < b.level or (a.level == b.level and a.key < b.key) end)
+  for _, e in ipairs(list) do enqueue(e) end
+  if card and card:IsShown() then NewSkill.RefreshCard() else NewSkill.Next() end
+end
+
+-- At login no card opens for a skill already seen: "later" skills only get a toast with a button to look at them.
+-- Cards at login are only for skills learned while the addon was not running.
+ns.OnLogin(function()
+  if not ns.IsShaman() then return end
   C_Timer.After(3, function()
     NewSkill.Scan(true)
-    if ns.char.initialised then showQueued() end
+    if not ns.char.initialised or not ns.settings.showCards then return end
+    local n = NewSkill.PrunePostponed()
+    if n > 0 then
+      C_Timer.After(10, function()
+        if ns.InCombat() or (card and card:IsShown()) then return end
+        ns.UI.Toast(ns.T("ui.card.postponed", { n = n }), 15, ns.T("ui.btn.look"), NewSkill.ShowPostponed)
+      end)
+    end
   end)
 end)
 ns.On("SPELLS_CHANGED", function() if ns.ready then scheduleScan() end end)

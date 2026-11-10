@@ -195,8 +195,11 @@ def check_static():
     talents = data["talents"]
     guide = data["guide"]
 
+    items = py(ns.ItemData)
     NAMES.extend(s["name"] for s in spells)
     NAMES.extend(t["name"] for t in talents["list"])
+    for kind in items["kinds"].values():
+        NAMES.extend([kind["label"], kind["macro"]] + [i["name"] for i in kind["list"]])
 
     # --- texts ------------------------------------------------------------------------------------------------
     for k in en:
@@ -321,17 +324,39 @@ def check_static():
     slots = layout["slots"]
     seen_slot, seen_key, seen_spell = {}, {}, {}
     allowed = set(layout["allowedKeys"])
+
+    def what(s):
+        return s.get("spell") or "@" + str(s.get("item"))
+
     for s in slots:
-        for what, seen, val in (("slot", seen_slot, s["slot"]), ("key", seen_key, s.get("key")), ("spell", seen_spell, s["spell"])):
+        if bool(s.get("spell")) == bool(s.get("item")):
+            problem(f"layout: slot {s['slot']} must hold exactly one spell or item")
+        for kind, seen, val in (("slot", seen_slot, s["slot"]), ("key", seen_key, s.get("key")), ("entry", seen_spell, what(s))):
             if val is None:
                 continue
             if val in seen:
-                problem(f"layout: {what} {val} used twice ({seen[val]} and {s['spell']})")
-            seen[val] = s["spell"]
+                problem(f"layout: {kind} {val} used twice ({seen[val]} and {what(s)})")
+            seen[val] = what(s)
         if s.get("key") and s["key"] not in allowed:
             problem(f"layout: key {s['key']} not allowed")
-        if s["spell"] not in keys:
+        if s.get("spell") and s["spell"] not in keys:
             problem(f"layout: unknown spell {s['spell']}")
+        if s.get("item") and s["item"] not in items["kinds"]:
+            problem(f"layout: unknown item kind {s['item']}")
+        if s.get("item") and s.get("key") not in (None, "Z"):
+            problem(f"layout: item @{s['item']} on key {s.get('key')} (only the mana potion has a key, Z)")
+    for slot_ in layout["spare"]:
+        if slot_["slot"] in seen_slot:
+            problem(f"layout: spare slot {slot_['slot']} is also planned")
+    bar_slots = {}
+    for bar in layout["bars"]:
+        r = set(range(bar["first"], bar["first"] + 12))
+        if any(r & other for other in bar_slots.values()):
+            problem(f"layout: bar {bar['id']} overlaps another bar's slots")
+        bar_slots[bar["id"]] = r
+    for kind in items["kinds"]:
+        if "@" + kind not in seen_spell:
+            problem(f"layout: item kind {kind} has no slot")
     if not allowed <= set(
         ["1", "2", "3", "4", "5", "Q", "E", "R", "F", "Z", "X", "C"]
         + ["SHIFT-" + k for k in "12345QERFZXC"]
@@ -347,11 +372,55 @@ def check_static():
             problem(f"layout: macro for unplaced spell {k}")
         if len(m) > 16:
             problem(f"layout: macro name {m} too long")
-    heal_keys = {"1", "2", "3", "4", "5"}
+    # Healer first (player feedback, layout version 2): heals on the keys next to WASD, every keyed totem on Shift,
+    # the pull totems on the easiest Shift keys.
+    by_key = {s["key"]: what(s) for s in slots if s.get("key")}
+    role = {x["key"]: x["role"] for x in spells}
+    for k in ("F", "C", "R", "E", "X"):
+        if role.get(by_key.get(k)) != "heal":
+            problem(f"layout: key {k} must hold a heal, has {by_key.get(k)}")
+    fixed = {
+        "1": "water_shield", "2": "lightning_shield", "Z": "@mana",
+        "SHIFT-E": "stoneskin_totem", "SHIFT-R": "searing_totem", "SHIFT-F": "tremor_totem",
+        "SHIFT-C": "call_of_the_elements",
+    }
+    for k, want in fixed.items():
+        if by_key.get(k) != want:
+            problem(f"layout: key {k} must be {want}, has {by_key.get(k)}")
+    names_by_key = {x["key"]: x["name"] for x in spells}
     for s in slots:
-        sp = next(x for x in spells if x["key"] == s["spell"])
-        if s.get("key") in heal_keys and sp["role"] != "heal":
-            problem(f"layout: non-heal {sp['key']} on healing key {s['key']}")
+        n = names_by_key.get(s.get("spell"), "")
+        totem = n.endswith(" Totem") or s.get("spell") == "call_of_the_elements"
+        if totem and s.get("key") and not s["key"].startswith("SHIFT-"):
+            problem(f"layout: totem {s['spell']} on key {s['key']} (keyed totems go on Shift)")
+    if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 2:
+        problem("layout: version missing (bump it when slots or keys change)")
+
+    # --- items ------------------------------------------------------------------------------------------------
+    if items.get("src") not in sources:
+        problem(f"items: unknown source {items.get('src')}")
+    if not re.fullmatch(r"\d{4}-\d\d-\d\d", str(items.get("verified"))):
+        problem("items: verified date must be YYYY-MM-DD")
+    seen_ids = set()
+    for kind, d in items["kinds"].items():
+        if len(d["macro"]) > 16 or not d["macro"].startswith("FS_"):
+            problem(f"items {kind}: bad macro name {d['macro']}")
+        if not re.fullmatch(r"INV_\w+", d["icon"]):
+            problem(f"items {kind}: bad icon {d['icon']}")
+        last = 99
+        for i in d["list"]:
+            if not isinstance(i.get("id"), (int, float)) or not i.get("name"):
+                problem(f"items {kind}: entry without id or name")
+                continue
+            if i["id"] in seen_ids:
+                problem(f"items {kind}: id {i['id']} listed twice")
+            seen_ids.add(i["id"])
+            lv = i.get("level") or 0
+            if lv > last:
+                problem(f"items {kind}: {i['name']} ({i['id']}) is listed after a lower-level item (best first)")
+            last = lv if lv else last
+        if d["list"] and d["list"][-1].get("level"):
+            problem(f"items {kind}: the last item should need no level (macro fallback for low levels)")
 
     # --- talents ----------------------------------------------------------------------------------------------
     by = {t["key"]: t for t in talents["list"]}

@@ -3,7 +3,7 @@
 A Japanese class coach addon for **World of Warcraft: Forever**. Version 1 covers the **Restoration Shaman** healer (made for a Skyborne / Horde player) from level 1 to 60.
 
 - **New skill cards (新しいスキル):** when you learn a skill, a card explains in Japanese what it does, when to use it, where it goes on your bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
-- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot, and only small-hand keys are used: `1-5`, `Q E R F`, `Z X C` and the same keys with Shift. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them.
+- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot, and only small-hand keys are used: `1-5`, `Q E R F`, `Z X C` and the same keys with Shift. Healing comes first: the heals are on `F C R E X` next to WASD, the shields on `1 2`, and every keyed totem is on Shift. The best mana potion in your bags is on `Z`. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them.
 - **New ranks:** the game does not put a new rank on the bars, so the addon upgrades bar buttons to the highest rank automatically (after combat if you are fighting), with a toast and **元に戻す** to keep the old rank. It can be turned off in the settings. Healing macros are checked to cast the highest rank too.
 - **Healing targeting:** mouseover healing macros, or plain spells for click-target healing. One setting switches between them.
 - **Talent advisor (タレント):** when you have an unspent point, it shows the next talent from the Mobalytics build with a short reason, plus the full order.
@@ -71,15 +71,19 @@ The **Main** bar (row 1) has no modifier. **Bar 2** (row 2) uses Shift plus the 
 
 | Key | 1 | 2 | 3 | 4 | 5 | Q | E | R | F | Z | X | C |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Main | Healing Wave | Lesser Healing Wave | Chain Heal | Riptide | Nature's Swiftness | Lightning Bolt | Earth Shock | Flame Shock | Chain Lightning | Water Shield | Healing Stream Totem | Call of the Elements |
-| Shift + (bar 2) | Cure Poison | Cure Disease | Purge | Mana Tide Totem | Mana Spring Totem | Frost Shock | Searing Totem | Fire Nova | Earthbind Totem | Lightning Shield | Strength of Earth Totem | Ghost Wolf |
+| Main | Water Shield | Lightning Shield | Lightning Bolt | Flame Shock | Earth Shock | Chain Lightning | Riptide | Chain Heal | Healing Wave | Mana Potion | Nature's Swiftness | Lesser Healing Wave |
+| Shift + (bar 2) | Cure Poison | Cure Disease | Purge | Frost Shock | Earthbind Totem | Healing Stream Totem | Stoneskin Totem | Searing Totem | Tremor Totem | Mana Spring Totem | Mana Tide Totem | Call of the Elements |
 
-Bars 3 and 4 have no keys. They hold click-only skills:
-- weapon imbues;
-- situational totems;
-- Totemic Recall and Totemic Call;
-- the Call of the Ancestors and Call of the Spirits totem sets;
-- Ancestral Spirit, Astral Recall, Water Walking, Water Breathing and Far Sight.
+The totems placed at every pull have the easiest Shift keys: Shift+E Stoneskin, Shift+R Searing, Shift+F Tremor (removes Sleep, Fear and Charm) and Shift+C Call of the Elements. The reasons for each slot are in the header of `ForeverSensei/Data/Shaman/Layout.lua`.
+
+Bars 3, 4 and 5 have no keys. They hold click-only buttons:
+- bar 3: weapon imbues, the Arcane Elixir and Healing Potion buttons, Strength of Earth, Stoneclaw and Grounding Totem, Fire Nova, Totemic Recall and Ghost Wolf;
+- bar 4: Ancestral Spirit, Astral Recall, Water Walking, Water Breathing, Far Sight and the situational totems;
+- bar 5 (Action Bar 5, at the right edge of the screen): Totemic Call, the Call of the Ancestors and Call of the Spirits totem sets, and spare buttons. Anything that was on a planned slot moves to the spare buttons first.
+
+The potion and elixir buttons are character macros the addon keeps up to date: `FS_MANA` (Mana Potion), `FS_HEALPOT` (Healing Potion) and `FS_ELIXIR` (Arcane Elixir, e.g. Minor Arcane Elixir). Each uses the best one of its kind in your bags that your level allows. They are only changed out of combat (after looting, or when combat ends). With none in the bags, the button keeps a fixed potion icon. The items are listed in `ForeverSensei/Data/Items.lua`.
+
+Players who applied the layout of 0.2.0 or older get a one-time message after updating, with a **すべて配置** button that opens the usual preview. Nothing moves by itself.
 
 The resistance totems and Windwall Totem are used from the Totem Bar or spellbook. Reincarnation is passive. The source of truth is `ForeverSensei/Data/Shaman/Layout.lua`.
 
@@ -102,16 +106,20 @@ These cannot be tested outside the game. Please go through them once, then paste
 2. [ ] **Font, fresh launch:** fully quit the game and start it again (not `/reload`). Japanese shows in the guide and cards, with no boxes or `?`. Test once with WFJ enabled and once without.
 3. [ ] Learning a skill at the trainer (or a level-up skill) shows a card out of combat. Hovering the icon shows the game tooltip.
 4. [ ] **配置する** on a card puts the skill in its slot and binds the key, and asks first if the slot is used.
-5. [ ] **すべて配置:** the preview is shown, **適用** changes the bars and keys, bars 2-4 become visible, and `/reload` keeps everything.
+5. [ ] **すべて配置:** the preview is shown, **適用** changes the bars and keys, bars 2-5 become visible, and `/reload` keeps everything.
 6. [ ] **元に戻す** / `/sensei undo` restores the old bars and keys.
-7. [ ] Mouseover mode: hovering a party frame and pressing `1` heals that player. With no mouseover, it heals the target. With no friendly target, it heals you.
+7. [ ] Mouseover mode: hovering a party frame and pressing `F` heals that player. With no mouseover, it heals the target. With no friendly target, it heals you.
 8. [ ] Switching to **ターゲットを回復** replaces the macros with plain spells in the same slots, and back again.
-9. [ ] Learning a higher rank (out of combat, or right after combat) changes the bar buttons to it and shows a toast. **元に戻す** on the toast puts the old rank back and keeps it. A mouseover macro (e.g. Healing Wave on `1`) casts the new rank: in `/sensei verify`, the macro lines under [Layout] show the same id after `casts` and `highest known`, and there is no `macro does not cast the highest rank` line. The game itself does not upgrade bar buttons (seen in game, v0.1.0).
+9. [ ] Learning a higher rank (out of combat, or right after combat) changes the bar buttons to it and shows a toast. **元に戻す** on the toast puts the old rank back and keeps it. A mouseover macro (e.g. Healing Wave on `F`) casts the new rank: in `/sensei verify`, the macro lines under [Layout] show the same id after `casts` and `highest known`, and there is no `macro does not cast the highest rank` line. The game itself does not upgrade bar buttons (seen in game, v0.1.0).
 10. [ ] Long texts (talent hint, cards, trainer list, report window) stay inside their windows, and the skill list's **カード** button opens the card with a working **配置する**.
 11. [ ] At level 10 and later, an unspent talent point shows the next talent hint. **タレントを開く** opens the talent window, and the advice matches what is already spent.
 12. [ ] Entering combat hides an open skill card, trainer list and talent hint. They come back after combat. A layout change started in combat is applied after combat.
 13. [ ] Translation report flow (below) works: save, send, copy, mark as sent.
 14. [ ] The minimap button can be dragged and hidden in settings, and the addon compartment entry works.
+15. [ ] **Login, no old cards:** close a skill card with **あとで**, then place that skill (**配置する** in the skill list, or **すべて配置**). `/reload`: no card opens. A skill left on **あとで** and not placed does not open a card either; a small message with **見る** shows it instead.
+16. [ ] **Layout notice (update from 0.2.0):** with the old layout on the bars, the first login after updating shows the message about the new layout once. **すべて配置** opens the preview, and nothing changes until **適用**. The message does not come back after `/reload`.
+17. [ ] After **すべて配置**, Action Bar 5 (right edge of the screen) is shown with Totemic Call and the totem sets, and `Shift+E`, `Shift+R`, `Shift+F`, `Shift+C` put down Stoneskin, Searing, Tremor and Call of the Elements.
+18. [ ] **Potions:** `Z` drinks the best mana potion in the bags. Loot or buy a better one: the button changes to it after combat (or right away out of combat). The healing potion and Arcane Elixir buttons on bar 3 work by clicking. With none in the bags, the buttons show a potion icon (no question mark). `/sensei verify` lists `FS_MANA`, `FS_HEALPOT` and `FS_ELIXIR` under [Layout] with no `bad` lines.
 
 ## Translation reports
 
@@ -163,9 +171,10 @@ When the user pastes a report block (starting `[ForeverSensei v`) or asks you to
 - `make check` runs all offline checks. It needs Python 3 and `pip install --user lupa`, which provides a real Lua 5.1. It loads the whole addon in a fake WoW client (`tools/wow_stub.lua`) and drives every screen, button and command in Japanese and English (`tools/scenarios.lua`). It also checks:
   - **texts:** both languages have every ID; Japanese rules; font glyphs; placeholders; no raw IDs on screen;
   - **data:** spell and talent IDs, names and levels against the Forever client dump in `research/`;
-  - **layout:** unique slots and keys, allowed keys only, heals on 1-5;
+  - **layout:** unique slots and keys, allowed keys only, healer first (heals on `F C R E X`, keyed totems on Shift, fixed pull-totem and potion keys), item slots;
+  - **items:** potion and elixir data (sources, ids, best-first order);
   - **talents:** one point per level, row requirements, max ranks, final 0/5/46;
-  - **layout scenario:** apply → undo round-trip;
+  - **scenarios:** layout apply → undo round-trip, potion macros, the login card fix and the one-time layout notice;
   - **reports:** round-trip of the report format.
 - `make zip` builds `dist/ForeverSensei-v<version>.zip`.
 - Layout of the addon:

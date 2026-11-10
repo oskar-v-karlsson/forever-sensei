@@ -46,16 +46,18 @@ Layout.SLOTS = {}
 for i = 1, 120 do table.insert(Layout.SLOTS, i) end
 for i = 145, 180 do table.insert(Layout.SLOTS, i) end
 
-local macroKeys -- macro name → spell key
+local macroKeys -- macro name → spell key, or "@kind" for the item macros
 local function macroKeyOf(name)
   if not macroKeys then
     macroKeys = {}
     for key, m in pairs(L().macros) do macroKeys[m] = key end
+    for kind, d in pairs(ns.ItemData.kinds) do macroKeys[d.macro] = "@" .. kind end
   end
   return name and macroKeys[name]
 end
 
 -- What sits in an action slot now. → { type, id, name, macroName, planKey } or nil when empty
+-- planKey: the plan entry it belongs to: a spell key, or "@kind" for an item macro or a potion/elixir of that kind.
 function Layout.Current(slot)
   local ok, t, id, sub = call(API.getAction, slot)
   if not ok or not t then return nil end
@@ -77,6 +79,8 @@ function Layout.Current(slot)
   elseif t == "item" then
     local ok2, n = call(API.itemName, id)
     cur.name = ok2 and n or nil
+    local kind = ns.Items.KindOf(id)
+    cur.planKey = kind and ("@" .. kind)
   end
   return cur
 end
@@ -91,13 +95,25 @@ function Layout.UsesMacro(entry)
   return ns.settings.targeting == "mouseover" and L().macros[entry.key] ~= nil
 end
 
--- The action this spell should be in its slot. → { kind = "spell"|"macro", entry, id, macro } or nil when not known
+-- The action this spell should be in its slot. → { kind = "spell"|"macro", entry, id, macro, name } or nil when not known
 function Layout.Desired(entry)
   if not entry or not Spells.IsKnown(entry) then return nil end
   if Layout.UsesMacro(entry) then
-    return { kind = "macro", entry = entry, macro = L().macros[entry.key] }
+    return { kind = "macro", entry = entry, macro = L().macros[entry.key], name = entry.name }
   end
-  return { kind = "spell", entry = entry, id = Spells.CurrentID(entry) }
+  return { kind = "spell", entry = entry, id = Spells.CurrentID(entry), name = entry.name }
+end
+
+-- An item slot always gets its macro, also with none in the bags (it shows a fixed icon then).
+function Layout.DesiredItem(kind)
+  local d = ns.Items.Get(kind)
+  return { kind = "macro", item = kind, macro = d.macro, name = d.label }
+end
+
+-- The desired action of a planned slot. → desired or nil
+function Layout.DesiredFor(s)
+  if s.item then return Layout.DesiredItem(s.item) end
+  return Layout.Desired(Spells.Get(s.spell))
 end
 
 -- slot (optional): an older rank the player kept there on purpose (undid its upgrade) counts as a match.
@@ -111,8 +127,8 @@ function Layout.Matches(cur, d, slot)
 end
 
 function Layout.DesiredLabel(d)
-  if d.kind == "macro" then return ns.T("ui.preview.macro", { name = d.macro }) .. " (" .. d.entry.name .. ")" end
-  return d.entry.name
+  if d.kind == "macro" then return ns.T("ui.preview.macro", { name = d.macro }) .. " (" .. d.name .. ")" end
+  return d.name
 end
 
 -- The spell as the macro names it: the plain name (the client casts the highest rank), or "Name(Rank N)" when
@@ -151,8 +167,22 @@ local function put(slot)
   call(API.clearCursor)
 end
 
--- Place a desired action. → true, usedFallback
+-- Place a desired action. → true, usedFallback ("spell" or "item": the macro could not be created)
 local function placeDesired(slot, d)
+  if d.item then
+    local idx = ns.Items.EnsureMacro(d.item)
+    if idx then
+      call(API.pickupMacro, idx)
+      put(slot)
+      return true, false
+    end
+    local best = ns.Items.Best(d.item)
+    if best then
+      call(API.pickupItem, best.id)
+      put(slot)
+    end
+    return true, "item"
+  end
   if d.kind == "macro" then
     local idx = Layout.EnsureMacro(d.entry)
     if idx then
@@ -162,7 +192,7 @@ local function placeDesired(slot, d)
     end
     call(API.pickupSpell, Spells.CurrentID(d.entry))
     put(slot)
-    return true, true
+    return true, "spell"
   end
   call(API.pickupSpell, d.id)
   put(slot)
@@ -217,6 +247,11 @@ local function slotWhere(s)
 end
 Layout.SlotWhere = slotWhere
 
+-- A planned spell slot whose spell the player does not know yet (item slots are always in use).
+local function reservedUnknown(s)
+  return s.spell ~= nil and not Spells.IsKnown(Spells.Get(s.spell))
+end
+
 -- Work out every change. onlyKey limits it to one spell (the card's 配置する button).
 -- → plan { place, moves, clears, lost, binds, bars }
 function Layout.BuildPlan(onlyKey)
@@ -225,18 +260,21 @@ function Layout.BuildPlan(onlyKey)
   local targets = {}
   for _, s in ipairs(layout.slots) do
     if not onlyKey or s.spell == onlyKey then
-      local d = Layout.Desired(Spells.Get(s.spell))
+      local d = Layout.DesiredFor(s)
       if d then targets[s.slot] = d end
     end
   end
 
-  -- Empty slots reserved for spells the player does not know yet take displaced actions, bar 4 then bar 3, right to left.
+  -- Displaced actions go to empty free slots: the spare buttons of Action Bar 5 first, then slots reserved for spells
+  -- the player does not know yet, bar 4 then bar 3, right to left.
   local free = {}
+  for _, s in ipairs(layout.spare) do
+    if Layout.Current(s.slot) == nil then table.insert(free, s) end
+  end
   for _, barId in ipairs({ "bar4", "bar3" }) do
     for i = #layout.slots, 1, -1 do
       local s = layout.slots[i]
-      if s.bar == barId and not targets[s.slot] and not Spells.IsKnown(Spells.Get(s.spell))
-        and Layout.Current(s.slot) == nil then
+      if s.bar == barId and not targets[s.slot] and reservedUnknown(s) and Layout.Current(s.slot) == nil then
         table.insert(free, s)
       end
     end
@@ -252,6 +290,7 @@ function Layout.BuildPlan(onlyKey)
           local dest = table.remove(free, 1)
           if dest then
             table.insert(plan.moves, { from = s.slot, to = dest.slot, fromSlot = s, toSlot = dest, label = Layout.Label(cur) })
+            barsNeeded[dest.bar] = true
           else
             table.insert(plan.lost, { slot = s.slot, where = s, label = Layout.Label(cur) })
           end
@@ -262,7 +301,7 @@ function Layout.BuildPlan(onlyKey)
         local ok, action = call(API.bindingAction, s.key)
         action = ok and action ~= "" and action or nil
         if action ~= s.binding then
-          table.insert(plan.binds, { key = s.key, binding = s.binding, old = action, name = d.entry.name })
+          table.insert(plan.binds, { key = s.key, binding = s.binding, old = action, name = d.name })
         end
       end
       barsNeeded[s.bar] = true
@@ -271,7 +310,7 @@ function Layout.BuildPlan(onlyKey)
 
   -- Copies of planned spells in slots reserved for spells the player does not know yet would become duplicates.
   for _, s in ipairs(layout.slots) do
-    if not targets[s.slot] and not Spells.IsKnown(Spells.Get(s.spell)) then
+    if not targets[s.slot] and reservedUnknown(s) then
       local cur = Layout.Current(s.slot)
       if cur and cur.planKey and (not onlyKey or cur.planKey == onlyKey) and Layout.Desired(Spells.Get(cur.planKey)) then
         table.insert(plan.clears, { slot = s.slot, where = s, label = Layout.Label(cur) })
@@ -320,11 +359,11 @@ function Layout.Execute(plan)
     backup.slots[c.slot] = info(Layout.Current(c.slot))
     clearSlot(c.slot)
   end
-  local fallback = false
+  local fallback = {}
   for _, p in ipairs(plan.place) do
     if not movedFrom[p.slot] and backup.slots[p.slot] == nil then backup.slots[p.slot] = info(p.old) end
     local _, fb = placeDesired(p.slot, p.desired)
-    fallback = fallback or fb
+    if fb then fallback[fb] = true end
   end
   if #plan.binds > 0 then
     for _, b in ipairs(plan.binds) do
@@ -344,7 +383,9 @@ function Layout.Execute(plan)
     end
   end
   pushBackup(backup)
-  if fallback then ns.UI.Toast(ns.T("ui.layout.macrofail"), 12) end
+  if fallback.spell then ns.UI.Toast(ns.T("ui.layout.macrofail"), 12) end
+  if fallback.item then ns.UI.Toast(ns.T("ui.items.macrofail"), 12) end
+  if ns.NewSkill then ns.NewSkill.PrunePostponed() end
   return backup
 end
 
@@ -650,7 +691,7 @@ end
 function Layout.SetTargeting(mode)
   ns.settings.targeting = mode
   ns.OutOfCombat("targeting", function()
-    local n, fallback = 0, false
+    local n, fallback = 0, nil
     for _, slot in ipairs(Layout.SLOTS) do
       local cur = Layout.Current(slot)
       if cur and cur.planKey and L().macros[cur.planKey] then
@@ -670,3 +711,22 @@ end
 
 ns.Command("apply", function() Layout.Preview() end)
 ns.Command("undo", function() Layout.Undo() end)
+
+-- One-time notice after an update that changed the layout (L.version). It only offers the preview: nothing moves
+-- unless the player applies it there (with the usual backup and undo). New characters just get the current version.
+ns.OnLogin(function()
+  if not ns.IsShaman() then return end
+  local version = L().version
+  if not ns.char.initialised then
+    ns.char.layoutVersion = version
+    return
+  end
+  if (ns.char.layoutVersion or 1) >= version then return end
+  C_Timer.After(6, function()
+    ns.OutOfCombat("layout-notice", function()
+      ns.char.layoutVersion = version
+      if Layout.IsEmptyPlan(Layout.BuildPlan()) then return end
+      ns.UI.Confirm(ns.T("ui.layout.changed"), ns.T("ui.btn.applyall"), Layout.Preview)
+    end)
+  end)
+end)

@@ -140,18 +140,34 @@ function UI.SpellIcon(parent, size)
   b.tex:SetAllPoints()
   b.tex:SetTexCoord(0.07, 0.93, 0.07, 0.93)
   function b:SetSpell(entry)
-    self.entry = entry
+    self.entry, self.itemID = entry, nil
     local id = entry and ns.Spells.CurrentID(entry)
     self.spellID = id
     local tex = id and ns.Spells.Texture(entry)
     self.tex:SetTexture(tex or 134400)
     if self.tex.SetDesaturated then self.tex:SetDesaturated(entry ~= nil and not ns.Spells.IsKnown(entry)) end
   end
+  -- Item slot of the layout (a potion or elixir kind): the best one in the bags, grey when there is none.
+  function b:SetItemKind(kind)
+    local d = ns.Items.Get(kind)
+    local best = ns.Items.Best(kind)
+    self.entry, self.spellID = nil, nil
+    self.itemID = (best or ns.Items.ForLevel(kind)).id
+    self.itemLabel = d.label
+    local ok, tex = ns.Call("C_Item.GetItemIconByID", self.itemID)
+    self.tex:SetTexture(ok and tex or ("Interface\\Icons\\" .. d.icon))
+    if self.tex.SetDesaturated then self.tex:SetDesaturated(best == nil) end
+  end
   b:SetScript("OnEnter", function(self)
-    if not self.spellID then return end
+    if not self.spellID and not self.itemID then return end
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-    local ok = pcall(GameTooltip.SetSpellByID, GameTooltip, self.spellID)
-    if not ok then GameTooltip:SetText(self.entry and self.entry.name or "?") end
+    local ok
+    if self.itemID then
+      ok = pcall(GameTooltip.SetItemByID, GameTooltip, self.itemID)
+    else
+      ok = pcall(GameTooltip.SetSpellByID, GameTooltip, self.spellID)
+    end
+    if not ok then GameTooltip:SetText(self.entry and self.entry.name or self.itemLabel or "?") end
     GameTooltip:Show()
   end)
   b:SetScript("OnLeave", function() GameTooltip:Hide() end)

@@ -11,11 +11,12 @@ All entries were checked on **2026-11-09** against client **1.60.1.70862**. Each
 | `simc` | [simc-forever SpellDataDump/shaman.txt](https://github.com/simulationcraft/simc-forever/blob/HEAD/SpellDataDump/shaman.txt), header "World of Warcraft 1.60.1.70862 Live". Parsed copy: `research/shaman_simc_1.60.1.70862.tsv` (made by `tools/research/parse_simc.py`) | 46 of the 53 spells: ID, English name, level, cooldown and cast-time facts; every talent (ID, row, column, max rank). `make check` cross-checks the data against the TSV. |
 | `simc` ranks | Same dump, through `tools/research/gen_ranks.py` → `Data/Shaman/Ranks.lua` (2026-11-09) | Every rank's spell ID and trainer level, used for automatic rank upgrades. `make check` fails if the file is out of date or a rank does not match the dump (name and "Rank N"). |
 | `wh_spell` | `https://www.wowhead.com/forever/spell=<id>` | 7 spells missing from the simc dump (see below) |
+| `wh_item` | `https://www.wowhead.com/forever/item=<id>` and the Forever potion and elixir lists ([potions](https://www.wowhead.com/forever/items/consumables/potions), [elixirs](https://www.wowhead.com/forever/items/consumables/elixirs)) | Potion and elixir IDs, names, required levels and icons in `Data/Items.lua` (see below) |
 | `wh_abilities` | [Wowhead Forever: Restoration Shaman healer abilities](https://www.wowhead.com/forever/guide/classes/shaman/restoration/healer-abilities) | Ability use and priorities |
 | `wh_overview` | [Wowhead Forever: Restoration Shaman overview](https://www.wowhead.com/forever/guide/classes/shaman/restoration/overview-pve-healer) | The healer role, strengths and weaknesses |
 | `wh_talents` | [Wowhead Forever: Restoration Shaman talent builds](https://www.wowhead.com/forever/guide/classes/shaman/restoration/talent-builds-pve-healer) | Cross-check for the talent build |
 | `moba` | [Mobalytics: WoW Forever Restoration Shaman guide](https://mobalytics.gg/wow-forever/classes/restoration-shaman-guide) (the guide this build follows) | Talent order (leveling path, final 0/5/46); healing, damage, totem and group tips |
-| `ui` | Blizzard UI code for Forever 1.60.1 ([reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode), folder `Forever`) | Action bar slot numbers, binding names, the talent frame, events and API names |
+| `ui` | Blizzard UI code for Forever 1.60.1 ([reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode), folder `Forever`) | Action bar slot numbers, binding names, the talent frame, events and API names. Action Bar 5 (MultiBarLeft) is page 4 (slots 37-48), binding `MULTIACTIONBAR4BUTTON<n>`, shown with `PROXY_SHOW_ACTIONBAR_5` (`Blizzard_ActionBar/Shared/MultiActionBars.xml`, checked 2026-11-10). |
 
 Wowhead and Mobalytics pages block scripted downloads (HTTP 403), so they were read in a browser.
 
@@ -32,6 +33,39 @@ These 7 are not in the simc dump. Their IDs and levels come from Wowhead Forever
 | Call of the Ancestors | 66843 | 30 |
 | Astral Recall | 556 | 30 |
 | Call of the Spirits | 66844 | 40 |
+
+## Potions and elixirs
+
+Checked on **2026-11-10** on Wowhead Forever item pages and tooltips. Listed best first, as in `ForeverSensei/Data/Items.lua`; "none" means the tooltip shows no required level. `/sensei verify` checks the names in the live client.
+
+| Kind (macro) | Item | ID | Level |
+|---|---|---|---|
+| Mana (`FS_MANA`, key Z) | Major Mana Potion | [13444](https://www.wowhead.com/forever/item=13444) | 49 |
+| | Superior Mana Potion | [13443](https://www.wowhead.com/forever/item=13443) | 41 |
+| | Greater Mana Potion | [6149](https://www.wowhead.com/forever/item=6149) | 31 |
+| | Mana Potion | [3827](https://www.wowhead.com/forever/item=3827) | 22 |
+| | Lesser Mana Potion | [3385](https://www.wowhead.com/forever/item=3385) | 14 |
+| | Lesser Mana Potion (Bind to Account) | [287969](https://www.wowhead.com/forever/item=287969) | none |
+| | Minor Mana Potion | [2455](https://www.wowhead.com/forever/item=2455) | 5 |
+| | Minor Mana Potion (Bind to Account) | [287968](https://www.wowhead.com/forever/item=287968) | none |
+| Healing (`FS_HEALPOT`, bar 3) | Major Healing Potion | [13446](https://www.wowhead.com/forever/item=13446) | 45 |
+| | Superior Healing Potion | [3928](https://www.wowhead.com/forever/item=3928) | 35 |
+| | Greater Healing Potion | [1710](https://www.wowhead.com/forever/item=1710) | 21 |
+| | Greater Healing Potion (Bind to Account) | [287977](https://www.wowhead.com/forever/item=287977) | none |
+| | Healing Potion | [929](https://www.wowhead.com/forever/item=929) | 12 |
+| | Perishable Healing Potion | [268883](https://www.wowhead.com/forever/item=268883) | 12 |
+| | Lesser Healing Potion | [858](https://www.wowhead.com/forever/item=858) | 3 |
+| | Lesser Healing Potion (Bind to Account) | [287967](https://www.wowhead.com/forever/item=287967) | none |
+| | Perishable Lesser Healing Potion | [268882](https://www.wowhead.com/forever/item=268882) | 3 |
+| | Minor Healing Potion | [118](https://www.wowhead.com/forever/item=118) | none |
+| | Minor Healing Potion (Bind to Account) | [287966](https://www.wowhead.com/forever/item=287966) | none |
+| | Perishable Minor Healing Potion | [268881](https://www.wowhead.com/forever/item=268881) | none |
+| Arcane Elixir (`FS_ELIXIR`, bar 3) | Greater Arcane Elixir (+35 spell damage, 1 hour) | [13454](https://www.wowhead.com/forever/item=13454) | 47 |
+| | Arcane Elixir (+20, 30 minutes) | [9155](https://www.wowhead.com/forever/item=9155) | 37 |
+| | Lesser Arcane Elixir (+15, 30 minutes, new in Forever) | [250342](https://www.wowhead.com/forever/item=250342) | 25 |
+| | Minor Arcane Elixir (+5, 30 minutes, new in Forever) | [247754](https://www.wowhead.com/forever/item=247754) | none |
+
+Left out on purpose: Discolored Healing Potions (they heal, then return 75% as poison or disease damage), the PvP Combat potions (18839, 18841, need a PvP rank), the Restored potions (282011, 282013) and draughts.
 
 ## Where sources disagree
 
@@ -57,7 +91,7 @@ These depend on the live Forever client. They are handled defensively in the cod
 
 1. The legacy action and macro globals exist: `PickupSpell`, `PickupMacro`, `PlaceAction`, `GetActionInfo`, `GetActionText`, `CreateMacro`, `EditMacro`, `GetMacroIndexByName`.
 2. The binding functions exist: `SetBinding`, `SaveBindings`, `GetBindingAction`, `GetCurrentBindingSet`. `SetBinding(key)` with no action unbinds the key.
-3. Extra action bars turn on through `Settings.SetValue("PROXY_SHOW_ACTIONBAR_2..4")`.
+3. Extra action bars turn on through `Settings.SetValue("PROXY_SHOW_ACTIONBAR_2..5")`.
 4. Totem Bar behaviour: the resistance totems and Windwall are left there.
 5. **Verified in game (v0.1.0, 2026-11):** learning a new rank does **not** upgrade the bar button, so the addon does it (Layout.ApplyNewRanks). Still to check: `/cast <Name>` in a macro uses the highest rank. `/sensei verify` prints what each macro casts. If a macro casts a lower rank, the addon writes `Name(Rank N)` into it instead.
 6. Talent reading through `C_Traits` (Forever's single class tree), opening the talent frame through `PlayerSpellsUtil`, and `IsSpellKnown` for talents with one rank.
@@ -67,3 +101,4 @@ These depend on the live Forever client. They are handled defensively in the cod
 10. `math.atan2` is available for dragging the minimap button.
 11. The 7 Wowhead-only spell IDs above.
 12. Combat: cards hide, and bar or key changes wait until combat ends.
+13. Potion macros (0.3.0): `/use item:<id>` in a character macro, `#showtooltip` picking up the item's icon, and the fixed icon (set by its file name, e.g. `INV_Potion_72`) when the bags have none. `C_Item.GetItemCount` and the required level from `C_Item.GetItemInfo`. `/sensei verify` prints each macro's body and the best item in the bags.

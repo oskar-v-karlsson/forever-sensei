@@ -76,6 +76,7 @@ local function button(frame, i, x, y, text, width, onClick)
   return b
 end
 
+-- entry: a spell entry, or a string item kind (potion and elixir slots of the layout).
 local function icon(frame, i, x, y, size, entry)
   local b = pool(frame, "icon", i, function()
     local ic = UI.SpellIcon(frame, size)
@@ -85,7 +86,7 @@ local function icon(frame, i, x, y, size, entry)
   b:SetSize(size, size)
   b:ClearAllPoints()
   b:SetPoint("TOPLEFT", x, -y)
-  b:SetSpell(entry)
+  if type(entry) == "string" then b:SetItemKind(entry) else b:SetSpell(entry) end
   return b
 end
 
@@ -168,7 +169,7 @@ renderers.layout = function(frame)
       if s.bar == bar.id then
         n = n + 1
         local x = (s.button - 1) * 46
-        icon(frame, n, x, y, 38, Spells.Get(s.spell))
+        icon(frame, n, x, y, 38, s.item or Spells.Get(s.spell))
         local keyText = pool(frame, "key", n, function() return UI.Text(frame, 10, "gold") end)
         keyText:SetWidth(46)
         keyText:SetJustifyH("CENTER")
@@ -184,7 +185,8 @@ renderers.layout = function(frame)
     if kind == "totembar" then table.insert(names, Spells.Get(key).name) end
   end
   table.sort(names)
-  y = y + label(frame, 10, y, ns.T("ui.layout.nobar", { names = table.concat(names, ", ") }), 12, "grey") + 12
+  y = y + label(frame, 10, y, ns.T("ui.layout.nobar", { names = table.concat(names, ", ") }), 12, "grey") + 8
+  y = y + paragraph(frame, 4, y, "ui.layout.items") + 12
 
   button(frame, 1, 0, y, ns.T("ui.btn.applyall"), 200, function() ns.Layout.Preview() end)
   local undo = button(frame, 2, 210, y, ns.T("ui.btn.undo"), 140, function() ns.Layout.Undo() end)

@@ -16,7 +16,10 @@ STUB = {
   cursor = nil,
   bindings = { ["Q"] = "STRAFELEFT", ["E"] = "STRAFERIGHT", ["1"] = "ACTIONBUTTON1", ["SHIFT-1"] = "ACTIONPAGE1" },
   macros = {},
-  settings = { PROXY_SHOW_ACTIONBAR_2 = false, PROXY_SHOW_ACTIONBAR_3 = false, PROXY_SHOW_ACTIONBAR_4 = false },
+  bags = {},       -- item id → count
+  itemLevels = {}, -- item id → required level the client reports (C_Item.GetItemInfo)
+  settings = { PROXY_SHOW_ACTIONBAR_2 = false, PROXY_SHOW_ACTIONBAR_3 = false, PROXY_SHOW_ACTIONBAR_4 = false,
+    PROXY_SHOW_ACTIONBAR_5 = false },
   meta = {},
 }
 
@@ -332,7 +335,13 @@ function PickupMacro(x)
   if idx and idx > 0 then STUB.cursor = { "macro", idx } end
 end
 function C_Item_PickupItem(id) STUB.cursor = { "item", id } end
-C_Item = { PickupItem = C_Item_PickupItem, GetItemNameByID = function(id) return "Item " .. id end }
+C_Item = {
+  PickupItem = C_Item_PickupItem,
+  GetItemNameByID = function(id) return "Item " .. id end,
+  GetItemCount = function(id) return STUB.bags[id] or 0 end,
+  GetItemInfo = function(id) return "Item " .. id, nil, 1, 1, STUB.itemLevels[id] or 0 end,
+  GetItemIconByID = function(id) return 100000 + id end,
+}
 function GetMacroIndexByName(name)
   for i, m in pairs(STUB.macros) do if m.name == name then return i end end
   return 0

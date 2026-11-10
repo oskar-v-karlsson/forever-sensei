@@ -110,7 +110,7 @@ function Verify.Run()
     local cur = ns.Layout.Current(slot.slot)
     local okB, action = false, nil
     if slot.key then okB, action = ns.Call("GetBindingAction", slot.key) end
-    add(string.format("  slot %3d %-24s now: %-28s %s", slot.slot, slot.spell, ns.Layout.Label(cur),
+    add(string.format("  slot %3d %-24s now: %-28s %s", slot.slot, slot.spell or ("@" .. slot.item), ns.Layout.Label(cur),
       slot.key and (slot.key .. "=" .. tostring(okB and action or "?")) or ""))
   end
   for _, bar in ipairs(layout.bars) do
@@ -135,6 +135,30 @@ function Verify.Run()
       end
     end
     if line then add(line) end
+  end
+  -- Item macros: the body names the best item in the bags; the icon is a verify-in-game question when there is none.
+  for _, kind in ipairs(ns.Items.Kinds()) do
+    local d = ns.Items.Get(kind)
+    local best = ns.Items.Best(kind)
+    local body, icon = ns.Items.MacroBody(kind)
+    local ok, idx = ns.Call("GetMacroIndexByName", d.macro)
+    local line = string.format("  item macro %s: best in bags %s  index %s  wanted icon %s  body %s", d.macro,
+      best and (best.name .. " " .. best.id) or "none", ok and tostring(idx) or "error", icon, (body:gsub("\n", " | ")))
+    if ok and type(idx) == "number" and idx > 0 then
+      local okI, _, curIcon, curBody = ns.Call("GetMacroInfo", idx)
+      line = line .. string.format("  now icon %s", okI and tostring(curIcon) or "?")
+      if okI and curBody ~= body then
+        bad(line .. "  (macro body is not up to date)")
+        line = nil
+      end
+    end
+    if line then add(line) end
+  end
+  for _, kind in ipairs(ns.Items.Kinds()) do
+    for _, item in ipairs(ns.Items.Get(kind).list) do
+      local ok, name = ns.Call("C_Item.GetItemNameByID", item.id)
+      if ok and name and name ~= item.name then bad(string.format("  item %d: data %q, client %q", item.id, item.name, name)) end
+    end
   end
   local outdated = ns.Layout.OutdatedRanks()
   add(string.format("  bar buttons with an older rank: %d  (auto ranks %s)", #outdated, tostring(ns.settings.autoRanks)))
