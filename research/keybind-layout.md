@@ -73,9 +73,9 @@ Cast, cooldown and cost are rank 1, from `simc`, or from `wh_tt` for spells miss
 | Tremor Totem | 18 | instant / – / 60, 5 min, Earth | fear, charm and sleep fights (Erika uses it a lot) | React | Shift+F |
 | Call of the Elements | 20 | 3 s / – / none / GCD | between pulls whenever the 5-minute totems run out (about every 5 minutes, i.e. every few pulls), and after a wipe | Set-up | Shift+C |
 | Frost Shock | 20 | instant / 6 s / 115, 8 s slow | rare: slow a runner or a chaser | React | Ctrl+Q |
-| Totemic Recall | 20 | instant / – / returns 25% of the totems' mana | after the last pull, before a long run | OOC | Ctrl+C |
+| Totemic Recall | 20 | instant / – / returns 25% of the totems' mana | after the last pull, before a long run | OOC | Ctrl+X |
 | Frostbrand Weapon | 20 | instant / – / 60 | solo only | OOC | none |
-| Ghost Wolf | 20 | 3 s / – / 100, outdoors only | none: Erika's talent path has no Improved Ghost Wolf, so it cannot be used indoors | OOC (questing) | C |
+| Ghost Wolf | 20 | 3 s / – / 100, outdoors only | none: Erika's talent path has no Improved Ghost Wolf, so it cannot be used indoors | OOC (questing) | Ctrl+C |
 | Healing Stream Totem | 20 | instant / – / 40, 5 min, Water | part of the pull set; swap with Mana Spring | Set-up | Shift+3 |
 | Lesser Healing Wave | 20 | 1.5 s / – / 105 | the fast emergency heal | React (cast) | E |
 | Water Shield | 20 (talent) | instant / – / none, 10 min, 3 globes | refresh between pulls or in gaps | Set-up | X |
@@ -170,7 +170,7 @@ Totemic Call only moves totems that are still up; it does not renew them.
    - Poison or Disease Cleansing (Shift+1 or Shift+2).
    - Mana Tide (Shift+Z) when your mana is low in a long fight.
    - Earthbind (Shift+5) for runners.
-4. **Leaving:** press **Totemic Recall** (Ctrl+C) to get some mana back.
+4. **Leaving:** press **Totemic Recall** (Ctrl+X) to get some mana back.
 
 Before level 22 there is no Totemic Call. At those levels, cast Stoneskin and Searing by hand at each pull, as
 Erika does now.
@@ -241,7 +241,7 @@ The client files list every binding name but not its default key (`wm` says the 
 
 ```
 /run for _,k in ipairs({"Q","E","R","F","Z","X","C","SHIFT-1","SHIFT-5"}) do print(k,GetBindingAction(k)) end
-/run for _,k in ipairs({"CTRL-Q","CTRL-E","CTRL-R","CTRL-C","CTRL-Z","BUTTON4","BUTTON5"}) do print(k,GetBindingAction(k)) end
+/run for _,k in ipairs({"CTRL-Q","CTRL-E","CTRL-R","CTRL-C","CTRL-X","BUTTON4","BUTTON5"}) do print(k,GetBindingAction(k)) end
 ```
 
 | Key | Expected default | Already replaced by layout v2? |
@@ -255,11 +255,11 @@ The client files list every binding name but not its default key (`wm` says the 
 | C | TOGGLECHARACTER0 (character window) | yes; the C button on the micro menu still opens it |
 | Shift+1-5 | ACTIONPAGE1-5 (bar paging) | yes |
 | Shift+Q/E/R/F/Z/X/C | none expected | yes |
-| **Ctrl+Q/E/C/Z** | none expected | **new** |
+| **Ctrl+Q/E/C/X** | none expected | **new** |
 | **Ctrl+R** | TOGGLEFPS (framerate display), likely | **new**: only a debug display is lost |
 | **Mouse4 / Mouse5** | none expected | **new** |
 | Ctrl+1-0 | SHAPESHIFTBUTTON1-10 (stance bar) | **not touched**; Ghost Wolf may live there (verify) |
-| Ctrl+F, Ctrl+X | none expected | not touched (spare) |
+| Ctrl+F, Ctrl+Z | none expected | not touched (spare) |
 
 ## Q5: Mouseover macros
 
@@ -308,8 +308,8 @@ makes these in mouseover mode, using the highest rank.
 | Item | Key | Why |
 |---|---|---|
 | Mana Potion (`FS_MANA`, best in the bags) | **Z** | her most used consumable; stays where it is |
-| Healthstone, else the best Healing Potion (one macro, e.g. `FS_HEALTH`) | **Ctrl+Z** | Healthstones come from warlocks, 2 min cooldown (`wh_tt`): Minor 5512 (also 19004), Lesser 5511, Healthstone 5509, Greater 5510, Major 9421. Under the Mana Potion (the Z column is items). Erika rarely uses the red potion, so it takes the cheaper Ctrl key. **Verify in game** whether Healthstones and potions share a cooldown. |
-| Healing Potion (`FS_HEALPOT`) | none, clickable | as now; Ctrl+Z covers it when there is no Healthstone |
+| Healthstone, else the best Healing Potion (one macro, e.g. `FS_HEALTH`) | **C** | Healthstones come from warlocks, 2 min cooldown (`wh_tt`): Minor 5512 (also 19004), Lesser 5511, Healthstone 5509, Greater 5510, Major 9421. Next to the Mana Potion on Z: the bottom row holds the consumables (Z mana, C health). The red potion alone is rare for Erika, but with a warlock's Healthstone this is her personal emergency button, and in a panic a key without a modifier is faster and harder to miss. **Verify in game** whether Healthstones and potions share a cooldown. |
+| Healing Potion (`FS_HEALPOT`) | none, clickable | as now; C covers it when there is no Healthstone |
 | Minor Arcane Elixir (`FS_ELIXIR`) | none, clickable | next to the weapon imbues and long buffs, as decided for 0.3.0 |
 | Bandages (Linen 1251, Silk 6450, Heavy Mageweave 8545, Runecloth 14529, Heavy Runecloth 14530) | none | They need First Aid and are an 8 s channel that damage breaks. A healer heals herself with spells. Optional clickable slot for solo. |
 
@@ -332,7 +332,7 @@ Abbreviations: **MO** = mouseover macro; *(lvl)* = the level it becomes availabl
 | F | Healing Wave, MO *(1)* | the main heal, as Erika asked | `wh_abil` |
 | Z | Mana Potion (`FS_MANA`) | her most used potion, as now | 0.3.0, `wh_tt` items |
 | X | Shield: Lightning Shield *(8)*, then Water Shield *(20)* | one key, because they don't stack and last 10 min | `simc`, `moba` |
-| C | Ghost Wolf *(20)* | travel while questing; 3 s cast, outdoors only (no Improved Ghost Wolf in her talent path) | `simc` 2645 |
+| C | Healthstone, else Healing Potion (`FS_HEALTH`) | the personal emergency button; no modifier in a panic; next to the Mana Potion on Z (see "Plain C" below) | `wh_tt` items |
 
 ### Shift (Action Bar 2, `MULTIACTIONBAR1BUTTON`): totems
 
@@ -358,9 +358,9 @@ Abbreviations: **MO** = mouseover macro; *(lvl)* = the level it becomes availabl
 | Ctrl+Q | Frost Shock *(20)* | the Q column holds the shocks; a rare slow | `wh_abil` |
 | Ctrl+E | Stoneclaw Totem *(8)* | an Earth totem next to Stoneskin; for enemies hitting you | `wh_abil` |
 | Ctrl+R | Chain Lightning *(32)* | the R column is "chain"; AoE damage when healing is light | `wh_abil` |
-| Ctrl+C | **Totemic Recall** *(20)* | the C column is "the whole totem set", under Call of the Elements | `wh_tt`, `moba` |
-| Ctrl+Z | Healthstone, else Healing Potion (one macro) | the Z column is items | `wh_tt` items |
-| Ctrl+F, Ctrl+X, Ctrl+1-5 | – (spare) | Ctrl+1-0 is the stance bar default; F and X are left free for later | – |
+| Ctrl+X | **Totemic Recall** *(20)* | out of combat only (when leaving), so a stretch key is fine; keeps the easier Ctrl+F free, and Ctrl+1-5 would collide with the stance bar default | `wh_tt`, `moba` |
+| Ctrl+C | Ghost Wolf *(20)* | the player's choice; travel while questing, 3 s cast, outdoors only (no Improved Ghost Wolf in her talent path), never needed in a dungeon | user, `simc` 2645 |
+| Ctrl+F, Ctrl+Z, Ctrl+1-5 | – (spare) | Ctrl+1-0 is the stance bar default; F and Z are left free for later | – |
 
 ### Mouse side buttons (Action Bar 7, `MULTIACTIONBAR6BUTTON`)
 
@@ -376,7 +376,7 @@ Abbreviations: **MO** = mouseover macro; *(lvl)* = the level it becomes availabl
 |---|---|
 | Rockbiter, Flametongue, Frostbrand and Windfury Weapon | weapon buffs that last long; cast before the pull |
 | Minor Arcane Elixir (`FS_ELIXIR`) | long buff, next to the weapon buffs (decided in 0.3.0) |
-| Healing Potion (`FS_HEALPOT`) | rarely used; Ctrl+Z covers it when there is no Healthstone |
+| Healing Potion (`FS_HEALPOT`) | rarely used; C covers it when there is no Healthstone |
 | Lightning Shield (after 20) | replaced by Water Shield on X |
 | Strength of Earth Totem | a set-up choice instead of Stoneskin; put it in the Totem Bar set for melee groups |
 | Windfury Totem, Grace of Air Totem | Air totems for melee groups; set up through the Totem Bar |
@@ -398,10 +398,10 @@ Already replaced by layout v2 (no change):
 
 New in this proposal:
 - **Ctrl+R** (probably TOGGLEFPS, the framerate display).
-- Ctrl+Q, Ctrl+E, Ctrl+C and Ctrl+Z (none expected).
+- Ctrl+Q, Ctrl+E, Ctrl+C and Ctrl+X (none expected).
 - Mouse4 and Mouse5 (none expected).
 
-Not touched: Ctrl+1-0 (stance bar), Ctrl+F, Ctrl+X, Alt+anything.
+Not touched: Ctrl+1-0 (stance bar), Ctrl+F, Ctrl+Z, Alt+anything.
 
 Verify all of these with the `/run` lines in Q4. Apply-layout already backs up and can undo bindings.
 
@@ -422,7 +422,7 @@ Verify all of these with the `/run` lines in Q4. Apply-layout already backs up a
 | F | Healing Wave | Healing Wave | Healing Wave | Healing Wave | Healing Wave |
 | Z | Mana Potion | Mana Potion | Mana Potion | Mana Potion | Mana Potion |
 | X | Lightning Shield | Water Shield | Water Shield | Water Shield | Water Shield |
-| C | – | Ghost Wolf | Ghost Wolf | Ghost Wolf | Ghost Wolf |
+| C | Healthstone / Healing Potion | same | same | same | same |
 | Shift+1 | – | – | Poison Cleansing | Poison Cleansing | Poison Cleansing |
 | Shift+2 | – | – | – | Disease Cleansing | Disease Cleansing |
 | Shift+3 | – | Healing Stream | Healing Stream | Healing Stream | Healing Stream |
@@ -438,8 +438,8 @@ Verify all of these with the `/run` lines in Q4. Apply-layout already backs up a
 | Ctrl+Q | – | Frost Shock | Frost Shock | Frost Shock | Frost Shock |
 | Ctrl+E | Stoneclaw | Stoneclaw | Stoneclaw | Stoneclaw | Stoneclaw |
 | Ctrl+R | – | – | – | Chain Lightning | Chain Lightning |
-| Ctrl+C | – | Totemic Recall | Totemic Recall | Totemic Recall | Totemic Recall |
-| Ctrl+Z | Healthstone / Healing Potion | same | same | same | same |
+| Ctrl+X | – | Totemic Recall | Totemic Recall | Totemic Recall | Totemic Recall |
+| Ctrl+C | – | Ghost Wolf | Ghost Wolf | Ghost Wolf | Ghost Wolf |
 | Mouse4 | – | – | NS + Healing Wave | NS + Healing Wave | NS + Healing Wave |
 | Mouse5 | – | – | – | Riptide | Riptide |
 | Keys in use | 11 | 20 | 27 | 31 | 31 |
@@ -462,7 +462,7 @@ Notes:
   after a wipe, not at every pull. It is never a reaction and is cast standing still out of combat, so a
   stretch key still fits. The every-pull key, Totemic Call, gets Shift+Q.
   What was wrong was that **Totemic Call** and **Totemic Recall** had no key. They now get Shift+Q (every pull)
-  and Ctrl+C.
+  and Ctrl+X.
 
 **Change:**
 1. **Shields on 1 and 2 → one shield key on X.**
@@ -483,6 +483,24 @@ Notes:
    - They are reactions on party frames (mouseover), so they should not need a modifier.
 6. **Totem-only Shift bar.** Frost Shock leaves Shift+4 for Ctrl+Q. The Shift bar now holds only totems and the
    totem calls, so "Shift = totem" has no exceptions.
+
+### Plain C (after Ghost Wolf moved to Ctrl+C, the player's decision)
+
+**Proposal: C = Healthstone, else the best Healing Potion (`FS_HEALTH`), moved from Ctrl+Z.** Ctrl+Z becomes a
+spare.
+- C is a tier-4 key (a stretch for a small hand), so it should hold something that is **plain-key worthy but not
+  pressed every few seconds**. A self-heal item fits: when the healer is about to die, there is no time to find a
+  modifier, and a wrong modifier on C would cast Call of the Elements or Ghost Wolf instead.
+- It works from level 1 (Minor Healing Potion has no level), so the key fills early and never changes.
+- The bottom row then reads Z mana, X shield, C health: all "keep myself going" buttons.
+
+Rejected candidates:
+- **Totemic Call on C:** it is used at every pull, but Shift+Q (tier 2) is easier to reach than C (tier 4), and
+  it is pressed while walking to the next pack, where holding Shift costs nothing. Moving it would also break
+  the "Shift = totem" rule.
+- **Lesser Healing Wave back on C (her original wish):** E is a tier-1 key next to WASD, and LHW is the "heal
+  now" spell. Moving it to a stretch key makes the most urgent heal slower. If Erika still prefers C after
+  trying E, the two can be swapped (C and E stay her own keys either way), but this is not recommended.
 
 **Caveat:** R and Mouse5 stay empty until 40, by design: keys must not move once a spell is learned.
 
@@ -513,7 +531,7 @@ Notes:
 | Q | Earth Shock（敵の詠唱を中断する） |
 | X | シールド（レベル20からWater Shield） |
 | Z | Mana Potion |
-| C | Ghost Wolf |
+| C | Healthstone（なければHealing Potion） |
 | Shift+E・Shift+R・Shift+F | Stoneskin Totem・Searing Totem・Tremor Totem（今まで通り） |
 | Shift+Q | Totemic Call |
 | Shift+C | Call of the Elements（今まで通り） |
@@ -522,8 +540,8 @@ Notes:
 | Shift+5 | Earthbind Totem |
 | Shift+Z・Shift+X | Mana Tide Totem・Grounding Totem |
 | Ctrl+Q・Ctrl+E・Ctrl+R | Frost Shock・Stoneclaw Totem・Chain Lightning |
-| Ctrl+C | Totemic Recall |
-| Ctrl+Z | Healthstone（なければHealing Potion） |
+| Ctrl+X | Totemic Recall |
+| Ctrl+C | Ghost Wolf |
 
 主な理由:
 - **回復はF・E・R・マウスのサイドボタンに置いた。** サイドボタンは、パーティーの枠にカーソルを置いたまま親指で押せる。歩きながらでも使えるので、すぐに使う回復に一番向いている。
@@ -534,8 +552,10 @@ Notes:
 - **トーテムは今まで通りShiftにまとめた。** 毎回置くStoneskin Totem・Searing Totem・Tremor Totemのキーは変わらない。
 - **Totemic CallをShift+Qに置いた。** 今出しているトーテムを自分の場所に移す呪文で、クールダウンは30秒。次の敵の所に進むたびに使おう。トーテムを全部置き直すより、マナも時間もかからない。ただし、消えたトーテムは戻らない。Searing Totemは30〜55秒で消えるので、毎回置き直そう。
 - **Call of the ElementsはShift+Cのまま。** 3秒の詠唱で最大4つのトーテムを一度に置く。長く続くトーテムも5分で消えるので、約5分ごと（数回の戦闘ごと）と全滅の後に、戦闘の合間に使おう。毎回の戦闘で使う必要はない。
-- **Totemic RecallはCtrl+C（Call of the Elementsの下）。** ダンジョンを出る時にトーテムを消して、マナを少し取り戻す。
-- **同じ列には同じ種類を置いた。** 1の列は毒、2の列は病気、Zの列はポーションなどのアイテム、Xの列は守り。
+- **Totemic RecallはCtrl+X。** ダンジョンを出る時にトーテムを消して、マナを少し取り戻す。戦闘の外でしか使わないので、少し遠いキーでいい。
+- **Ghost WolfはCtrl+C。** 外を移動する時だけに使う。屋内では使えないので、ダンジョンではほとんど使わない。
+- **CはHealthstone（なければHealing Potion）。** 自分が倒れそうな時の緊急用。あわてている時でも、Shiftなしで押せる。ZのMana Potionの隣。
+- **同じ列には同じ種類を置いた。** 1の列は毒、2の列は病気、一番下の段（Z・X・C）は自分を守るもの（マナ・シールド・体力）。
 - **Ctrlのキーはあまり使わない呪文用。**
 - **Rとマウスのボタン5はレベル40まで空いている。** Chain HealとRiptideを覚えたらそこに置く。一度置いたキーは後で変わらない。
 - **めったに使わない呪文はキーなしでクリック用のバーに置く。** Ancestral Spirit・Astral Recall・Water Walkingなど。
