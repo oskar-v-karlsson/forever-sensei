@@ -5,7 +5,7 @@ local _, ns = ...
 local Layout = {}
 ns.Layout = Layout
 
-local function L() return ns.ClassData.SHAMAN.layout end
+local function L() return ns.spec.layout end
 local Spells = ns.Spells
 
 -- Call the first API from the list that exists. → ok, results...
@@ -151,8 +151,12 @@ function Layout.MacroBody(entry)
   local layout = L()
   local kind = layout.macroKind[entry.key] or "help"
   if ns.settings.targeting ~= "mouseover" and layout.macroBodies[kind .. "_click"] then kind = kind .. "_click" end
+  -- {spell} is the spell itself; the spec's macroVars name the other spells a body casts ({heal} = healing_wave).
   local vars = { spell = Layout.MacroSpellName(entry) }
-  if kind:match("^nshw") then vars.heal = Layout.MacroSpellName(Spells.Get("healing_wave")) end
+  for var, key in pairs(layout.macroVars) do
+    local other = Spells.Get(key)
+    if other then vars[var] = Layout.MacroSpellName(other) end
+  end
   return (layout.macroBodies[kind]:gsub("{(%w+)}", function(k) return vars[k] end))
 end
 
@@ -589,7 +593,7 @@ function Layout.Warnings(plan)
       keys[id] = {}
       table.insert(order, id)
     end
-    if key then table.insert(keys[id], L().KeyLabel(key)) end
+    if key then table.insert(keys[id], ns.KeyLabel(key)) end
   end
   for _, b in ipairs(plan.binds) do
     local id = L().defaultWarn[b.key]
@@ -636,7 +640,7 @@ function Layout.Describe(plan)
   if #plan.binds > 0 then
     head("ui.preview.keys")
     for _, b in ipairs(plan.binds) do
-      table.insert(lines, ns.T("ui.preview.keyline", { key = L().KeyLabel(b.key), old = bindingName(b.old), new = b.name }))
+      table.insert(lines, ns.T("ui.preview.keyline", { key = ns.KeyLabel(b.key), old = bindingName(b.old), new = b.name }))
     end
   end
   if #plan.bars > 0 then
@@ -792,7 +796,7 @@ function Layout.PlaceOne(entry)
   end
   for _, b in ipairs(plan.binds) do
     if b.old and b.old ~= "" then
-      table.insert(warn, ns.T("ui.place.keybusy", { key = L().KeyLabel(b.key), action = bindingName(b.old) }))
+      table.insert(warn, ns.T("ui.place.keybusy", { key = ns.KeyLabel(b.key), action = bindingName(b.old) }))
     end
   end
   for _, w in ipairs(Layout.Warnings(plan)) do table.insert(warn, w) end
@@ -927,14 +931,14 @@ function Layout.SetTargeting(mode)
   end)
 end
 
-ns.Command("apply", function() Layout.Preview() end)
-ns.Command("undo", function() Layout.Undo() end)
-ns.Command("clean", function() Layout.Clean() end)
+ns.Command("apply", function() Layout.Preview() end, true)
+ns.Command("undo", function() Layout.Undo() end, true)
+ns.Command("clean", function() Layout.Clean() end, true)
 
 -- One-time notice after an update that changed the layout (L.version). It only offers the preview: nothing moves
 -- unless the player applies it there (with the usual backup and undo). New characters just get the current version.
 ns.OnLogin(function()
-  if not ns.IsShaman() then return end
+  if not ns.Active() then return end
   local version = L().version
   if not ns.char.initialised then
     ns.char.layoutVersion = version

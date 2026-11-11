@@ -1,4 +1,5 @@
--- Data/Shaman/Layout.lua: the fixed slot and key plan (layout version 5, ForeverSensei 0.4.3).
+-- ForeverSensei_Shaman/Data/Restoration/Layout.lua: the fixed slot and key plan (layout version 5, since
+-- ForeverSensei 0.4.3; unchanged in 0.5.0, when the Shaman data moved into this class pack).
 -- Spec: research/keybind-layout.md (approved). The level-60 dungeon-healer layout comes first; lower levels use a
 -- subset of it, and a key never moves once its spell is learned (a reserved key stays empty until then).
 -- Rules from the pull walkthroughs in the spec:
@@ -40,11 +41,15 @@
 --   (page 3, 25-36) holds out-of-combat spells, situational totems and the extra Totem Bar presets. Both are clicked.
 --   To make room for the mouse block (0.4.3), the rarest out-of-combat spells have no bar slot (L.noSlot "spellbook").
 --   Things moved out of a planned slot go to the spare buttons (bar 3, bar 4, bar 5, then bar 2) first.
--- Plan entries: a spell key; "@kind" an item macro (Data/Items.lua); "-" a spare button; "#" the player's own button.
-local _, ns = ...
+-- Plan entries: a spell key; "@kind" an item macro (ForeverSensei/Data/Items.lua); "-" a spare button; "#" the
+-- player's own button. The core builds L.slots, L.bySpell, L.byItem, L.own and L.spare from L.plan
+-- (ns.BuildLayout in ForeverSensei/Core/Class.lua).
+local _, P = ...
+P.specs = P.specs or {}
+P.specs.RESTORATION = P.specs.RESTORATION or {}
 
 local L = {}
-ns.ClassData.SHAMAN.layout = L
+P.specs.RESTORATION.layout = L
 
 -- Display order (the guide's key page). keys: the key of each button, nil = no key.
 local KEYS = { "1", "2", "3", "4", "5", "Q", "E", "R", "F", "Z", "X", "C" }
@@ -89,7 +94,7 @@ L.allowedKeys = {
 L.ownKeys = { "5", "SHIFT-5", "CTRL-5" }
 
 -- One row per bar, button 1..12 left to right.
-local plan = {
+L.plan = {
   main = {
     "totemic_call", "flame_shock", "lightning_bolt", "chain_lightning", "#",
     "earth_shock", "lesser_healing_wave", "chain_heal", "healing_wave",
@@ -134,6 +139,11 @@ L.noSlot = {
   frostbrand_weapon = "spellbook",
   reincarnation = "passive",
 }
+-- The key page lists the spells without a slot, one line per kind (Reincarnation is passive and not listed).
+L.noSlotLines = {
+  { kind = "totembar", text = "ui.layout.nobar" },
+  { kind = "spellbook", text = "ui.layout.nobook" },
+}
 
 -- Spells that become macros. In "click" targeting mode they are plain spells, except macroAlways ones.
 L.macros = {
@@ -156,7 +166,8 @@ L.macroKind = {
 -- Always macros, also in click mode (then they use the "<kind>_click" body): Nature's Swiftness is the one-press
 -- NS + Healing Wave macro, and Earth Shock stops your own cast first so the interrupt goes off at once.
 L.macroAlways = { natures_swiftness = true, earth_shock = true }
--- {spell} = the spell (with a rank when needed), {heal} = Healing Wave as its own macro names it.
+-- {spell} = the spell (with a rank when needed); L.macroVars names the other spells a body casts:
+-- {heal} = Healing Wave as its own macro names it.
 -- help: the Mobalytics guide's mouseover macro (mouseover friend, else friendly target, else yourself).
 -- nshw: #showtooltip shows Nature's Swiftness, so the button shows its 3-minute cooldown. While it is on cooldown
 -- the first /cast fails and the press casts a normal Healing Wave.
@@ -168,6 +179,7 @@ L.macroBodies = {
   nshw = "#showtooltip {spell}\n/cast {spell}\n/cast [@mouseover,help,nodead][help,nodead][@player] {heal}",
   nshw_click = "#showtooltip {spell}\n/cast {spell}\n/cast [help,nodead][@player] {heal}",
 }
+L.macroVars = { heal = "healing_wave" }
 
 -- Earlier layouts put these spells in buttons that are spare now. A full apply clears such a button when it still
 -- holds that spell and the spell has its new place (or now lives in the spellbook), so no duplicates are left
@@ -201,52 +213,5 @@ L.defaultWarn = {
   ["CTRL-R"] = "ui.preview.warn.fps",
 }
 
-L.slots = {}
-L.bySpell = {}
-L.byItem = {}
-L.own = {}   -- slot → true
-L.spare = {} -- unplanned buttons: first choice for things moved out of a planned slot. key: spare keyed buttons
-local spareByBar = {}
-for _, bar in ipairs(L.bars) do
-  spareByBar[bar.id] = {}
-  for i = 1, 12 do
-    local what = plan[bar.id][i] or "-"
-    local slotNo = bar.first + i - 1
-    if what == "#" then
-      L.own[slotNo] = true
-    elseif what == "-" then
-      local key = bar.keys and bar.keys[i] or nil
-      table.insert(spareByBar[bar.id], { bar = bar.id, button = i, slot = slotNo, key = key,
-        binding = key and string.format(bar.binding, i) or nil })
-    else
-      local opts = type(what) == "table" and what or {}
-      if type(what) == "table" then what = what[1] end
-      local key = bar.keys and bar.keys[i] or nil
-      local item = what:match("^@(%w+)$")
-      local slot = {
-        bar = bar.id,
-        button = i,
-        slot = slotNo,
-        key = key,
-        binding = key and string.format(bar.binding, i) or nil,
-        spell = not item and what or nil,
-        item = item,
-        standIn = opts.standIn,
-        after = opts.after,
-      }
-      table.insert(L.slots, slot)
-      if item then L.byItem[item] = slot else L.bySpell[what] = slot end
-    end
-  end
-end
-for _, id in ipairs({ "bar3", "bar4", "bar5", "bar2" }) do
-  for _, s in ipairs(spareByBar[id]) do table.insert(L.spare, s) end
-end
-
--- "SHIFT-Q" → "Shift+Q", "CTRL-BUTTON4" → "Ctrl+Mouse 4"
-function L.KeyLabel(key)
-  if not key then return nil end
-  local label = key:gsub("^SHIFT%-", "Shift+"):gsub("^CTRL%-", "Ctrl+")
-  label = label:gsub("BUTTON(%d)$", function(n) return ns.T("ui.key.mouse", { n = n }) end)
-  return label
-end
+-- Spare buttons in this bar order are the first choice for things moved out of a planned slot.
+L.spareOrder = { "bar3", "bar4", "bar5", "bar2" }

@@ -2,14 +2,14 @@
 
 Every fact in ForeverSensei comes from a **World of Warcraft: Forever** source: the Forever client data, Forever guides, or the Forever UI code. Classic and Retail pages were never used, because Forever changed many spells and talents.
 
-All entries were checked on **2026-11-09** against client **1.60.1.70862**. Each data entry in `ForeverSensei/Data/Shaman/*.lua` has a `src` key, which points into `ns.Sources` in `Data/Shaman/Spells.lua`, and a `verified` date. `make check` fails if any entry is missing them.
+All entries were checked on **2026-11-09** against client **1.60.1.70862**. Each data entry in `ForeverSensei_Shaman/Data/**/*.lua` (the Shaman class pack) and `ForeverSensei/Data/Items.lua` has a `src` key, which points into the pack's `P.sources` in `ForeverSensei_Shaman/Data/Spells.lua` or the core's `ns.Sources` in `ForeverSensei/Core/Class.lua`, and a `verified` date. `make check` fails if any entry is missing them.
 
 ## Game data and guides
 
 | Key | Source | Used for |
 |---|---|---|
 | `simc` | [simc-forever SpellDataDump/shaman.txt](https://github.com/simulationcraft/simc-forever/blob/HEAD/SpellDataDump/shaman.txt), header "World of Warcraft 1.60.1.70862 Live". Parsed copy: `research/shaman_simc_1.60.1.70862.tsv` (made by `tools/research/parse_simc.py`) | 46 of the 53 spells: ID, English name, level, cooldown and cast-time facts; every talent (ID, row, column, max rank). `make check` cross-checks the data against the TSV. |
-| `simc` ranks | Same dump, through `tools/research/gen_ranks.py` → `Data/Shaman/Ranks.lua` (2026-11-09) | Every rank's spell ID and trainer level, used for automatic rank upgrades. `make check` fails if the file is out of date or a rank does not match the dump (name and "Rank N"). |
+| `simc` ranks | Same dump, through `tools/research/gen_ranks.py` → `ForeverSensei_Shaman/Data/Ranks.lua` (2026-11-09) | Every rank's spell ID and trainer level, used for automatic rank upgrades. `make check` fails if the file is out of date or a rank does not match the dump (name and "Rank N"). |
 | `wh_spell` | `https://www.wowhead.com/forever/spell=<id>` | 7 spells missing from the simc dump (see below) |
 | `wh_item` | `https://www.wowhead.com/forever/item=<id>` and the Forever potion and elixir lists ([potions](https://www.wowhead.com/forever/items/consumables/potions), [elixirs](https://www.wowhead.com/forever/items/consumables/elixirs)) | Potion and elixir IDs, names, required levels and icons in `Data/Items.lua` (see below) |
 | `wh_abilities` | [Wowhead Forever: Restoration Shaman healer abilities](https://www.wowhead.com/forever/guide/classes/shaman/restoration/healer-abilities) | Ability use and priorities |

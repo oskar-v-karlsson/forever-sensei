@@ -1,13 +1,15 @@
--- Modules/Guide.lua: the /sensei window. Text tabs (role, healing, damage, totems, manners) show their sources;
--- the other tabs show the skill list, the key layout, the talent order, the translation review and settings.
+-- Modules/Guide.lua: the /sensei window. The spec's text tabs come first (the class pack lists them in spec.tabs,
+-- for example role, healing, damage, totems and manners) and show their sources; the core's tabs show the skill list,
+-- the key layout, the talent order, the translation review and settings. Without a class pack only the translation
+-- review and settings are there.
 local _, ns = ...
 local Guide = {}
 ns.Guide = Guide
 local UI = ns.UI
 local Spells = ns.Spells
 
-local TABS = { "role", "healing", "damage", "totems", "manners", "skills", "layout", "talents", "review", "settings" }
-local TEXT_TABS = { role = true, healing = true, damage = true, totems = true, manners = true }
+local TABS = { "skills", "layout", "talents", "review", "settings" }
+local IDLE_TABS = { "review", "settings" }
 local WIDTH = 548 -- the scroll area is 550 wide (760 - 176 - 34)
 local REVIEW_PAGE = 5
 
@@ -113,12 +115,31 @@ end
 
 local renderers = {}
 
+-- The tabs of this character, top to bottom.
+local function tabs()
+  if not ns.spec then return IDLE_TABS end
+  local list = {}
+  for _, id in ipairs(ns.spec.tabs) do table.insert(list, id) end
+  for _, id in ipairs(TABS) do table.insert(list, id) end
+  return list
+end
+
+local function hasTab(id)
+  for _, t in ipairs(tabs()) do
+    if t == id then return true end
+  end
+  return false
+end
+
+local function guideSection(id)
+  for _, s in ipairs(ns.spec and ns.spec.guide or {}) do
+    if s.id == id then return s end
+  end
+end
+
 local function textTab(id)
   return function(frame)
-    local section
-    for _, s in ipairs(ns.ClassData.SHAMAN.guide) do
-      if s.id == id then section = s end
-    end
+    local section = guideSection(id)
     local y = 0
     for i = 1, #section.paragraphs do
       y = y + paragraph(frame, i, y, "guide." .. id .. ".p" .. i) + 12
@@ -128,7 +149,13 @@ local function textTab(id)
     return y + 10
   end
 end
-for id in pairs(TEXT_TABS) do renderers[id] = textTab(id) end
+local function renderer(id)
+  if renderers[id] then return renderers[id] end
+  if guideSection(id) then
+    renderers[id] = textTab(id)
+    return renderers[id]
+  end
+end
 
 renderers.skills = function(frame)
   local y = paragraph(frame, 1, 0, "ui.skills.intro") + 10
@@ -166,7 +193,7 @@ renderers.skills = function(frame)
 end
 
 renderers.layout = function(frame)
-  local layout = ns.ClassData.SHAMAN.layout
+  local layout = ns.spec.layout
   local y = paragraph(frame, 1, 0, "ui.layout.intro") + 8
   y = y + paragraph(frame, 5, y, "ui.layout.intro2") + 12
   local n = 0
@@ -197,20 +224,23 @@ renderers.layout = function(frame)
         keyText:SetJustifyH("CENTER")
         keyText:ClearAllPoints()
         keyText:SetPoint("TOPLEFT", x - 4, -(rowY + 40))
-        keyText:SetText(key and layout.KeyLabel(key) or "")
+        keyText:SetText(key and ns.KeyLabel(key) or "")
       end
     end
     y = y + (twoRows and 116 or 58)
   end
-  local names, book = {}, {}
-  for key, kind in pairs(layout.noSlot) do
-    if kind == "totembar" then table.insert(names, Spells.Get(key).name) end
-    if kind == "spellbook" then table.insert(book, Spells.Get(key).name) end
+  -- Spells without a bar slot, one line per kind the spec lists (noSlotLines: { kind, text }).
+  for i, line in ipairs(layout.noSlotLines or {}) do
+    local names = {}
+    for key, kind in pairs(layout.noSlot) do
+      if kind == line.kind then table.insert(names, Spells.Get(key).name) end
+    end
+    table.sort(names)
+    if #names > 0 then
+      y = y + label(frame, 9 + i, y, ns.T(line.text, { names = table.concat(names, ", ") }), 12, "grey") + 4
+    end
   end
-  table.sort(names)
-  table.sort(book)
-  y = y + label(frame, 10, y, ns.T("ui.layout.nobar", { names = table.concat(names, ", ") }), 12, "grey") + 4
-  y = y + label(frame, 11, y, ns.T("ui.layout.nobook", { names = table.concat(book, ", ") }), 12, "grey") + 8
+  y = y + 4
   y = y + paragraph(frame, 4, y, "ui.layout.items") + 12
 
   button(frame, 1, 0, y, ns.T("ui.btn.applyall"), 200, function() ns.Layout.Preview() end)
@@ -234,7 +264,7 @@ renderers.layout = function(frame)
 end
 
 renderers.talents = function(frame)
-  local T = ns.ClassData.SHAMAN.talents
+  local T = ns.spec.talents
   local state = ns.Talents.State()
   local y = paragraph(frame, 1, 0, "ui.talents.intro") + 8
   if not state.readable then y = y + paragraph(frame, 2, y, "ui.talent.unreadable") + 8 end
@@ -263,13 +293,15 @@ renderers.talents = function(frame)
   end
   li = li + 1
   y = y + label(frame, li, y, ns.T("ui.talents.notes"), 13, "gold") + 6
-  for _, id in ipairs({ "talent.note.wowhead", "talent.note.alt", "talent.note.reset" }) do
+  for _, id in ipairs(T.notes or {}) do
     pi = pi + 1
     y = y + paragraph(frame, pi, y, id) + 8
   end
   li = li + 1
-  y = y + label(frame, li, y, ns.T("ui.guide.sources") .. "\n・" .. ns.Sources.moba .. "\n・" .. ns.Sources.wh_talents
-    .. "\n・" .. ns.Sources.simc .. "\n" .. ns.T("ui.guide.verified", { date = T.pathSource.verified }), 10, "grey")
+  local src = {}
+  for _, key in ipairs(T.sources or {}) do table.insert(src, "\n・" .. ns.Sources[key]) end
+  y = y + label(frame, li, y, ns.T("ui.guide.sources") .. table.concat(src) .. "\n"
+    .. ns.T("ui.guide.verified", { date = T.pathSource.verified }), 10, "grey")
   return y + 10
 end
 
@@ -330,6 +362,10 @@ renderers.settings = function(frame)
   local s = ns.settings
   local y = 0
   local bi, li = 0, 0
+  if ns.packNote then
+    li = li + 1
+    y = y + label(frame, li, y, ns.PackNoteText(), 13, "gold") + 12
+  end
   local function toggle(textId, on, onClick)
     bi = bi + 1
     button(frame, bi, 0, y, (on and "● " or "○ ") .. ns.T(textId), 320, function()
@@ -352,14 +388,16 @@ renderers.settings = function(frame)
     s.minimap = not s.minimap
     if ns.Minimap then ns.Minimap.Update() end
   end)
-  y = y + 8
-  li = li + 1
-  y = y + label(frame, li, y, ns.T("ui.settings.more"), 12, "grey") + 8
-  bi = bi + 1
-  button(frame, bi, 0, y, ns.T("ui.btn.trainer"), 220, function() ns.NewSkill.ShowTrainer() end)
-  bi = bi + 1
-  button(frame, bi, 230, y, ns.T("ui.btn.talents.hint"), 220, function() ns.Talents.ShowHint(true) end)
-  y = y + 30
+  if ns.Active() then
+    y = y + 8
+    li = li + 1
+    y = y + label(frame, li, y, ns.T("ui.settings.more"), 12, "grey") + 8
+    bi = bi + 1
+    button(frame, bi, 0, y, ns.T("ui.btn.trainer"), 220, function() ns.NewSkill.ShowTrainer() end)
+    bi = bi + 1
+    button(frame, bi, 230, y, ns.T("ui.btn.talents.hint"), 220, function() ns.Talents.ShowHint(true) end)
+    y = y + 30
+  end
   li = li + 1
   y = y + label(frame, li, y, "ForeverSensei v" .. ns.VERSION .. "  (/sensei help, /sensei verify)", 10, "grey") + 4
   return y
@@ -368,7 +406,7 @@ end
 local function build()
   win = UI.Window("ForeverSenseiGuide", 760, 580, ns.T("ui.guide.title"))
   win.tabs = {}
-  for i, id in ipairs(TABS) do
+  for i, id in ipairs(tabs()) do
     local b = UI.Button(win, ns.T("ui.tab." .. id), 150, 26, function() Guide.Open(id) end)
     b:SetPoint("TOPLEFT", 14, -40 - (i - 1) * 30)
     win.tabs[id] = b
@@ -402,7 +440,7 @@ function Guide.Refresh()
     if id ~= current then f:Hide() end
   end
   hidePools(frame)
-  local h = renderers[current](frame)
+  local h = renderer(current)(frame)
   frame:SetHeight(math.max(h, 10))
   frame:Show()
   win.sf:SetScrollChild(frame)
@@ -420,12 +458,19 @@ end
 
 function Guide.Open(tab)
   if not win then build() end
-  if tab and renderers[tab] then current = tab end
-  current = current or "role"
+  if tab and hasTab(tab) then current = tab end
+  if not current or not hasTab(current) then current = tabs()[1] end
   if win.sf.SetVerticalScroll then win.sf:SetVerticalScroll(0) end
   win:Show()
   Guide.Refresh()
 end
+
+function Guide.Current()
+  return current
+end
+
+-- The tab ids of this character (the spec's text tabs, then the core's; without a class pack: review and settings).
+Guide.Tabs = tabs
 
 function Guide.Toggle()
   if win and win:IsShown() then win:Hide() else Guide.Open() end

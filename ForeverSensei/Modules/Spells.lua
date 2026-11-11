@@ -3,16 +3,17 @@ local _, ns = ...
 local Spells = {}
 ns.Spells = Spells
 
+-- The active class pack (Core/Class.lua). Only called while a pack is active.
 function Spells.Data()
-  return ns.ClassData.SHAMAN
+  return ns.class
 end
 
 function Spells.List()
-  return ns.ClassData.SHAMAN.spells
+  return ns.class.spells
 end
 
 function Spells.Get(key)
-  return ns.ClassData.SHAMAN.byKey[key]
+  return ns.class.byKey[key]
 end
 
 -- Find an entry by English name (any case) or key.
@@ -40,9 +41,9 @@ local function spellName(id)
 end
 Spells.Name = spellName
 
--- Every rank's spell id, rank 1 first (Data/Shaman/Ranks.lua; one id for single-rank spells).
+-- Every rank's spell id, rank 1 first (the pack's Data/Ranks.lua; one id for single-rank spells).
 function Spells.Ranks(entry)
-  return ns.ClassData.SHAMAN.ranks[entry.key] or { entry.id }
+  return ns.class.ranks[entry.key] or { entry.id }
 end
 
 -- Rank number of a spell id of this entry, or nil when the id is not one of its ranks.
@@ -96,7 +97,7 @@ end
 -- The planned slot of a spell. A spell that only gets its own slot "after" another one is learned stands in on
 -- that spell's slot until then (Lightning Shield on X before Water Shield).
 function Spells.LayoutSlot(entry)
-  local layout = ns.ClassData.SHAMAN.layout
+  local layout = ns.spec.layout
   local slot = layout.bySpell[entry.key]
   if slot and slot.after and not Spells.IsKnown(Spells.Get(slot.after)) then return layout.bySpell[slot.after] end
   return slot
@@ -104,12 +105,12 @@ end
 
 -- "メインバー・キー 1" / "アクションバー 3（クリック）" / Totem Bar / passive
 function Spells.WhereText(entry)
-  local layout = ns.ClassData.SHAMAN.layout
+  local layout = ns.spec.layout
   local slot = Spells.LayoutSlot(entry)
   if slot then
     local bar = ns.T("ui.bar." .. slot.bar)
     if slot.key then
-      return ns.T("ui.where.key", { bar = bar, button = slot.button, key = layout.KeyLabel(slot.key) })
+      return ns.T("ui.where.key", { bar = bar, button = slot.button, key = ns.KeyLabel(slot.key) })
     end
     return ns.T("ui.where.click", { bar = bar, button = slot.button })
   end

@@ -62,7 +62,7 @@ function Verify.Run()
   end
 
   add("")
-  add("[Ranks]  every rank id in Data/Shaman/Ranks.lua: name and 'Rank N' checked against the client")
+  add("[Ranks]  every rank id in " .. ns.class.name .. "/Data/Ranks.lua: name and 'Rank N' checked against the client")
   local rankIds = 0
   for _, e in ipairs(ns.Spells.List()) do
     local ranks = ns.Spells.Ranks(e)
@@ -89,7 +89,7 @@ function Verify.Run()
     bad("talent tree could not be read through C_Traits (advice follows the level only)")
   else
     add(string.format("  read via %s, unspent=%s", tostring(source), tostring(unspent)))
-    for _, t in ipairs(ns.ClassData.SHAMAN.talents.list) do
+    for _, t in ipairs(ns.spec.talents.list) do
       if ranks[t.name] == nil then
         bad("talent not found in tree: " .. t.name)
       else
@@ -105,7 +105,7 @@ function Verify.Run()
 
   add("")
   add("[Layout]")
-  local layout = ns.ClassData.SHAMAN.layout
+  local layout = ns.spec.layout
   for _, slot in ipairs(layout.slots) do
     local cur = ns.Layout.Current(slot.slot)
     local okB, action = false, nil
@@ -129,6 +129,14 @@ function Verify.Run()
     add(string.format("  key %s = %s", key, ok and tostring(action) or "?"))
   end
   -- In-game question: does "/cast Name" in a macro cast the highest rank? GetMacroSpell tells which id it casts.
+  -- A body that also casts other spells (a macroVars {var}, like NS + Healing Wave's {heal}) is not compared.
+  local function castsOthers(key)
+    local body = layout.macroBodies[layout.macroKind[key] or "help"] or ""
+    for var in body:gmatch("{(%w+)}") do
+      if var ~= "spell" then return true end
+    end
+    return false
+  end
   for key, name in pairs(layout.macros) do
     local ok, idx = ns.Call("GetMacroIndexByName", name)
     local line = string.format("  macro %s (%s): %s", name, key, ok and tostring(idx) or "error")
@@ -142,7 +150,7 @@ function Verify.Run()
       if okI and curBody ~= ns.Layout.MacroBody(e) then
         bad(line .. "  (macro body is not up to date)")
         line = nil
-      elseif okM and casts and bestId and casts ~= bestId and (layout.macroKind[key] or "help") ~= "nshw" then
+      elseif okM and casts and bestId and casts ~= bestId and not castsOthers(key) then
         bad(line .. "  (macro does not cast the highest rank)")
         line = nil
       end
@@ -191,4 +199,4 @@ ns.Command("verify", function()
   local text, problems = Verify.Run()
   ns.Print(string.format("verify: %d problem(s). Copy the window text and send it to the maintainer.", problems))
   ns.UI.CopyBox("ForeverSensei verify", ns.T("ui.verify.intro"), text)
-end)
+end, true)

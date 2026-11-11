@@ -6,13 +6,15 @@ The player saves reports in-game and copies them from the 報告を送る box in
 
 For every report:
 - A suggestion (案) that passes the Japanese rules (tools/textrules.py) and was made against the current text
-  (今) is written into ForeverSensei/Locales/ja.lua.
+  (今) is written into the ja.lua that owns the id: ForeverSensei/Locales/ja.lua for the core's texts, or
+  ForeverSensei_<Class>/Locales/ja.lua for a class pack's (skills, talents, guide). Every id lives in one file.
 - Everything else (no suggestion, a suggestion that breaks a rule, text changed since, unknown id) goes to
   reports/open.md with the English source and current Japanese, for a person or agent to handle.
 - Every report is appended to reports/log.md.
 reports/ is gitignored: it holds the player's own comments and stays local (never commit it).
-Then, when ja.lua changed, the patch version is bumped (TOC + Core/Init.lua) and dist/ForeverSensei-v<version>.zip
-is built (also built with --zip when nothing changed).
+Then, when a ja.lua changed, the patch version is bumped (every TOC + Core/Init.lua; core and packs share one
+version) and dist/ForeverSensei-v<version>.zip is built with every addon folder at its top level (also built with
+--zip when nothing changed).
 
 Report format (Modules/Feedback.lua, Feedback.Format):
     [ForeverSensei v0.1.0 報告 2件]
@@ -32,8 +34,6 @@ import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ADDON = os.path.join(ROOT, "ForeverSensei")
-JA = os.path.join(ADDON, "Locales", "ja.lua")
-EN = os.path.join(ADDON, "Locales", "en.lua")
 TOC = os.path.join(ADDON, "ForeverSensei.toc")
 INIT = os.path.join(ADDON, "Core", "Init.lua")
 REPORTS_DIR = os.path.join(ROOT, "reports")
@@ -85,38 +85,54 @@ def parse(text):
     return out
 
 
+def addon_folders():
+    """The core first, then every class pack (ForeverSensei_<Class>/ with a TOC)."""
+    packs = sorted(d for d in os.listdir(ROOT) if d.startswith("ForeverSensei_")
+                   and os.path.isfile(os.path.join(ROOT, d, d + ".toc")))
+    return [os.path.join(ROOT, d) for d in ["ForeverSensei"] + packs]
+
+
 def read_locales():
-    en, ja = {}, {}
-    with open(EN, encoding="utf-8") as fh:
-        for line in fh:
-            m = EN_LINE.match(line.rstrip("\n"))
-            if m:
-                en[m.group(1)] = lua_unescape(m.group(2))
-    with open(JA, encoding="utf-8") as fh:
-        for line in fh:
-            m = JA_LINE.match(line.rstrip("\n"))
-            if m:
-                ja[m.group(2)] = lua_unescape(m.group(3))
-    return en, ja
+    """→ en, ja, owner: texts by id over the core and every pack, and the ja.lua path that owns each id."""
+    en, ja, owner = {}, {}, {}
+    for folder in addon_folders():
+        with open(os.path.join(folder, "Locales", "en.lua"), encoding="utf-8") as fh:
+            for line in fh:
+                m = EN_LINE.match(line.rstrip("\n"))
+                if m:
+                    en[m.group(1)] = lua_unescape(m.group(2))
+        path = os.path.join(folder, "Locales", "ja.lua")
+        with open(path, encoding="utf-8") as fh:
+            for line in fh:
+                m = JA_LINE.match(line.rstrip("\n"))
+                if m:
+                    ja[m.group(2)] = lua_unescape(m.group(3))
+                    owner[m.group(2)] = path
+    return en, ja, owner
 
 
 def names():
+    """Spell and talent names from every pack's data (they stay in English letters in the Japanese)."""
     out = []
-    for rel in ("Data/Shaman/Spells.lua", "Data/Shaman/Talents.lua"):
-        with open(os.path.join(ADDON, rel), encoding="utf-8") as fh:
-            out += re.findall(r'name = "([^"]+)"', fh.read())
+    for folder in addon_folders()[1:]:
+        for dirpath, _, files in os.walk(os.path.join(folder, "Data")):
+            for fn in sorted(files):
+                if fn.endswith(".lua"):
+                    with open(os.path.join(dirpath, fn), encoding="utf-8") as fh:
+                        out += re.findall(r'name = "([^"]+)"', fh.read())
     return out
 
 
-def write_ja(changes):
-    with open(JA, encoding="utf-8") as fh:
-        lines = fh.read().split("\n")
-    for i, line in enumerate(lines):
-        m = JA_LINE.match(line)
-        if m and m.group(2) in changes:
-            lines[i] = f'{m.group(1)}"{lua_escape(changes[m.group(2)])}"{m.group(4)}'
-    with open(JA, "w", encoding="utf-8") as fh:
-        fh.write("\n".join(lines))
+def write_ja(changes, owner):
+    for path in sorted({owner[rid] for rid in changes}):
+        with open(path, encoding="utf-8") as fh:
+            lines = fh.read().split("\n")
+        for i, line in enumerate(lines):
+            m = JA_LINE.match(line)
+            if m and m.group(2) in changes and owner[m.group(2)] == path:
+                lines[i] = f'{m.group(1)}"{lua_escape(changes[m.group(2)])}"{m.group(4)}'
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(lines))
 
 
 def version():
@@ -129,10 +145,9 @@ def bump_version():
     parts = [int(x) for x in old.split(".")]
     parts[-1] += 1
     new = ".".join(str(x) for x in parts)
-    for path, pattern, repl in (
-        (TOC, r"^## Version: \S+", f"## Version: {new}"),
-        (INIT, r'^ns\.VERSION = "[^"]+"', f'ns.VERSION = "{new}"'),
-    ):
+    tocs = [(os.path.join(f, os.path.basename(f) + ".toc"), r"^## Version: \S+", f"## Version: {new}")
+            for f in addon_folders()]
+    for path, pattern, repl in tocs + [(INIT, r'^ns\.VERSION = "[^"]+"', f'ns.VERSION = "{new}"')]:
         with open(path, encoding="utf-8") as fh:
             src = fh.read()
         src, n = re.subn(pattern, repl, src, count=1, flags=re.M)
@@ -149,12 +164,14 @@ def build_zip():
     os.makedirs(dist, exist_ok=True)
     path = os.path.join(dist, f"ForeverSensei-v{v}.zip")
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
-        for dirpath, _, files in os.walk(ADDON):
-            for fn in sorted(files):
-                if fn.startswith("."):
-                    continue
-                full = os.path.join(dirpath, fn)
-                z.write(full, os.path.relpath(full, ROOT))
+        for folder in addon_folders():
+            for dirpath, dirs, files in os.walk(folder):
+                dirs.sort()
+                for fn in sorted(files):
+                    if fn.startswith("."):
+                        continue
+                    full = os.path.join(dirpath, fn)
+                    z.write(full, os.path.relpath(full, ROOT))
     return path
 
 
@@ -168,7 +185,7 @@ def process(text, dry_run=False):
         sys.exit("no reports found in the input (expected a line like '[ForeverSensei v0.1.0 報告 2件]')")
     if parsed["count"] is not None and parsed["count"] != len(parsed["reports"]):
         print(f"warning: header says {parsed['count']} reports, found {len(parsed['reports'])} (paste cut off?)")
-    en, ja = read_locales()
+    en, ja, owner = read_locales()
     all_names = names()
     changes, open_items, log = {}, [], []
     for r in parsed["reports"]:
@@ -210,7 +227,7 @@ def process(text, dry_run=False):
         with open(path, "a", encoding="utf-8") as fh:
             if new:
                 fh.write("# Open translation reports\n\nReports from the game that need a person or agent: write a "
-                         "better Japanese text in ForeverSensei/Locales/ja.lua (follow README 'Processing translation "
+                         "better Japanese text in the ja.lua that owns the id (ForeverSensei/Locales or ForeverSensei_<Class>/Locales; follow README 'Processing translation "
                          "reports'), run make check, then delete the entry here. This file is local (reports/ is gitignored); do not commit it.\n")
             for r, why, en_text, ja_text in open_items:
                 fh.write(f"\n## {r['id']} ({r['reason']}, {today}, v{parsed['version']})\n\n")
@@ -227,7 +244,7 @@ def process(text, dry_run=False):
             extra = "".join(f" | {k}: {r[k]}" for k in ("suggestion", "note") if r[k])
             fh.write(f"- {today} v{parsed['version']} {r['id']} | {r['reason']} | {status}{extra}\n".replace("\n|", " |"))
     if changes:
-        write_ja(changes)
+        write_ja(changes, owner)
         old, new = bump_version()
         print(f"version {old} -> {new}")
     return parsed, changes, open_items

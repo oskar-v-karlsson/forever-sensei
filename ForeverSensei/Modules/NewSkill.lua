@@ -180,7 +180,7 @@ end
 
 -- Compare known spells and ranks with the saved state. atLogin: also catch up on old ranks still on the bars.
 function NewSkill.Scan(atLogin)
-  if not ns.char or not ns.IsShaman() then return end
+  if not ns.char or not ns.Active() then return end
   local known, ranks = ns.char.known, charRanks()
   local first = not ns.char.initialised
   local newRanks = {}
@@ -315,7 +315,7 @@ end
 -- At login no card opens for a skill already seen: "later" skills only get a toast with a button to look at them.
 -- Cards at login are only for skills learned while the addon was not running.
 ns.OnLogin(function()
-  if not ns.IsShaman() then return end
+  if not ns.Active() then return end
   C_Timer.After(3, function()
     NewSkill.Scan(true)
     if not ns.char.initialised or not ns.settings.showCards then return end
@@ -331,7 +331,7 @@ end)
 ns.On("SPELLS_CHANGED", function() if ns.ready then scheduleScan() end end)
 ns.On("LEARNED_SPELL_IN_SKILL_LINE", function() if ns.ready then scheduleScan() end end)
 ns.On("PLAYER_LEVEL_UP", function(level)
-  if not ns.ready or not ns.IsShaman() then return end
+  if not ns.ready or not ns.Active() then return end
   ns.char.lastLevel = level
   C_Timer.After(2, function() NewSkill.ShowTrainer(level) end)
 end)
@@ -360,5 +360,5 @@ ns.Command("card", function(rest)
     return
   end
   NewSkill.ShowCard(e, true)
-end)
-ns.Command("trainer", function() NewSkill.ShowTrainer() end)
+end, true)
+ns.Command("trainer", function() NewSkill.ShowTrainer() end, true)

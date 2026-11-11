@@ -6,7 +6,7 @@ local Talents = {}
 ns.Talents = Talents
 local UI = ns.UI
 
-local function data() return ns.ClassData.SHAMAN.talents end
+local function data() return ns.spec.talents end
 
 local function configID()
   local ok, id = ns.Call("C_ClassTalents.GetActiveConfigID")
@@ -145,7 +145,7 @@ local function buildHint()
 end
 
 function Talents.ShowHint(force)
-  if not ns.IsShaman() then return end
+  if not ns.Active() then return end
   local s = Talents.State()
   if not force and (not s.readable or not s.unspent or s.unspent <= 0) then
     if hint then hint:Hide() end
@@ -199,4 +199,4 @@ ns.On("TRAIT_CONFIG_UPDATED", refresh)
 ns.On("PLAYER_TALENT_UPDATE", refresh)
 ns.On("PLAYER_REGEN_DISABLED", function() if hint then hint:Hide() end end)
 
-ns.Command("talents", function() Talents.ShowHint(true) end)
+ns.Command("talents", function() Talents.ShowHint(true) end, true)

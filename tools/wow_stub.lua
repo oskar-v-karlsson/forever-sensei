@@ -20,7 +20,11 @@ STUB = {
   itemLevels = {}, -- item id → required level the client reports (C_Item.GetItemInfo)
   settings = { PROXY_SHOW_ACTIONBAR_2 = false, PROXY_SHOW_ACTIONBAR_3 = false, PROXY_SHOW_ACTIONBAR_4 = false,
     PROXY_SHOW_ACTIONBAR_5 = false, PROXY_SHOW_ACTIONBAR_6 = false, PROXY_SHOW_ACTIONBAR_7 = false },
-  meta = {},
+  meta = {},       -- ForeverSensei's TOC metadata (C_AddOns.GetAddOnMetadata)
+  addonMeta = {},  -- other addons' TOC metadata: name → field → value
+  class = "SHAMAN",
+  loadAddOn = nil, -- set by tools/check.py: name → loaded, reason (loads a class pack's files)
+  loaded = {},     -- addon name → true once loaded
 }
 
 BINDING_NAME_STRAFELEFT = "Strafe Left"
@@ -263,7 +267,12 @@ end
 -- Player ------------------------------------------------------------------------------------------
 function UnitName() return "Hana" end
 function GetRealmName() return "Test" end
-function UnitClass() return "Shaman", "SHAMAN", 7 end
+local CLASS_IDS = { WARRIOR = 1, PALADIN = 2, HUNTER = 3, ROGUE = 4, PRIEST = 5, SHAMAN = 7, MAGE = 8, WARLOCK = 9,
+  DRUID = 11 }
+function UnitClass()
+  local c = STUB.class
+  return c:sub(1, 1) .. c:sub(2):lower(), c, CLASS_IDS[c] or 0
+end
 function UnitLevel() return STUB.level end
 function UnitCharacterPoints() return STUB.unspent or 0 end
 function InCombatLockdown() return STUB.combat end
@@ -273,8 +282,20 @@ function GetActiveSpecGroup() return 1 end
 WOW_PROJECT_ID = 1
 
 C_AddOns = {}
-function C_AddOns.GetAddOnMetadata(_, field) return STUB.meta[field] end
-function C_AddOns.IsAddOnLoaded() return false end
+function C_AddOns.GetAddOnMetadata(name, field)
+  if STUB.addonMeta[name] then return STUB.addonMeta[name][field] end
+  return STUB.meta[field]
+end
+function C_AddOns.IsAddOnLoaded(name) return STUB.loaded[name] or false end
+-- Like the client: loads a LoadOnDemand addon (its Dependencies are loaded already) → loaded, reason.
+function C_AddOns.LoadAddOn(name)
+  STUB.loadCalls = (STUB.loadCalls or 0) + 1
+  if STUB.loaded[name] then return true, nil end
+  if not STUB.loadAddOn then return false, "MISSING" end
+  local ok, reason = STUB.loadAddOn(name)
+  if ok then STUB.loaded[name] = true end
+  return ok, reason
+end
 
 -- Spells ------------------------------------------------------------------------------------------
 -- A name means its highest known rank (highest learn level), else its first rank.

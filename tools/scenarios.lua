@@ -10,8 +10,11 @@ return function(ns, lang)
     return ok
   end
   ns.settings.language = lang
-  local data = ns.ClassData.SHAMAN
-  local L = data.layout
+  if not ns.Active() or ns.class.classFile ~= "SHAMAN" or ns.specId ~= "RESTORATION" then
+    fail("class pack: ForeverSensei_Shaman (Restoration) is not active")
+    return { errors = errors, notes = notes }
+  end
+  local L = ns.spec.layout
 
   -- Popup layout: every text inside its window, wrapped, not overlapping (STUB.checkLayout).
   local layoutFails = 0
@@ -37,8 +40,12 @@ return function(ns, lang)
     try("trainer " .. lv, ns.NewSkill.ShowTrainer, lv)
     fits("trainer " .. lv, "ForeverSenseiTrainer")
   end
-  for _, tab in ipairs({ "role", "healing", "damage", "totems", "manners", "skills", "layout", "talents", "review", "settings" }) do
+  -- The pack's text tabs first, then the core's.
+  local tabs = { "role", "healing", "damage", "totems", "manners", "skills", "layout", "talents", "review", "settings" }
+  for i, tab in ipairs(tabs) do
     try("guide " .. tab, ns.Guide.Open, tab)
+    if ns.Guide.Current and ns.Guide.Current() ~= tab then fail("guide: tab " .. tab .. " did not open") end
+    if i == 1 and _G.ForeverSenseiGuide and not _G.ForeverSenseiGuide:IsShown() then fail("guide: window not shown") end
   end
   for lv = 10, 60, 5 do
     STUB.level, STUB.unspent = lv, 1
@@ -48,7 +55,7 @@ return function(ns, lang)
   STUB.unspent = 0
 
   -- Readable talent tree: the player followed the path up to the point before this level → next is that level's step.
-  local T = data.talents
+  local T = ns.spec.talents
   for _, lv in ipairs({ 10, 25, 40, 60 }) do
     local ranks = {}
     for i = 1, lv - 10 do ranks[T.order[i].key] = (ranks[T.order[i].key] or 0) + 1 end

@@ -1,7 +1,7 @@
 -- Core/Init.lua: namespace, safe event bus, combat queue, saved variables and the /sensei command.
 local ADDON, ns = ...
 ns.ADDON = ADDON
-ns.VERSION = "0.4.3"
+ns.VERSION = "0.5.0"
 do
   local getMeta = C_AddOns and C_AddOns.GetAddOnMetadata
   if getMeta then
@@ -122,6 +122,7 @@ local CHAR_DEFAULTS = {
   macroRank = {},   -- spell key → "Rank N" when the macro has to name the rank (/cast <name> did not cast the highest)
   -- backup = { slots = {...}, bindings = {...}, time = ... } once the full layout was applied
   -- layoutVersion = layout version this character last saw (nil: from before 0.3.0); see Modules/Layout.lua
+  -- packNote = the class-pack note this character already saw (Core/Class.lua), so it shows once
 }
 
 local function fill(dst, src)
@@ -165,20 +166,22 @@ ns.On("PLAYER_LOGIN", function()
   fill(ns.db.chars[key], CHAR_DEFAULTS)
   ns.char = ns.db.chars[key]
   ns.ready = true
+  -- The class pack loads first (Core/Class.lua), so the modules' login callbacks see ns.class and ns.spec.
+  local ok, err = pcall(ns.LoadClass)
+  if not ok then ns.Debug("class pack: " .. tostring(err)) end
   for _, fn in ipairs(ns.loginCallbacks) do
     local ok, err = pcall(fn)
     if not ok then ns.Debug("login: " .. tostring(err)) end
   end
 end)
 
-function ns.IsShaman()
-  local _, classFile = UnitClass("player")
-  return classFile == "SHAMAN"
-end
-
 -- /sensei
-local commands = {}
-function ns.Command(name, fn) commands[name] = fn end
+local commands, needsClass = {}, {}
+-- classOnly: the command needs the class pack (bars, skills, talents); without one it only says so.
+function ns.Command(name, fn, classOnly)
+  commands[name] = fn
+  needsClass[name] = classOnly or nil
+end
 
 local function help()
   ns.Print("/sensei              - guide")
@@ -203,7 +206,9 @@ SlashCmdList.FOREVERSENSEI = function(msg)
   local cmd, rest = msg:match("^(%S*)%s*(.-)$")
   cmd = (cmd or ""):lower()
   local fn = commands[cmd]
-  if fn then
+  if fn and needsClass[cmd] and not ns.Active() then
+    ns.Print(ns.PackNoteText("en") or "no class pack")
+  elseif fn then
     local ok, err = pcall(fn, rest)
     if not ok then ns.Print("error: " .. tostring(err)) end
   else

@@ -1,26 +1,24 @@
--- Data/Shaman/Spells.lua: every Shaman spell a Restoration Shaman learns from level 1 to 60 in WoW: Forever.
+-- ForeverSensei_Shaman/Data/Spells.lua: every Shaman spell a Restoration Shaman learns from level 1 to 60 in WoW: Forever.
 -- Fields: key (text id stem), name (English client name, also used to resolve the highest rank), id (rank 1 spell id),
 -- level (first available), role (heal | damage | support), use (group | solo | both), talent (learned through the
--- talent tree; level = when the Mobalytics leveling path takes it), passive, src (key in ns.Sources), verified.
--- What/when texts live in Locales as spell.<key>.what / spell.<key>.when.
-local _, ns = ...
+-- talent tree; level = when the Mobalytics leveling path takes it), passive, src (a key in P.sources or the core's
+-- sources: wh_spell, wh_item, ui), verified.
+-- What/when texts live in this pack's Locales as spell.<key>.what / spell.<key>.when.
+local _, P = ...
 
-ns.Sources = {
+-- Sources of this pack's data (the core merges them into its own list while the pack is active).
+P.sources = {
   simc = "simc-forever SpellDataDump, client 1.60.1.70862 (github.com/simulationcraft/simc-forever, SpellDataDump/shaman.txt)",
   wh_abilities = "https://www.wowhead.com/forever/guide/classes/shaman/restoration/healer-abilities",
   wh_overview = "https://www.wowhead.com/forever/guide/classes/shaman/restoration/overview-pve-healer",
   wh_talents = "https://www.wowhead.com/forever/guide/classes/shaman/restoration/talent-builds-pve-healer",
-  wh_spell = "https://www.wowhead.com/forever/spell=",
-  wh_item = "https://www.wowhead.com/forever/item=",
   moba = "https://mobalytics.gg/wow-forever/classes/restoration-shaman-guide",
-  ui = "Blizzard UI code for Forever 1.60.1 (github.com/reckhou/WoWBlzCode, folder Forever)",
 }
 
 local V = "2026-11-09"
 
-ns.ClassData = ns.ClassData or {}
 local S = {}
-ns.ClassData.SHAMAN = { spells = S }
+P.spells = S
 
 local function add(t)
   t.verified = t.verified or V
@@ -80,6 +78,3 @@ add { key = "call_of_the_spirits",     name = "Call of the Spirits",     id = 66
 add { key = "chain_heal",              name = "Chain Heal",              id = 1064,   level = 40, role = "heal",    use = "group", src = "simc" }
 add { key = "riptide",                 name = "Riptide",                 id = 408521, level = 40, role = "heal",    use = "both",  src = "simc", talent = true }
 add { key = "grace_of_air_totem",      name = "Grace of Air Totem",      id = 8835,   level = 42, role = "support", use = "group", src = "simc" }
-
-ns.ClassData.SHAMAN.byKey = {}
-for _, s in ipairs(S) do ns.ClassData.SHAMAN.byKey[s.key] = s end

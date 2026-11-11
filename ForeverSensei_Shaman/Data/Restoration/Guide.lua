@@ -1,9 +1,16 @@
--- Data/Shaman/Guide.lua: guide panel sections. Each paragraph is guide.<section>.p<n> in Locales and names its
--- sources (keys in ns.Sources). Facts follow the Forever guides and the Forever client spell data only.
-local _, ns = ...
+-- ForeverSensei_Shaman/Data/Restoration/Guide.lua: Restoration guide sections. Each paragraph is
+-- guide.<section>.p<n> in this pack's Locales and names its sources (keys in P.sources or the core's sources). Facts
+-- follow the Forever guides and the Forever client spell data only.
+local _, P = ...
 local V = "2026-11-09"
+P.specs = P.specs or {}
+P.specs.RESTORATION = P.specs.RESTORATION or {}
+local spec = P.specs.RESTORATION
 
-ns.ClassData.SHAMAN.guide = {
+-- The guide's text tabs, top to bottom (ui.tab.<id> in this pack's Locales); one section each.
+spec.tabs = { "role", "healing", "damage", "totems", "manners" }
+
+spec.guide = {
   { id = "role", paragraphs = {
     { src = { "wh_overview", "moba" } },
     { src = { "wh_abilities" } },
@@ -49,6 +56,6 @@ ns.ClassData.SHAMAN.guide = {
   } },
 }
 
-for _, section in ipairs(ns.ClassData.SHAMAN.guide) do
+for _, section in ipairs(spec.guide) do
   section.verified = section.verified or V
 end

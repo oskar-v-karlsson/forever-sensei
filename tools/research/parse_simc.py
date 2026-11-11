@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Parse a SimulationCraft SpellDataDump class file (e.g. simc-forever shaman.txt)
-into a TSV used as research evidence for Data/Shaman.
+into a TSV used as research evidence for ForeverSensei_Shaman/Data.
 
 Usage: python3 tools/research/parse_simc.py <shaman.txt> [out.tsv]
 Source: https://github.com/simulationcraft/simc-forever/blob/HEAD/SpellDataDump/shaman.txt

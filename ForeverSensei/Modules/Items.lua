@@ -30,9 +30,12 @@ local function playerLevel()
   return ok and type(level) == "number" and level or 1
 end
 
+-- The kinds the active class pack uses (pack.items), sorted.
 function Items.Kinds()
   local list = {}
-  for kind in pairs(ns.ItemData.kinds) do table.insert(list, kind) end
+  for _, kind in ipairs(ns.class and ns.class.items or {}) do
+    if ns.ItemData.kinds[kind] then table.insert(list, kind) end
+  end
   table.sort(list)
   return list
 end
@@ -109,7 +112,7 @@ end
 -- Update the existing item macros whose best item changed. Never creates macros (only the layout does).
 local pending = false
 function Items.Refresh()
-  if not ns.char or not ns.IsShaman() then return end
+  if not ns.char or not ns.Active() then return end
   if ns.InCombat() then
     pending = true
     return
