@@ -430,6 +430,9 @@ def check_static():
     if retired != {("bar6", 145, "MULTIACTIONBAR5BUTTON%d", "PROXY_SHOW_ACTIONBAR_6", 5),
                    ("bar7", 157, "MULTIACTIONBAR6BUTTON%d", "PROXY_SHOW_ACTIONBAR_7", None)}:
         problem("layout: retired must be exactly Action Bars 6 and 7")
+    assigned = {r.get("id"): r.get("assigned") for r in layout.get("retired") or []}
+    if assigned.get("bar6") != [1, 6, 7, 9, 10, 12] or assigned.get("bar7") != [1, 2, 3, 4, 5, 6]:
+        problem("layout: retired assigned must be layout 3's buttons (bar6 1,6,7,9,10,12; bar7 1-6)")
     for b in layout["bars"]:
         if b["first"] >= 145 or b.get("setting") in ("PROXY_SHOW_ACTIONBAR_6", "PROXY_SHOW_ACTIONBAR_7") \
                 or re.match(r"MULTIACTIONBAR[56]BUTTON", b.get("binding") or ""):

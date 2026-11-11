@@ -667,22 +667,25 @@ function Layout.Preview()
   ns.UI.Refit(preview)
 end
 
--- The clean-up button: every button of the bars the full layout uses, and of the retired Action Bars 6 and 7, except
--- the player's own buttons (5 and Shift+5). → plan with clears only (Execute backs them up, Undo restores them)
+-- The clean-up button: only the buttons the addon configures. Those are every slot of the plan (spells, item macros,
+-- stand-ins, and slots kept free for spells not learned yet) and the buttons layout 3 filled on the retired Action
+-- Bars 6 and 7. Spare buttons, the player's own buttons and any other button are never touched.
+-- → plan with clears only (Execute backs them up, Undo restores them)
 function Layout.BuildCleanPlan()
   local layout = L()
   local plan = { place = {}, moves = {}, clears = {}, lost = {}, binds = {}, bars = {}, hide = {} }
-  local function scan(bar)
-    for i = 1, 12 do
+  local function add(slot, where)
+    local cur = Layout.Current(slot)
+    if cur then table.insert(plan.clears, { slot = slot, where = where, label = Layout.Label(cur) }) end
+  end
+  for _, s in ipairs(layout.slots) do add(s.slot, s) end
+  for _, bar in ipairs(layout.retired) do
+    for _, i in ipairs(bar.assigned) do
       local slot = bar.first + i - 1
-      local cur = not layout.own[slot] and Layout.Current(slot)
-      if cur then
-        table.insert(plan.clears, { slot = slot, where = { bar = bar.id, button = i, slot = slot }, label = Layout.Label(cur) })
-      end
+      add(slot, { bar = bar.id, button = i, slot = slot })
     end
   end
-  for _, bar in ipairs(layout.bars) do scan(bar) end
-  for _, bar in ipairs(layout.retired) do scan(bar) end
+  table.sort(plan.clears, function(a, b) return a.slot < b.slot end)
   return plan
 end
 

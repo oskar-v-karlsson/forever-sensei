@@ -234,27 +234,43 @@ return function(ns, lang)
   ok, why = same(migS, settingsSnap())
   if not ok then fail("migration undo: bar settings differ: " .. why) end
 
-  -- Clean bars: asks first, empties every button of the layout's bars and of Action Bars 6/7 except 5 and Shift+5,
-  -- leaves other bars alone, and Undo puts everything back.
+  -- Clean bars: asks first, empties only the buttons the addon configures (planned slots, including ones kept free for
+  -- spells not learned yet, and layout 3's buttons on Action Bars 6/7), keeps spare and own buttons and everything
+  -- else, and Undo puts everything back.
+  local spare = L.spare[1].slot
+  local unlearned = L.bySpell.chain_heal.slot
+  for _, sl in ipairs(L.slots) do
+    if sl.slot == spare or sl.slot == 146 then fail("clean: test slot " .. sl.slot .. " is planned") end
+  end
+  local knownBefore = STUB.known
+  STUB.known = {}
+  for id in pairs(knownBefore) do STUB.known[id] = true end
+  for _, id in ipairs(ns.Spells.Ranks(ns.Spells.Get("chain_heal"))) do STUB.known[id] = nil end
+  if ns.Spells.IsKnown(ns.Spells.Get("chain_heal")) then
+    fail("clean: Chain Heal should be unlearned here, to test a slot kept free for it")
+  end
   STUB.actions = { [1] = { "spell", 403 }, [5] = { "item", 6948 }, [65] = { "spell", 324 }, [30] = { "item", 6948 },
-    [45] = { "spell", 331 }, [149] = { "spell", 403 }, [160] = { "spell", 324 }, [100] = { "spell", 403 } }
+    [45] = { "spell", 331 }, [149] = { "spell", 403 }, [160] = { "spell", 324 }, [100] = { "spell", 403 },
+    [spare] = { "spell", 324 }, [146] = { "spell", 403 }, [unlearned] = { "spell", 403 } }
   local clA = snapshot()
   try("clean", ns.Layout.Clean)
   local cf = _G.ForeverSenseiConfirm
-  if not cf or not cf:IsShown() or not (cf.text:GetText() or ""):find("6", 1, true) then
-    fail("clean: no confirmation shown")
+  if not cf or not cf:IsShown() or not (cf.text:GetText() or ""):find(ns.T("ui.clean.confirm", { n = 5 }), 1, true) then
+    fail("clean: no confirmation for the 5 planned buttons shown")
   else
     fits("clean confirm", cf)
     try("clean confirm", function() cf.yes:Click() end)
   end
+  local keepSlots = { [5] = true, [65] = true, [100] = true, [149] = true, [146] = true, [spare] = true }
   for slot in pairs(clA) do
-    local keep = slot == 5 or slot == 65 or slot == 100
+    local keep = keepSlots[slot] or false
     if (STUB.actions[slot] ~= nil) ~= keep then fail("clean: slot " .. slot .. (keep and " was emptied" or " still set")) end
   end
   try("clean undo", ns.Layout.Undo)
   ok, why = same(clA, (snapshot()))
   if not ok then fail("clean undo: action slots differ: " .. why) end
   STUB.actions = { [5] = { "item", 6948 }, [65] = { "spell", 324 } }
+  STUB.known = knownBefore
   if cf then cf:Hide() end
   try("clean nothing", ns.Layout.Clean)
   if cf and cf:IsShown() then fail("clean: asked although only the own buttons hold something") end

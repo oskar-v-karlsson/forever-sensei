@@ -3,7 +3,7 @@
 A Japanese class coach addon for **World of Warcraft: Forever**. Version 1 covers the **Restoration Shaman** healer (made for a Skyborne / Horde player) from level 1 to 60.
 
 - **New skill cards (新しいスキル):** when you learn a skill, a card explains in Japanese what it does, when to use it, where it goes on your bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
-- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot and key, planned for a level-60 dungeon healer, so a key never moves as you level. Only keys near WASD are used: `1-4`, `Q E R F`, `Z X C`, the same keys with Shift or Ctrl, and the two mouse side buttons. The heals have keys without a modifier (`F`, `E`, `R`, Mouse 4, Mouse 5), and spells for the same job share one key with Shift and Ctrl (e.g. `1` / `Shift+1` / `Ctrl+1` move your totems). `5`, `Shift+5` and `Ctrl+5` are yours: the addon never touches them. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them. **バーを空にする** first empties the bars the layout uses (except your `5` buttons), so nothing of your own is left in between.
+- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot and key, planned for a level-60 dungeon healer, so a key never moves as you level. Only keys near WASD are used: `1-4`, `Q E R F`, `Z X C`, the same keys with Shift or Ctrl, and the two mouse side buttons. The heals have keys without a modifier (`F`, `E`, `R`, Mouse 4, Mouse 5), and spells for the same job share one key with Shift and Ctrl (e.g. `1` / `Shift+1` / `Ctrl+1` move your totems). `5`, `Shift+5` and `Ctrl+5` are yours: the addon never touches them. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them. **バーを空にする** first empties only the buttons the layout uses, so the full layout starts clean; your other buttons stay.
 - **New ranks:** the game does not put a new rank on the bars, so the addon upgrades bar buttons to the highest rank automatically (after combat if you are fighting), with a toast and **元に戻す** to keep the old rank. It can be turned off in the settings. Healing macros are checked to cast the highest rank too.
 - **Healing targeting:** mouseover healing macros, or plain spells for click-target healing. One setting switches between them.
 - **Talent advisor (タレント):** when you have an unspent point, it shows the next talent from the Mobalytics build with a short reason, plus the full order.
@@ -41,7 +41,7 @@ To update, delete the old `ForeverSensei` folder and put the new one in its plac
 1. Type `/sensei`, or click the minimap button, or use the addon compartment (the AddOns button at the minimap). The guide opens.
 2. Open **キー配置** (layout), choose how to pick a healing target (**マウスオーバーで回復** or **ターゲットを回復**), then press **すべて配置** to see the preview.
 3. The preview lists every slot and key that changes. Press **適用** to apply. `/sensei undo` or the **元に戻す** button restores the old bars and keys.
-   To start from empty bars, press **バーを空にする** first (`/sensei clean`). It asks first, empties Action Bars 1-5 except `5` and `Shift+5` (and Action Bars 6 and 7 if anything is left there), and saves the bars, so **元に戻す** puts them back.
+   To start from empty bars, press **バーを空にする** first (`/sensei clean`). It asks first and empties only the buttons the addon configures: every planned slot (spells, item macros, and slots kept free for spells you haven't learned yet) and the buttons 0.4.0 used on Action Bars 6 and 7. Spare buttons, `5`, `Shift+5` and every other button stay. It saves the bars first, so **元に戻す** puts them back.
 
    Note: the full layout binds `Q`/`E` (strafe by default), `Shift+1-4` (bar paging by default), `Ctrl+1` (first stance-bar button, e.g. Ghost Wolf) and the mouse side buttons. The preview warns about this.
 4. Play. New skills show a card out of combat. Cards wait until combat ends, and bar or key changes started in combat are applied when it ends.
@@ -56,7 +56,7 @@ The game's 12.x API hides health, cooldowns and auras from addons in combat, so 
 | `/sensei skills` | Skill list by level: learned, not learned, and slot. **カード** opens the skill's card. |
 | `/sensei layout` | Key layout tab |
 | `/sensei apply` / `/sensei undo` | Apply the full layout (with preview) / restore the backup |
-| `/sensei clean` | Empty the bars the full layout uses, except `5` and `Shift+5` (asks first; **元に戻す** restores) |
+| `/sensei clean` | Empty only the buttons the full layout uses (asks first; **元に戻す** restores) |
 | `/sensei talents` | Talent advice; `/sensei order` shows the full order |
 | `/sensei trainer` | Skills available at the trainer for your level |
 | `/sensei card <Spell>` | Show the card for a spell (English name, e.g. `/sensei card Chain Heal`) |
@@ -150,7 +150,7 @@ These cannot be tested outside the game. Please go through them once, then paste
 23. [ ] **Levelling:** below level 20, `X` holds Lightning Shield; after learning Water Shield and **配置する**, `X` holds Water Shield and Lightning Shield moves to bar 3. A key whose spell is not learned yet stays empty.
 24. [ ] **Totem Bar:** the addon does not set up the Totem Bar (3 pages of 4 totems for Call of the Elements/Ancestors/Spirits). Set it up by hand and check that Call of the Elements puts down that set.
 25. [ ] **Update from 0.4.0:** with the 0.4.0 layout applied (Action Bars 6 and 7 in the middle of the screen), the first login shows the layout message once. **すべて配置** lists Action Bars 6 and 7 under the bars to hide; after **適用** they are gone, the Ctrl and mouse keys work from Action Bar 5, and nothing is left over the character. **元に戻す** brings bars 6 and 7 back as they were.
-26. [ ] **バーを空にする:** put a few things of your own on Action Bars 1-5 and on `5` and `Shift+5`. The button asks first; after confirming, Action Bars 1-5 are empty except `5` and `Shift+5`, and the other bars are unchanged. **元に戻す** puts everything back. Out of combat only: in combat it says to try again after the fight.
+26. [ ] **バーを空にする:** put a few things of your own on planned buttons, on spare buttons (e.g. the free buttons of Action Bar 3) and on `5` and `Shift+5`. The button asks first; after confirming, only the planned buttons are empty, and the spare buttons, `5`, `Shift+5` and the other bars are unchanged. **元に戻す** puts everything back. Out of combat only: in combat it says to try again after the fight.
 
 ## Translation reports
 

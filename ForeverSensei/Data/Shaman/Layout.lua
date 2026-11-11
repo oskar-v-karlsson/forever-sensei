@@ -58,11 +58,13 @@ L.bars = {
 }
 
 -- Bars the addon no longer uses (layout 3 put the Ctrl and mouse spells there). A full apply hides them, clears the
--- plan's spells from them and unbinds keys bound to their buttons; the clean-up button empties them. own: layout 3's
--- Ctrl+5 button (the player's), which a full apply leaves alone.
+-- plan's spells from them and unbinds keys bound to their buttons. own: layout 3's Ctrl+5 button (the player's),
+-- which a full apply leaves alone. assigned: the buttons layout 3 filled, the only ones the clean-up button empties.
 L.retired = {
-  { id = "bar6", first = 145, binding = "MULTIACTIONBAR5BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_6", own = 5 },
-  { id = "bar7", first = 157, binding = "MULTIACTIONBAR6BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_7" },
+  { id = "bar6", first = 145, binding = "MULTIACTIONBAR5BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_6", own = 5,
+    assigned = { 1, 6, 7, 9, 10, 12 } },
+  { id = "bar7", first = 157, binding = "MULTIACTIONBAR6BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_7",
+    assigned = { 1, 2, 3, 4, 5, 6 } },
 }
 
 -- Bumped when slots or keys change: players who had the older layout get a one-time notice (Modules/Layout.lua).

@@ -1,7 +1,7 @@
 -- Core/Init.lua: namespace, safe event bus, combat queue, saved variables and the /sensei command.
 local ADDON, ns = ...
 ns.ADDON = ADDON
-ns.VERSION = "0.4.1"
+ns.VERSION = "0.4.2"
 do
   local getMeta = C_AddOns and C_AddOns.GetAddOnMetadata
   if getMeta then
@@ -186,7 +186,7 @@ local function help()
   ns.Print("/sensei layout       - key layout")
   ns.Print("/sensei talents      - talent advice")
   ns.Print("/sensei apply        - full key layout (preview first)")
-  ns.Print("/sensei clean        - empty the layout's bars (asks first)")
+  ns.Print("/sensei clean        - empty the layout's own buttons (asks first)")
   ns.Print("/sensei undo         - undo the last bar change")
   ns.Print("/sensei report       - send translation reports")
   ns.Print("/sensei review       - translation check")
