@@ -2,9 +2,9 @@
 
 Every fact in ForeverSensei comes from a **World of Warcraft: Forever** source: the Forever client data, Forever guides, or the Forever UI code. Classic and Retail pages were never used, because Forever changed many spells and talents.
 
-All entries were checked on **2026-11-09** against client **1.60.1.70862**. Each data entry in `ForeverSensei_Shaman/Data/**/*.lua` (the Shaman class pack) and `ForeverSensei/Data/Items.lua` has a `src` key, which points into the pack's `P.sources` in `ForeverSensei_Shaman/Data/Spells.lua` or the core's `ns.Sources` in `ForeverSensei/Core/Class.lua`, and a `verified` date. `make check` fails if any entry is missing them.
+All entries were checked against client **1.60.1.70862**: the Shaman pack on **2026-11-09**, the Paladin pack on **2026-11-11**. Each data entry in `ForeverSensei_<Class>/Data/**/*.lua` (the class packs) and `ForeverSensei/Data/Items.lua` has a `src` key, which points into the pack's `P.sources` in `ForeverSensei_<Class>/Data/Spells.lua` or the core's `ns.Sources` in `ForeverSensei/Core/Class.lua`, and a `verified` date. `make check` fails if any entry is missing them.
 
-## Game data and guides
+## Game data and guides (Shaman pack)
 
 | Key | Source | Used for |
 |---|---|---|
@@ -33,6 +33,29 @@ These 7 are not in the simc dump. Their IDs and levels come from Wowhead Forever
 | Call of the Ancestors | 66843 | 30 |
 | Astral Recall | 556 | 30 |
 | Call of the Spirits | 66844 | 40 |
+
+## Game data and guides (Paladin pack, Protection)
+
+All checked on **2026-11-11**. The research behind the key layout, the pull walkthroughs and every decision is in [research/keybind-layout-paladin.md](research/keybind-layout-paladin.md) (its "Sources" section has more detail).
+
+| Key | Source | Used for |
+|---|---|---|
+| `simc` | [simc-forever SpellDataDump/paladin.txt](https://github.com/simulationcraft/simc-forever/blob/HEAD/SpellDataDump/paladin.txt) (commit `3c1d319e`), header "SimulationCraft 160-01 for World of Warcraft 1.60.1.70862 Live". Parsed copy: `research/paladin_simc_1.60.1.70862.tsv` (`tools/research/parse_simc.py`) | 42 of the 45 spells and every talent: ID, English name, level, cast, cooldown, GCD, cost, duration, the "Use Shapeshift Bar" attribute of the auras. `make check` cross-checks the data against the TSV. |
+| `simc` ranks | Same dump, through `tools/research/gen_ranks.py --class paladin` → `ForeverSensei_Paladin/Data/Ranks.lua` | Every rank's spell ID and trainer level. Holy Light rank 1 ([635](https://www.wowhead.com/forever/spell=635), level 1) is missing from the dump and comes from its Wowhead Forever tooltip. |
+| `wh_tt` | Wowhead Forever tooltips, `https://nether.wowhead.com/forever/tooltip/spell/<id>` | Current tooltip text (ranges, effects, Forbearance, "Does not consume the Seal"), and 3 spells whose ID the pack takes from a tooltip: Holy Light (635, rank 1, missing from the dump), Summon Warhorse (13819), Summon Charger (23214) |
+| `wh_guide` | [Wowhead: Protection Paladin Leveling Guide - WoW: Forever](https://www.wowhead.com/forever/guide/classes/paladin/protection/tank-leveling-tips), Riyani, updated 2026-11-06 | **The talent path**: 0/32/19 with its "Talent Order", one point per level 10-60. The trainer spell list and mana tips. |
+| `moba` | [Mobalytics: WoW Forever Protection Paladin guide](https://mobalytics.gg/wow-forever/classes/protection-paladin-guide), Subtle, updated 2026-11-11 | Gameplay: opener, pull, single- and multi-target rotation, seals, auras, blessings, tips, the "Big Threat Opener" macro. Its 0/35/16 build is only noted as an alternative. |
+| `wh_abil` | [Wowhead Forever: Paladin abilities](https://www.wowhead.com/forever/spells/abilities/paladin) | Which spells exist and are trainable; "New" and "Removed" tags |
+| `ui` | [reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode) @ `7245053`, folder `Forever` | Binding names (`Bindings_Camelot.xml`), the stance bar (`Blizzard_ActionBar/Shared/StanceBar.lua`) and the default Ctrl+1-4 stance bindings |
+
+### Paladin: where sources disagree, or can't be verified
+
+| Topic | Disagreement | Used |
+|---|---|---|
+| Seal of Fury Judgement taunt | `moba`: 4 s. `wh_tt` 1311649 and `simc` 20232 (Judgement of Fury): 3 s. | 3 s (client data). Verify in game. |
+| Blessings of Salvation, Sanctuary and Light; Hammer of the Righteous | Named by a guide or listed in the dump, but not confirmed as trainable in Forever (empty tooltips, missing from `wh_abil` or from both guides). | Left out of every key, text and card until checked in game (`tools/check.py` `PALADIN_EXCLUDED`). Ctrl+E stays spare for Hammer of the Righteous. |
+| `moba` opener macro | `/start attack` (a typo), and its Holy Shield and Exorcism macros cast Consecration. | Our `FS_OPEN` uses `/startattack` and casts Judgement, Swift Judgement and Holy Strike. |
+| Level-60 build | `wh_guide`: 0/32/19. `moba`: 0/35/16. | `wh_guide`, as Oskar asked. |
 
 ## Potions and elixirs
 
@@ -82,7 +105,7 @@ Healthstones for `FS_HEALTH` (key C: a Healthstone first, else the best Healing 
 
 Left out on purpose: Discolored Healing Potions (they heal, then return 75% as poison or disease damage), the PvP Combat potions (18839, 18841, need a PvP rank), the Restored potions (282011, 282013) and draughts.
 
-## Where sources disagree
+## Where sources disagree (Shaman pack)
 
 | Topic | Disagreement | Used |
 |---|---|---|
@@ -97,7 +120,7 @@ Forever runs the modern 12.x UI ("Camelot", `## Interface: 16001`, `WOW_PROJECT_
 
 - [warcraft.wiki.gg](https://warcraft.wiki.gg/): the API reference, including how secret values work in combat in 12.x.
 - [realworldbuilder/wowwrapped docs/addon-api.md](https://github.com/realworldbuilder/wowwrapped/blob/main/docs/addon-api.md): notes on the Forever addon API.
-- [reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode), `Forever`: the function and event lists, `Bindings.xml` (including `MULTIACTIONBAR4BUTTON` for Action Bar 5, which holds the Ctrl and mouse keys, and `MULTIACTIONBAR5BUTTON`/`MULTIACTIONBAR6BUTTON` for Action Bars 6 and 7, which layout 3 used and 0.4.1 hides), the MultiBar layout and pages, the `BUTTON4`/`BUTTON5` key names (`Blizzard_FrameXML/BindingUtil`), the talent tree code, and the macro icon picker. The macro limit, `MAX_CHARACTER_MACROS = 30` (and `MAX_ACCOUNT_MACROS = 120`), is in `Blizzard_APIDocumentationGenerated/MacroConstantsDocumentation.lua`; the addon uses 13 character macros. Details and verification dates for the layout v3 keys are in [research/keybind-layout.md](research/keybind-layout.md).
+- [reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode), `Forever`: the function and event lists, `Bindings.xml` (including `MULTIACTIONBAR4BUTTON` for Action Bar 5, which holds the Ctrl and mouse keys, and `MULTIACTIONBAR5BUTTON`/`MULTIACTIONBAR6BUTTON` for Action Bars 6 and 7, which layout 3 used and 0.4.1 hides), the MultiBar layout and pages, the `BUTTON4`/`BUTTON5` key names (`Blizzard_FrameXML/BindingUtil`), the talent tree code, and the macro icon picker. The macro limit, `MAX_CHARACTER_MACROS = 30` (and `MAX_ACCOUNT_MACROS = 120`), is in `Blizzard_APIDocumentationGenerated/MacroConstantsDocumentation.lua`; the addon uses at most 13 character macros for the Restoration Shaman and 12 for the Protection Paladin (character macros are per character). Details and verification dates for the layout v3 keys are in [research/keybind-layout.md](research/keybind-layout.md).
 - [zyaga/wow-forever-japanese](https://github.com/zyaga/wow-forever-japanese) (WFJ, GPLv2): the Japanese style guide and glossary (name policy, katakana terms), the bundled IPA font, the font-refusal fix (`docs/lessons/2026-09-14-bundled-font-refused-on-fresh-launch.md`), and the AddOns install path.
 
 ## Not verifiable offline: test in the game
@@ -118,3 +141,4 @@ These depend on the live Forever client. They are handled defensively in the cod
 12. Combat: cards hide, and bar or key changes wait until combat ends.
 13. Potion macros (0.3.0): `/use item:<id>` in a character macro, `#showtooltip` picking up the item's icon, and the fixed icon (set by its file name, e.g. `INV_Potion_72`) when the bags have none. `C_Item.GetItemCount` and the required level from `C_Item.GetItemInfo`. `/sensei verify` prints each macro's body and the best item in the bags.
 14. Layout v3 macros (0.4.0): `/stopcasting` in `FS_ES` lets Earth Shock interrupt at once; `FS_NSHW` casts Nature's Swiftness and Healing Wave in one press; `FS_HEALTH` uses a Healthstone else a Healing Potion. Whether Healthstones and potions share a cooldown, and the mana cost of Call of the Elements with a full set.
+15. Paladin pack (0.6.0): the list in [research/keybind-layout-paladin.md](research/keybind-layout-paladin.md) "Verify in game" and the README checklist. Above all: the stance bar order and Ctrl+1-4 firing the auras, the 3 s taunt, `FS_OPEN` casting all three spells in one press, the help macros' self fallback, and the spells left out above.

@@ -7,7 +7,9 @@ The player saves reports in-game and copies them from the 報告を送る box in
 For every report:
 - A suggestion (案) that passes the Japanese rules (tools/textrules.py) and was made against the current text
   (今) is written into the ja.lua that owns the id: ForeverSensei/Locales/ja.lua for the core's texts, or
-  ForeverSensei_<Class>/Locales/ja.lua for a class pack's (skills, talents, guide). Every id lives in one file.
+  ForeverSensei_<Class>/Locales/ja.lua for a class pack's (skills, talents, guide). An id lives in one file per
+  addon, but packs can share ids (guide.role.p1): the report line names the pack, and a report without one whose
+  id is in several packs stays open.
 - Everything else (no suggestion, a suggestion that breaks a rule, text changed since, unknown id) goes to
   reports/open.md with the English source and current Japanese, for a person or agent to handle.
 - Every report is appended to reports/log.md.
@@ -18,7 +20,7 @@ version) and dist/ForeverSensei-v<version>.zip is built with every addon folder 
 
 Report format (Modules/Feedback.lua, Feedback.Format):
     [ForeverSensei v0.1.0 報告 2件]
-    #1 spell.chain_heal.when | 不自然
+    #1 spell.chain_heal.when | 不自然 | ForeverSensei_Shaman      (the pack folder: a pack's text; packs can share ids)
     今: <current Japanese>
     案: <suggested Japanese>          (optional)
     メモ: <note>                      (optional)
@@ -42,7 +44,7 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 import textrules  # noqa: E402
 
 HEADER = re.compile(r"\[ForeverSensei v(\S+) 報告 (\d+)件\]")
-ITEM = re.compile(r"^#(\d+)\s+(\S+)\s*\|\s*(.*?)\s*$")
+ITEM = re.compile(r"^#(\d+)\s+(\S+)\s*\|\s*(.*?)(?:\s*\|\s*(ForeverSensei_\w+))?\s*$")
 FIELD = re.compile(r"^(今|案|メモ)\s*[:：]\s?(.*)$")
 EN_LINE = re.compile(r'^L\["([^"]+)"\] = "((?:[^"\\]|\\.)*)"$')
 JA_LINE = re.compile(r'^(  \["([^"]+)"\] = )"((?:[^"\\]|\\.)*)"(,)$')
@@ -74,8 +76,8 @@ def parse(text):
             continue
         m = ITEM.match(line)
         if m:
-            cur = {"n": int(m.group(1)), "id": m.group(2), "reason": m.group(3), "current": None,
-                   "suggestion": None, "note": None}
+            cur = {"n": int(m.group(1)), "id": m.group(2), "reason": m.group(3), "pack": m.group(4),
+                   "current": None, "suggestion": None, "note": None}
             out["reports"].append(cur)
             continue
         f = FIELD.match(line)
@@ -93,22 +95,43 @@ def addon_folders():
 
 
 def read_locales():
-    """→ en, ja, owner: texts by id over the core and every pack, and the ja.lua path that owns each id."""
-    en, ja, owner = {}, {}, {}
+    """→ en, ja, owners: en[path][id] and ja[path][id] for every addon's ja.lua path, and owners[id] = the ja.lua
+    paths that have the id (the core, or one or more packs)."""
+    en, ja, owners = {}, {}, {}
     for folder in addon_folders():
+        path = os.path.join(folder, "Locales", "ja.lua")
+        en[path], ja[path] = {}, {}
         with open(os.path.join(folder, "Locales", "en.lua"), encoding="utf-8") as fh:
             for line in fh:
                 m = EN_LINE.match(line.rstrip("\n"))
                 if m:
-                    en[m.group(1)] = lua_unescape(m.group(2))
-        path = os.path.join(folder, "Locales", "ja.lua")
+                    en[path][m.group(1)] = lua_unescape(m.group(2))
         with open(path, encoding="utf-8") as fh:
             for line in fh:
                 m = JA_LINE.match(line.rstrip("\n"))
                 if m:
-                    ja[m.group(2)] = lua_unescape(m.group(3))
-                    owner[m.group(2)] = path
-    return en, ja, owner
+                    ja[path][m.group(2)] = lua_unescape(m.group(3))
+                    owners.setdefault(m.group(2), []).append(path)
+    return en, ja, owners
+
+
+def owner_of(report, owners):
+    """→ (ja.lua path, None) or (None, why): the file a report's id belongs to."""
+    paths = owners.get(report["id"], [])
+    if report.get("pack"):
+        want = os.path.join(ROOT, report["pack"], "Locales", "ja.lua")
+        if want in paths:
+            return want, None
+        core = os.path.join(ROOT, "ForeverSensei", "Locales", "ja.lua")
+        if paths == [core]:
+            return core, None
+        return None, f"unknown id in {report['pack']} (renamed or removed?)"
+    if len(paths) == 1:
+        return paths[0], None
+    if not paths:
+        return None, "unknown id (renamed or removed?)"
+    return None, "the id is in several packs and the report does not say which: " + ", ".join(
+        os.path.relpath(p, ROOT) for p in paths)
 
 
 def names():
@@ -123,14 +146,15 @@ def names():
     return out
 
 
-def write_ja(changes, owner):
-    for path in sorted({owner[rid] for rid in changes}):
+def write_ja(changes):
+    """changes: {(ja.lua path, id): new Japanese}."""
+    for path in sorted({p for p, _ in changes}):
         with open(path, encoding="utf-8") as fh:
             lines = fh.read().split("\n")
         for i, line in enumerate(lines):
             m = JA_LINE.match(line)
-            if m and m.group(2) in changes and owner[m.group(2)] == path:
-                lines[i] = f'{m.group(1)}"{lua_escape(changes[m.group(2)])}"{m.group(4)}'
+            if m and (path, m.group(2)) in changes:
+                lines[i] = f'{m.group(1)}"{lua_escape(changes[(path, m.group(2))])}"{m.group(4)}'
         with open(path, "w", encoding="utf-8") as fh:
             fh.write("\n".join(lines))
 
@@ -158,9 +182,9 @@ def bump_version():
     return old, new
 
 
-def build_zip():
+def build_zip(dist=None):
     v = version()
-    dist = os.path.join(ROOT, "dist")
+    dist = dist or os.path.join(ROOT, "dist")
     os.makedirs(dist, exist_ok=True)
     path = os.path.join(dist, f"ForeverSensei-v{v}.zip")
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
@@ -185,36 +209,39 @@ def process(text, dry_run=False):
         sys.exit("no reports found in the input (expected a line like '[ForeverSensei v0.1.0 報告 2件]')")
     if parsed["count"] is not None and parsed["count"] != len(parsed["reports"]):
         print(f"warning: header says {parsed['count']} reports, found {len(parsed['reports'])} (paste cut off?)")
-    en, ja, owner = read_locales()
+    en, ja, owners = read_locales()
     all_names = names()
     changes, open_items, log = {}, [], []
     for r in parsed["reports"]:
         rid = r["id"]
         status, why = "open", []
-        if rid not in en:
-            why.append("unknown id (renamed or removed?)")
+        path, err = owner_of(r, owners)
+        en_text = en[path].get(rid) if path else None
+        ja_text = ja[path].get(rid) if path else None
+        if err or en_text is None:
+            why.append(err or "unknown id (renamed or removed?)")
         elif r["suggestion"]:
-            if r["current"] and r["current"] != ja.get(rid):
+            if r["current"] and r["current"] != ja_text:
                 why.append("the Japanese changed since it was reported; compare by hand")
-            probs = textrules.ja_problems(rid, r["suggestion"], en[rid], all_names)
+            probs = textrules.ja_problems(rid, r["suggestion"], en_text, all_names)
             if probs:
                 why.append("suggestion breaks rules: " + "; ".join(probs))
-            if r["suggestion"] == ja.get(rid):
+            if r["suggestion"] == ja_text:
                 status, why = "same", []
             elif not why:
-                changes[rid] = r["suggestion"]
+                changes[(path, rid)] = r["suggestion"]
                 status = "applied"
         else:
             why.append("no suggestion: needs a new Japanese text")
         log.append((r, status))
         if status == "open":
-            open_items.append((r, why, en.get(rid), ja.get(rid)))
+            open_items.append((r, why, en_text, ja_text))
 
     today = datetime.date.today().isoformat()
     print(f"{len(parsed['reports'])} report(s) from v{parsed['version']}: "
           f"{len(changes)} applied, {len(open_items)} open")
-    for rid, s in changes.items():
-        print(f"  applied {rid}: {s}")
+    for (path, rid), s in changes.items():
+        print(f"  applied {rid} ({os.path.relpath(path, ROOT)}): {s}")
     for r, why, _, _ in open_items:
         print(f"  open    {r['id']} ({r['reason']}): {'; '.join(why)}")
     if dry_run:
@@ -230,7 +257,8 @@ def process(text, dry_run=False):
                          "better Japanese text in the ja.lua that owns the id (ForeverSensei/Locales or ForeverSensei_<Class>/Locales; follow README 'Processing translation "
                          "reports'), run make check, then delete the entry here. This file is local (reports/ is gitignored); do not commit it.\n")
             for r, why, en_text, ja_text in open_items:
-                fh.write(f"\n## {r['id']} ({r['reason']}, {today}, v{parsed['version']})\n\n")
+                pack = f", {r['pack']}" if r.get("pack") else ""
+                fh.write(f"\n## {r['id']} ({r['reason']}{pack}, {today}, v{parsed['version']})\n\n")
                 fh.write(f"- Why open: {'; '.join(why)}\n")
                 if r["note"]:
                     fh.write(f"- Player's note: {r['note']}\n")
@@ -244,7 +272,7 @@ def process(text, dry_run=False):
             extra = "".join(f" | {k}: {r[k]}" for k in ("suggestion", "note") if r[k])
             fh.write(f"- {today} v{parsed['version']} {r['id']} | {r['reason']} | {status}{extra}\n".replace("\n|", " |"))
     if changes:
-        write_ja(changes, owner)
+        write_ja(changes)
         old, new = bump_version()
         print(f"version {old} -> {new}")
     return parsed, changes, open_items

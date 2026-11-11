@@ -17,12 +17,17 @@ local function oneLine(s)
 end
 Feedback.OneLine = oneLine
 
--- reports: list of { id, reason, now, suggestion, note }. → text
+-- reports: list of { id, reason, now, suggestion, note, pack }. → text. A pack's text gets its folder at the end of
+-- its line ("#1 guide.role.p1 | 不自然 | ForeverSensei_Paladin"): packs can use the same id.
 function Feedback.Format(reports, version)
   local lines = {}
   table.insert(lines, string.format("[ForeverSensei v%s 報告 %d件]", version or ns.VERSION, #reports))
   for i, r in ipairs(reports) do
-    table.insert(lines, string.format("#%d %s | %s", i, r.id, ns.Raw("ui.reason." .. (r.reason or Feedback.DEFAULT_REASON), "ja")))
+    local line = string.format("#%d %s | %s", i, r.id, ns.Raw("ui.reason." .. (r.reason or Feedback.DEFAULT_REASON), "ja"))
+    -- Reports saved before 0.6.0 have no pack: they come from the pack in use.
+    local pack = r.pack or ns.TextPack(r.id)
+    if pack then line = line .. " | " .. pack end
+    table.insert(lines, line)
     table.insert(lines, "今: " .. oneLine(r.now))
     if r.suggestion and oneLine(r.suggestion) ~= "" then table.insert(lines, "案: " .. oneLine(r.suggestion)) end
     if r.note and oneLine(r.note) ~= "" then table.insert(lines, "メモ: " .. oneLine(r.note)) end
@@ -46,6 +51,7 @@ function Feedback.Save(id, reason, suggestion, note)
     suggestion = suggestion,
     note = note,
     version = ns.VERSION,
+    pack = ns.TextPack(id),
     time = time and time() or 0,
   })
   ns.db.review[id] = "reported"

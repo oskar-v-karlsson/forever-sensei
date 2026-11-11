@@ -1,0 +1,20 @@
+## Interface: 16001
+## Title: ForeverSensei - Paladin
+## Notes: Protection Paladin pack for ForeverSensei: skills, key layout, talents and guide.
+## Notes-jaJP: ForeverSensei用のProtection パラディンのパック（スキル・キー配置・タレント・ガイド）。
+## Author: oskar-v-karlsson
+## Version: 0.6.0
+## Dependencies: ForeverSensei
+## LoadOnDemand: 1
+## X-ForeverSensei-API: 1
+## IconTexture: Interface\Icons\Spell_Holy_DevotionAura
+## X-License: GPL-2.0-or-later
+
+Locales\en.lua
+Locales\ja.lua
+Data\Spells.lua
+Data\Ranks.lua
+Data\Protection\Layout.lua
+Data\Protection\Talents.lua
+Data\Protection\Guide.lua
+Register.lua

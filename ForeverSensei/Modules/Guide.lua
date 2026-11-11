@@ -218,6 +218,7 @@ renderers.layout = function(frame)
         local rowY = second and y + 58 or y
         local e = s and s.spell and Spells.Get(s.spell)
         if e and s.standIn and not Spells.IsKnown(e) then e = Spells.Get(s.standIn) end
+        if s and s.combo then e = Spells.Get(layout.combos[s.combo].needs) end
         icon(frame, n, x + (step - 46) / 2, rowY, 38, s and (s.item or e) or false)
         local keyText = pool(frame, "key", n, function() return UI.Text(frame, 10, "gold") end)
         keyText:SetWidth(step)
@@ -228,6 +229,10 @@ renderers.layout = function(frame)
       end
     end
     y = y + (twoRows and 116 or 58)
+  end
+  -- Keys the spec leaves on their game default (the paladin's Ctrl+1-4 = auras on the stance bar).
+  for i, id in ipairs(layout.keyNotes or {}) do
+    y = y + label(frame, 15 + i, y, ns.T(id), 12, "grey") + 4
   end
   -- Spells without a bar slot, one line per kind the spec lists (noSlotLines: { kind, text }).
   for i, line in ipairs(layout.noSlotLines or {}) do

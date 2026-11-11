@@ -42,16 +42,22 @@ function ns.KeyLabel(key)
 end
 
 -- A spec layout from its plan: L.plan[bar id] = 12 entries (a spell key; "@kind" an item macro; "-" a spare button;
--- "#" the player's own button; { "key", standIn = .., after = .. } a spell with options). Builds L.slots, L.bySpell,
--- L.byItem, L.own (slot → true) and L.spare (unplanned buttons, in L.spareOrder bar order: first choice for things
--- moved out of a planned slot; key/binding for keyed bars).
+-- "#" the player's own button; "x" a button the addon never uses (not spare, never filled or bound); "!id" a multi-spell macro from L.combos; { "key", standIn = .., after = .. } a spell
+-- with options). Builds L.slots, L.bySpell, L.byItem, L.byCombo, L.own (slot → true) and L.spare (unplanned buttons,
+-- in L.spareOrder bar order: first choice for things moved out of a planned slot; key/binding for keyed bars).
+-- A bar's keys entry false leaves that button unbound and the key on its game default (the paladin's Ctrl+1-4).
 function ns.BuildLayout(L)
-  L.slots, L.bySpell, L.byItem, L.own, L.spare = {}, {}, {}, {}, {}
+  L.slots, L.bySpell, L.byItem, L.byCombo, L.own, L.spare = {}, {}, {}, {}, {}, {}
   L.noSlot = L.noSlot or {}
   L.macros = L.macros or {}
   L.macroKind = L.macroKind or {}
   L.macroAlways = L.macroAlways or {}
   L.macroVars = L.macroVars or {}
+  L.combos = L.combos or {}
+  L.old = L.old or {}
+  L.oldOwn = L.oldOwn or {}
+  L.retired = L.retired or {}
+  L.ownKeys = L.ownKeys or {}
   L.KeyLabel = ns.KeyLabel
   local spareByBar = {}
   for _, bar in ipairs(L.bars) do
@@ -64,18 +70,27 @@ function ns.BuildLayout(L)
       local binding = key and string.format(bar.binding, i) or nil
       if what == "#" then
         L.own[slotNo] = true
+      elseif what == "x" then -- nothing: the addon leaves this button alone
       elseif what == "-" then
         table.insert(spareByBar[bar.id], { bar = bar.id, button = i, slot = slotNo, key = key, binding = binding })
       else
         local opts = type(what) == "table" and what or {}
         if type(what) == "table" then what = what[1] end
         local item = what:match("^@(%w+)$")
+        local combo = what:match("^!(%w+)$")
         local slot = {
           bar = bar.id, button = i, slot = slotNo, key = key, binding = binding,
-          spell = not item and what or nil, item = item, standIn = opts.standIn, after = opts.after,
+          spell = not item and not combo and what or nil, item = item, combo = combo,
+          standIn = opts.standIn, after = opts.after,
         }
         table.insert(L.slots, slot)
-        if item then L.byItem[item] = slot else L.bySpell[what] = slot end
+        if item then
+          L.byItem[item] = slot
+        elseif combo then
+          L.byCombo[combo] = slot
+        else
+          L.bySpell[what] = slot
+        end
       end
     end
   end

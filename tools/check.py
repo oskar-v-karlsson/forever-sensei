@@ -119,9 +119,9 @@ end
 """
 
 
-def new_runtime(cls="SHAMAN", meta=None, db=None):
+def new_runtime(cls="SHAMAN", meta=None, db=None, skip=()):
     """A fresh fake client with the core loaded (not logged in). meta: {pack folder: {TOC field: value}} overrides.
-    db: ForeverSenseiDB from an earlier session (Lua source)."""
+    db: ForeverSenseiDB from an earlier session (Lua source). skip: pack folders not installed."""
     lua = lupa_mod.LuaRuntime(unpack_returned_tuples=True)
     lua.execute(read(os.path.join(ROOT, "tools", "wow_stub.lua")))
     lua.execute(LOADER)
@@ -143,6 +143,8 @@ def new_runtime(cls="SHAMAN", meta=None, db=None):
         except Exception as e:  # noqa: BLE001
             problem(f"load {CORE}/{rel}: {e}")
     for folder in pack_folders():
+        if folder in skip:
+            continue
         m, files = toc(folder)
         m.update((meta or {}).get(folder) or {})
         stub.addonMeta[folder] = lua.table_from(m)
@@ -231,7 +233,23 @@ def check_runtime():
         reports.append(out.get("report"))
         check_shown(lua, lang)
     for lang in ("ja", "en"):
+        # Protection Paladin: the paladin pack loads, the shaman pack stays unloaded.
+        lua, ns = new_runtime(cls="PALADIN", db="{ settings = { language = %r } }" % lang)
+        stub = lua.globals().STUB
+        login(lua, ns)
+        if stub.loadCalls != 1 or not stub.loaded["ForeverSensei_Paladin"] or stub.loaded["ForeverSensei_Shaman"]:
+            problem(f"runtime paladin [{lang}] ForeverSensei_Paladin was not the one pack loaded at login")
+        if ns.packNote is not None:
+            problem(f"runtime paladin [{lang}] a Paladin with the pack got a pack note")
+        run = lua.execute(read(os.path.join(ROOT, "tools", "scenarios_paladin.lua")))
+        out = py(run(ns, lang))
+        for e in out.get("errors") or []:
+            problem("runtime " + e)
+        check_shown(lua, "paladin " + lang)
+    for lang in ("ja", "en"):
         check_idle(lang)
+        # A Paladin with only the Shaman pack installed: the same note, idle.
+        check_idle(lang, "PALADIN", skip=("ForeverSensei_Paladin",))
         check_api_mismatch(lang)
     check_language()
     return reports
@@ -353,10 +371,12 @@ def unexpected_errors(ns):
             if not re.search(r"\d (LoadAddOn ForeverSensei_\w+: MISSING|cannot register )", e)]
 
 
-def check_idle(lang):
-    """A Warrior: no pack. One note per character, then idle; /sensei still opens."""
-    label = f"runtime idle [{lang}]"
-    lua, ns = new_runtime(cls="WARRIOR")
+def check_idle(lang, cls="WARRIOR", skip=()):
+    """A class without an installed pack (a Warrior; a Paladin without ForeverSensei_Paladin). One note per character,
+    then idle; /sensei still opens."""
+    label = f"runtime idle {cls} [{lang}]"
+    folder = "ForeverSensei_" + cls.capitalize()
+    lua, ns = new_runtime(cls=cls, skip=skip)
     stub = lua.globals().STUB
     lua.execute("ForeverSenseiDB = { settings = { language = %r } }" % lang)
     login(lua, ns)
@@ -364,10 +384,10 @@ def check_idle(lang):
         problem(f"{label}: a class pack is active for a Warrior")
     if ns.Active():
         problem(f"{label}: ns.Active() is true without a pack")
-    if not ns.packNote or ns.packNote.id != "ui.pack.missing" or ns.packFolder != "ForeverSensei_Warrior":
-        problem(f"{label}: no 'ui.pack.missing' note for ForeverSensei_Warrior")
-    if stub.loadCalls != 1:
-        problem(f"{label}: LoadAddOn calls {stub.loadCalls}, expected 1 (ForeverSensei_Warrior)")
+    if not ns.packNote or ns.packNote.id != "ui.pack.missing" or ns.packFolder != folder:
+        problem(f"{label}: no 'ui.pack.missing' note for {folder}")
+    if stub.loadCalls != 1 or any(py(stub.loaded) or {}):
+        problem(f"{label}: LoadAddOn calls {stub.loadCalls}, expected 1 ({folder}, missing), loaded {py(stub.loaded)}")
     if note_count(lua, ns) != 1:
         problem(f"{label}: the note was shown {note_count(lua, ns)} times at the first login, expected 1")
     # Game events that drive cards, hints and the layout do nothing.
@@ -403,7 +423,7 @@ def check_idle(lang):
     check_shown(lua, "idle " + lang)
     # Next session: no second note.
     db = lua.globals().STUB.serialize(lua.globals().ForeverSenseiDB)
-    lua2, ns2 = new_runtime(cls="WARRIOR", db=db)
+    lua2, ns2 = new_runtime(cls=cls, db=db, skip=skip)
     login(lua2, ns2)
     if not ns2.packNote or note_count(lua2, ns2) != 0:
         problem(f"{label}: the note came back at the second login")
@@ -567,7 +587,7 @@ def check_texts(ns, core_en, core_ja, pack_texts, packs):
             problem(f"text {k}: a class text (ns.PackTexts) must live in the packs, not in {CORE}")
     # The core is class-neutral.
     for k, v in list(core_en.items()) + list(core_ja.items()):
-        if re.search(r"Shaman|シャーマン|[Tt]otem|トーテム", v):
+        if re.search(r"Shaman|シャーマン|[Tt]otem|トーテム|Paladin|パラディン", v):
             problem(f"text {k}: class words in a core text (move it to the class pack)")
 
     # Every character of every text (and the UI symbols) must be in the bundled font.
@@ -644,7 +664,7 @@ def check_spells(pack, sources):
         for f in ("key", "name", "id", "level", "role", "use", "src", "verified"):
             if s.get(f) in (None, ""):
                 problem(f"spell {s.get('key')}: missing {f}")
-        if s.get("role") not in ("heal", "damage", "support"):
+        if s.get("role") not in ("heal", "damage", "support", "tank"):
             problem(f"spell {s['key']}: bad role")
         if s.get("use") not in ("group", "solo", "both"):
             problem(f"spell {s['key']}: bad use")
@@ -664,12 +684,18 @@ def check_layout(pack, layout):
     seen_slot, seen_key, seen_spell = {}, {}, {}
     allowed = set(layout["allowedKeys"])
 
+    combos = layout.get("combos") or {}
+
     def what(s):
+        if s.get("combo"):
+            return "!" + s["combo"]
         return s.get("spell") or "@" + str(s.get("item"))
 
     for s in slots:
-        if bool(s.get("spell")) == bool(s.get("item")):
-            problem(f"layout: slot {s['slot']} must hold exactly one spell or item")
+        if sum(bool(s.get(f)) for f in ("spell", "item", "combo")) != 1:
+            problem(f"layout: slot {s['slot']} must hold exactly one spell, item or combo")
+        if s.get("combo") and s["combo"] not in combos:
+            problem(f"layout: slot {s['slot']} combo {s['combo']} is not in L.combos")
         for kind, seen, val in (("slot", seen_slot, s["slot"]), ("key", seen_key, s.get("key")), ("entry", seen_spell, what(s))):
             if val is None:
                 continue
@@ -702,8 +728,9 @@ def check_layout(pack, layout):
         unslotted = k in layout["noSlot"]
         if placed == unslotted:
             problem(f"layout: spell {k} must be in exactly one of the plan or noSlot")
+    stand_ins = {s["standIn"] for s in slots if s.get("standIn")}
     for k, m in layout["macros"].items():
-        if k not in seen_spell:
+        if k not in seen_spell and k not in stand_ins:
             problem(f"layout: macro for unplaced spell {k}")
         if len(m) > 16:
             problem(f"layout: macro name {m} too long")
@@ -713,8 +740,24 @@ def check_layout(pack, layout):
     for line in layout.get("noSlotLines") or []:
         if line.get("kind") not in set(layout["noSlot"].values()):
             problem(f"layout: noSlotLines kind {line.get('kind')} has no spell")
+    for cid, c in combos.items():
+        if "!" + cid not in seen_spell:
+            problem(f"layout: combo {cid} has no slot")
+        if len(c.get("macro") or "") > 16 or not str(c.get("macro")).startswith("FS_"):
+            problem(f"layout: combo {cid} bad macro name {c.get('macro')}")
+        for var, k in (c.get("vars") or {}).items():
+            if k not in keys:
+                problem(f"layout: combo {cid} var {var} = {k} is not a spell")
+            if "{" + var + "}" not in c.get("body", ""):
+                problem(f"layout: combo {cid} var {var} is not used in its body")
+        if re.search(r"\{(?!(%s)\})\w+\}" % "|".join(c.get("vars") or {"x": 1}), c.get("body", "")):
+            problem(f"layout: combo {cid} body has an unknown placeholder")
+        if c.get("needs") and c["needs"] not in keys:
+            problem(f"layout: combo {cid} needs unknown spell {c['needs']}")
+        if len(c.get("body", "")) > 255:
+            problem(f"layout: combo {cid} body longer than 255 characters")
     # Character macros: Forever allows 30 (MAX_CHARACTER_MACROS); leave most of them to the player.
-    n_macros = len(layout["macros"]) + len(pack_items)
+    n_macros = len(layout["macros"]) + len(pack_items) + len(combos)
     if n_macros > 15:
         problem(f"layout: {n_macros} addon macros (keep it at 15 or fewer of the 30 character macros)")
     if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 1:
@@ -790,17 +833,10 @@ def check_items(items, sources):
             problem(f"items {kind}: the last item should need no level (macro fallback for low levels)")
 
 
-# --- Shaman ---------------------------------------------------------------------------------------------------
-def check_shaman(pack, sources):
+def check_client_dump(pack, cls, talents):
+    """Spells, talents and Ranks.lua against the Forever client dump research/<cls>_simc_1.60.1.70862.tsv."""
     spells = pack["spells"]
-    keys = [s["key"] for s in spells]
-    pack_items = pack["items"]
-    spec = pack["specs"]["RESTORATION"]
-    layout = spec["layout"]
-    talents = spec["talents"]
-    if pack.get("defaultSpec") != "RESTORATION" or set(pack["specs"]) != {"RESTORATION"}:
-        problem("shaman: the pack must have the Restoration spec, the default")
-    tsv = os.path.join(ROOT, "research", "shaman_simc_1.60.1.70862.tsv")
+    tsv = os.path.join(ROOT, "research", f"{cls}_simc_1.60.1.70862.tsv")
     if os.path.exists(tsv):
         with open(tsv, encoding="utf-8") as f:
             rows = {int(r["id"]): r for r in csv.DictReader(f, delimiter="\t")}
@@ -824,11 +860,14 @@ def check_shaman(pack, sources):
                 problem(f"talent {t['key']}: name {t['name']!r} but client has {r['name']!r}")
         # Ranks.lua is generated from the same dump: it must be up to date, and every rank id must be in the dump
         # with the spell's name and "Rank N".
-        gen = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "research", "gen_ranks.py"), "--check"],
+        gen = subprocess.run([sys.executable, os.path.join(ROOT, "tools", "research", "gen_ranks.py"), "--class", cls, "--check"],
                              capture_output=True, text=True)
         if gen.returncode != 0:
-            problem("ranks: " + (gen.stdout + gen.stderr).strip())
+            problem(f"ranks [{cls}]: " + (gen.stdout + gen.stderr).strip())
         by_key = {s["key"]: s for s in spells}
+        sys.path.insert(0, os.path.join(ROOT, "tools", "research"))
+        import gen_ranks
+        extra = {k: {(n, i) for n, i, _ in v} for k, v in gen_ranks.CLASSES[cls]["extra"].items()}
         for key, lst in rank_levels(pack["folder"]).items():
             if key not in by_key:
                 problem(f"ranks: {key} is not a spell in Spells.lua")
@@ -836,6 +875,8 @@ def check_shaman(pack, sources):
             if lst[0][0] != int(by_key[key]["id"]):
                 problem(f"ranks: {key} rank 1 is {lst[0][0]}, Spells.lua has {by_key[key]['id']}")
             for n, (rid, lv) in enumerate(lst, 1):
+                if (n, rid) in extra.get(key, set()):
+                    continue  # missing from the dump, verified on its Wowhead Forever tooltip (gen_ranks.py CLASSES)
                 r = rows.get(rid)
                 if not r or r["name"] != by_key[key]["name"] or r.get("rank") != f"Rank {n}":
                     problem(f"ranks: {key} rank {n} id {rid} does not match the client dump")
@@ -843,6 +884,19 @@ def check_shaman(pack, sources):
                 problem(f"ranks: {key} levels not ascending")
     else:
         problem("research TSV missing: cannot cross-check spells")
+
+
+# --- Shaman ---------------------------------------------------------------------------------------------------
+def check_shaman(pack, sources):
+    spells = pack["spells"]
+    keys = [s["key"] for s in spells]
+    pack_items = pack["items"]
+    spec = pack["specs"]["RESTORATION"]
+    layout = spec["layout"]
+    talents = spec["talents"]
+    if pack.get("defaultSpec") != "RESTORATION" or set(pack["specs"]) != {"RESTORATION"}:
+        problem("shaman: the pack must have the Restoration spec, the default")
+    check_client_dump(pack, "shaman", talents)
 
     # --- layout -----------------------------------------------------------------------------------------------
     slots = layout["slots"]
@@ -1013,7 +1067,157 @@ def check_talents_points(talents):
     return tree_points
 
 
-PACK_CHECKS = {"SHAMAN": check_shaman}
+# --- Paladin --------------------------------------------------------------------------------------------------
+# Spells the paladin research left unverified for Forever: kept out of every text, key and data file.
+PALADIN_EXCLUDED = ("Blessing of Salvation", "Blessing of Sanctuary", "Blessing of Light", "Hammer of the Righteous")
+
+
+def check_paladin(pack, sources):
+    spec = (pack["specs"] or {}).get("PROTECTION") or {}
+    layout = spec.get("layout") or {}
+    talents = spec.get("talents") or {}
+    if pack.get("defaultSpec") != "PROTECTION" or set(pack["specs"]) != {"PROTECTION"}:
+        problem("paladin: the pack must have the Protection spec, the default")
+        return
+    check_client_dump(pack, "paladin", talents)
+    if sorted(pack["items"]) != ["health", "mana"]:
+        problem(f"paladin: items must be health and mana, are {sorted(pack['items'])}")
+    if spec.get("tabs") != ["role", "rotation", "seals", "auras", "cooldowns", "manners"]:
+        problem(f"paladin: Protection tabs must be role, rotation, seals, auras, cooldowns, manners, are {spec.get('tabs')}")
+
+    # --- layout: the approved grid (research/keybind-layout-paladin.md, commit 824c74c) -----------------------
+    slots = layout["slots"]
+    bars = {b["id"]: b for b in layout["bars"]}
+
+    def what(s):
+        return s.get("spell") or ("!" + s["combo"] if s.get("combo") else "@" + str(s.get("item")))
+
+    grid = {
+        "1": "holy_strike", "2": "consecration", "3": "holy_shield", "4": "flash_of_light",
+        "Q": "judgement", "E": "hammer_of_justice", "R": "exorcism", "F": "seal_of_fury",
+        "Z": "@health", "X": "righteous_fury", "C": "templars_bulwark",
+        "SHIFT-4": "holy_light", "SHIFT-Q": "swift_judgement", "SHIFT-E": "hammer_of_wrath",
+        "SHIFT-R": "holy_wrath", "SHIFT-F": "seal_of_righteousness", "SHIFT-Z": "@mana",
+        "SHIFT-X": "blessing_of_kings", "SHIFT-C": "divine_shield",
+        "CTRL-Q": "!opener", "CTRL-R": "turn_undead", "CTRL-F": "seal_of_the_crusader",
+        "CTRL-X": "redemption", "CTRL-C": "divine_protection",
+        "BUTTON4": "blessing_of_protection", "BUTTON5": "cleanse",
+        "SHIFT-BUTTON4": "lay_on_hands", "SHIFT-BUTTON5": "blessing_of_freedom",
+        "CTRL-BUTTON4": "blessing_of_sacrifice", "CTRL-BUTTON5": "voice_of_truth",
+    }
+    by_key = {s["key"]: what(s) for s in slots if s.get("key")}
+    for k in sorted(set(grid) | set(by_key)):
+        if by_key.get(k) != grid.get(k):
+            problem(f"paladin layout: key {k} must be {grid.get(k)}, has {by_key.get(k)}")
+    # Families: one base key, plain / Shift / Ctrl (what the grid above must keep together).
+    families = {
+        "Q": ("judgement", "swift_judgement", "!opener"), "E": ("hammer_of_justice", "hammer_of_wrath", None),
+        "R": ("exorcism", "holy_wrath", "turn_undead"),
+        "F": ("seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader"), "Z": ("@health", "@mana", None),
+        "X": ("righteous_fury", "blessing_of_kings", "redemption"),
+        "C": ("templars_bulwark", "divine_shield", "divine_protection"), "4": ("flash_of_light", "holy_light", None),
+        "BUTTON4": ("blessing_of_protection", "lay_on_hands", "blessing_of_sacrifice"),
+        "BUTTON5": ("cleanse", "blessing_of_freedom", "voice_of_truth"),
+    }
+    for base, fam in families.items():
+        got = tuple(by_key.get(m + base) for m in ("", "SHIFT-", "CTRL-"))
+        if got != fam:
+            problem(f"paladin layout: family on {base} must be {fam}, is {got}")
+    spare_keys = {x["key"] for x in layout["spare"] if x.get("key")}
+    if spare_keys != {"SHIFT-1", "SHIFT-2", "SHIFT-3", "CTRL-E", "CTRL-Z"}:
+        problem(f"paladin layout: spare keys must be Shift+1/2/3, Ctrl+E and Ctrl+Z, are {sorted(spare_keys)}")
+    allowed = set(layout["allowedKeys"])
+    if allowed != set(grid) | spare_keys:
+        problem(f"paladin layout: allowedKeys must be the grid's and spare keys (diff {sorted(allowed ^ (set(grid) | spare_keys))})")
+    # 5, Shift+5, Ctrl+5 are his own; Ctrl+1-4 keep the stance bar (auras): never bound, filled or spare.
+    if layout.get("ownKeys") != ["5", "SHIFT-5", "CTRL-5"]:
+        problem("paladin layout: ownKeys must be 5, SHIFT-5 and CTRL-5")
+    keep = layout.get("keepDefault") or []
+    if keep != ["CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4"]:
+        problem("paladin layout: keepDefault must be Ctrl+1-4 (the stance bar, auras)")
+    if (set(keep) | set(layout["ownKeys"])) & allowed:
+        problem("paladin layout: an own or kept default key is in allowedKeys")
+    b5 = bars.get("bar5", {})
+    if (b5.get("first"), b5.get("binding")) != (37, "MULTIACTIONBAR4BUTTON%d") or \
+            [k or None for k in b5.get("keys") or []] != [None] * 4 + ["CTRL-" + k for k in "5QERFZXC"]:
+        problem("paladin layout: bar5 must be Action Bar 5 with Ctrl+5..C on buttons 5-12 and buttons 1-4 unbound")
+    planned = {s["slot"] for s in slots} | {x["slot"] for x in layout["spare"]}
+    for i in range(4):
+        if b5.get("first", 37) + i in planned:
+            problem(f"paladin layout: Action Bar 5 button {i + 1} (Ctrl+{i + 1}, stance bar) is planned or spare")
+    b3keys = [k or None for k in (bars.get("bar3", {}).get("keys") or [])]
+    if b3keys != [None] * 6 + ["BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]:
+        problem("paladin layout: bar3 buttons 7-12 must hold the mouse keys, 1-6 no key")
+    for b in layout["bars"]:
+        if b["first"] >= 145 or re.match(r"MULTIACTIONBAR[56]BUTTON", b.get("binding") or ""):
+            problem(f"paladin layout: bar {b['id']} uses Action Bar 6 or 7")
+    own_slots = sorted(int(x) for x in (layout.get("own") or {}))
+    if own_slots != [5, 41, 65]:
+        problem(f"paladin layout: own slots must be main 5, bar5 5 and bar2 5, are {own_slots}")
+    if layout.get("old") or layout.get("oldOwn") or layout.get("retired"):
+        problem("paladin layout: a first layout has no earlier layouts' leftovers")
+    # Auras on the stance bar; Purify stands in on Cleanse's button until 42, then is in the spellbook.
+    auras = [s["key"] for s in pack["spells"] if s["key"].endswith("_aura")]
+    for k in auras:
+        if layout["noSlot"].get(k) != "stancebar":
+            problem(f"paladin layout: {k} must be on the stance bar (noSlot)")
+    m5 = next((s for s in slots if s.get("key") == "BUTTON5"), {})
+    if m5.get("standIn") != "purify" or layout["noSlot"].get("purify") != "spellbook":
+        problem("paladin layout: Mouse5 must be Cleanse with Purify standing in until it is learned")
+    clicked = {what(s) for s in slots if not s.get("key")}
+    for k in ("blessing_of_might", "blessing_of_wisdom", "greater_blessing_of_kings", "greater_blessing_of_might",
+              "greater_blessing_of_wisdom", "seal_of_wisdom", "seal_of_light", "seal_of_justice", "divine_intervention"):
+        if k not in clicked:
+            problem(f"paladin layout: {k} must be on a clicked button (no key)")
+    # Macros: help with the self fallback, help_nofb (Blessing of Protection, Sacrifice) without, Hammer of Justice
+    # stops the cast, the opener fires Judgement, Swift Judgement and Holy Strike once Swift Judgement is known.
+    want = {"flash_of_light", "holy_light", "lay_on_hands", "cleanse", "purify", "blessing_of_freedom",
+            "blessing_of_protection", "blessing_of_sacrifice", "hammer_of_justice"}
+    if set(layout["macros"]) != want:
+        problem(f"paladin layout: macros must be {sorted(want)}, are {sorted(layout['macros'])}")
+    bodies = layout["macroBodies"]
+    if "[@player]" not in bodies.get("help", "") or "@player" in bodies.get("help_nofb", "@player") \
+            or "@mouseover,help" not in bodies.get("help_nofb", ""):
+        problem("paladin layout: help must fall back to yourself, help_nofb must not")
+    if {k: v for k, v in layout["macroKind"].items()} != {
+            "blessing_of_protection": "help_nofb", "blessing_of_sacrifice": "help_nofb", "hammer_of_justice": "interrupt"}:
+        problem("paladin layout: macroKind must be help_nofb for Protection and Sacrifice, interrupt for Hammer of Justice")
+    if "/stopcasting" not in bodies.get("interrupt", "") or "@mouseover,harm" not in bodies.get("interrupt", ""):
+        problem("paladin layout: the Hammer of Justice macro must /stopcasting and use the enemy mouseover")
+    op = (layout.get("combos") or {}).get("opener") or {}
+    lines = (op.get("body") or "").split("\n")
+    if op.get("macro") != "FS_OPEN" or op.get("needs") != "swift_judgement" or \
+            lines != ["#showtooltip {swift}", "/startattack", "/cast {judge}", "/cast {swift}", "/cast {strike}"] or \
+            op.get("vars") != {"swift": "swift_judgement", "judge": "judgement", "strike": "holy_strike"}:
+        problem("paladin layout: the opener must be FS_OPEN: Judgement, Swift Judgement, Holy Strike, needs Swift Judgement")
+    names = set(layout["macros"].values()) | {"FS_OPEN", "FS_HEALTH", "FS_MANA"}
+    if len(names) > 15:
+        problem(f"paladin layout: {len(names)} macros, over the budget of 15")
+    if layout.get("defaultWarn", {}).get("CTRL-R") != "ui.preview.warn.fps":
+        problem("paladin layout: the preview must warn that Ctrl+R loses its default")
+    if layout.get("version") != 1:
+        problem(f"paladin layout: version must be 1, is {layout.get('version')}")
+
+    # --- talents: Wowhead 0/32/19, one point per level 10-60 ---------------------------------------------------
+    tree_points = check_talents_points(talents)
+    if tree_points != {"Protection": 32, "Retribution": 19}:
+        problem(f"paladin talents: final build should be 0/32/19 (Wowhead), is {tree_points}")
+    levels = [lv for _, a, b in talents["path"] for lv in range(a, b + 1)]
+    if levels != list(range(10, 61)):
+        problem("paladin talents: the path must give one point per level from 10 to 60")
+
+    # --- unverified spells stay out --------------------------------------------------------------------------
+    folder = os.path.join(ROOT, pack["folder"])
+    for dirpath, _, files in os.walk(folder):
+        for fn in files:
+            if fn.endswith((".lua", ".toc")):
+                text = read(os.path.join(dirpath, fn))
+                for name in PALADIN_EXCLUDED:
+                    if name in text:
+                        problem(f"paladin: unverified {name} appears in {os.path.relpath(os.path.join(dirpath, fn), ROOT)}")
+
+
+PACK_CHECKS = {"SHAMAN": check_shaman, "PALADIN": check_paladin}
 
 
 # --- TOCs -----------------------------------------------------------------------------------------------------
@@ -1063,23 +1267,56 @@ def check_reports(texts):
             continue
         parsed = reports.parse(text)
         want = [
-            {"id": "spell.chain_heal.when", "reason": "不自然", "suggestion": "2人以上が傷ついている時に使おう。", "note": None},
-            {"id": "guide.healing.p3", "reason": "わかりにくい", "suggestion": None, "note": "line one\nline two | x"},
+            {"id": "spell.chain_heal.when", "reason": "不自然", "suggestion": "2人以上が傷ついている時に使おう。", "note": None,
+             "pack": "ForeverSensei_Shaman"},
+            {"id": "guide.healing.p3", "reason": "わかりにくい", "suggestion": None, "note": "line one\nline two | x",
+             "pack": "ForeverSensei_Shaman"},
         ]
-        got = [{k: r.get(k) for k in ("id", "reason", "suggestion", "note")} for r in parsed["reports"]]
+        got = [{k: r.get(k) for k in ("id", "reason", "suggestion", "note", "pack")} for r in parsed["reports"]]
         if got != want:
             problem(f"reports: round-trip mismatch\n{text}\n→ {got}")
         if not parsed.get("version"):
             problem("reports: version not parsed")
-    en, ja, owner = reports.read_locales()
-    if set(en) != set(ja) or set(ja) != set(owner):
+    en, ja, owners = reports.read_locales()
+    if any(set(en[p]) != set(ja[p]) for p in en) or {i for p in ja for i in ja[p]} != set(owners):
         problem("reports.py: read_locales does not see the same ids in en and ja")
-    for rid, folder in (("spell.chain_heal.when", "ForeverSensei_Shaman"), ("guide.healing.p3", "ForeverSensei_Shaman"),
-                        ("ui.pack.missing", CORE)):
-        if os.path.relpath(owner.get(rid, ""), ROOT) != os.path.join(folder, "Locales", "ja.lua"):
-            problem(f"reports.py: {rid} would be written to {owner.get(rid)}, not {folder}/Locales/ja.lua")
-    if "Healing Wave" not in reports.names():
-        problem("reports.py: names() misses the pack's spell names")
+    # Packs share ids (guide.role.p1): a report names its pack; an old one without a pack must not guess.
+    old = reports.parse("[ForeverSensei v0.5.1 報告 1件]\n#1 spell.chain_heal.when | 不自然\n今: x")["reports"][0]
+    if old.get("pack") is not None or old["reason"] != "不自然":
+        problem(f"reports.py: an old report line without a pack parses as {old}")
+    for rid, pack, folder in (("spell.chain_heal.when", None, "ForeverSensei_Shaman"),
+                              ("spell.chain_heal.when", "ForeverSensei_Shaman", "ForeverSensei_Shaman"),
+                              ("guide.healing.p3", "ForeverSensei_Shaman", "ForeverSensei_Shaman"),
+                              ("ui.pack.missing", None, CORE), ("ui.pack.missing", "ForeverSensei_Paladin", CORE),
+                              ("spell.consecration.when", None, "ForeverSensei_Paladin"),
+                              ("guide.seals.p1", "ForeverSensei_Paladin", "ForeverSensei_Paladin"),
+                              ("ui.role.tank", "ForeverSensei_Paladin", "ForeverSensei_Paladin"),
+                              ("ui.layout.intro", "ForeverSensei_Paladin", "ForeverSensei_Paladin"),
+                              ("guide.role.p1", "ForeverSensei_Shaman", "ForeverSensei_Shaman"),
+                              ("ui.layout.intro", None, None), ("spell.consecration.when", "ForeverSensei_Shaman", None)):
+        path, why = reports.owner_of({"id": rid, "pack": pack}, owners)
+        want = os.path.join(ROOT, folder, "Locales", "ja.lua") if folder else None
+        if path != want:
+            problem(f"reports.py: {rid} ({pack}) would be written to {path} ({why}), not {want}")
+    if "Healing Wave" not in reports.names() or "Holy Strike" not in reports.names():
+        problem("reports.py: names() misses a pack's spell names")
+    check_zip(reports)
+
+
+def check_zip(reports):
+    """make zip: every addon folder at the top level of the zip (unzip straight into AddOns), each with its TOC."""
+    import tempfile
+    import zipfile
+    want = {"ForeverSensei", "ForeverSensei_Paladin", "ForeverSensei_Shaman"}
+    with tempfile.TemporaryDirectory() as tmp:
+        with zipfile.ZipFile(reports.build_zip(tmp)) as z:
+            names = z.namelist()
+    tops = {n.split("/")[0] for n in names}
+    if tops != want:
+        problem(f"zip: top-level folders are {sorted(tops)}, not {sorted(want)}")
+    for t in sorted(want):
+        if f"{t}/{t}.toc" not in names:
+            problem(f"zip: {t}/{t}.toc missing")
 
 
 def main():

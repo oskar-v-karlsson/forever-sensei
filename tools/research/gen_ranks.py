@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Generate ForeverSensei_Shaman/Data/Ranks.lua (every rank's spell id, rank 1 first) from the Forever client dump.
+"""Generate ForeverSensei_<Class>/Data/Ranks.lua (every rank's spell id, rank 1 first) from the Forever client dump.
 
 A row is a learnable rank when it has the spell's exact name, "Rank N", a mana cost, is not passive and carries the
-"Shaman Spells" label. That leaves out same-name helper spells (Lightning Overload copies, weapon-enchant procs,
-totem auras). Rank 1 must be the id in ForeverSensei_Shaman/Data/Spells.lua and ranks must run 1..N without gaps.
+"<Class> Spells" label. That leaves out same-name helper spells (Lightning Overload copies, weapon-enchant procs,
+totem auras, the paladin's Seal of Fury and Divine Protection copies). Rank 1 must be the id in
+ForeverSensei_<Class>/Data/Spells.lua and ranks must run 1..N without gaps.
+Per class (CLASSES): spells whose rows lack the label (Turn Undead), ranks the dump lacks, verified on a Wowhead Forever
+tooltip instead (Holy Light rank 1), and duplicate rows of one rank (the dump has two Seal of Righteousness rank 1
+rows, 20154 and 21084, both level 1): the rank keeps the Spells.lua id for rank 1, else the lowest id.
 
-Usage: python3 tools/research/gen_ranks.py [--check]
+Usage: python3 tools/research/gen_ranks.py [--class shaman|paladin] [--check]
+  --class  the class pack (default shaman).
   --check  exit 1 when the committed Ranks.lua differs from what the dump gives (used by tools/check.py).
 """
 import csv
@@ -14,10 +19,40 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TSV = os.path.join(ROOT, "research", "shaman_simc_1.60.1.70862.tsv")
-SPELLS = os.path.join(ROOT, "ForeverSensei_Shaman", "Data", "Spells.lua")
-OUT = os.path.join(ROOT, "ForeverSensei_Shaman", "Data", "Ranks.lua")
-VERIFIED = "2026-11-09"
+
+# label: the dump's spell label for the class; verified: the date the pack's rank data was checked; unlabelled: spell
+# names whose rank rows carry no label; extra: {key: [(rank, id, level)]} ranks missing from the dump, each verified on
+# its Wowhead Forever tooltip (source wh_tt, noted in Ranks.lua); free: spell names whose ranks cost no mana (auras,
+# Lay on Hands), so their rows count without a mana cost.
+CLASSES = {
+    "shaman": {"label": "Shaman Spells", "verified": "2026-11-09", "unlabelled": (), "free": (), "extra": {}},
+    "paladin": {
+        "label": "Paladin Spells", "verified": "2026-11-11", "unlabelled": ("Turn Undead",),
+        "free": ("Devotion Aura", "Retribution Aura", "Shadow Resistance Aura", "Frost Resistance Aura",
+                 "Fire Resistance Aura", "Lay on Hands"),
+        "extra": {"holy_light": [(1, 635, "1")]},
+    },
+}
+
+
+def arg(name, default):
+    if name in sys.argv:
+        i = sys.argv.index(name)
+        if i + 1 < len(sys.argv):
+            return sys.argv[i + 1]
+    return default
+
+
+CLASS = arg("--class", "shaman")
+if CLASS not in CLASSES:
+    sys.exit(f"gen_ranks: unknown class {CLASS} (one of {', '.join(CLASSES)})")
+CFG = CLASSES[CLASS]
+PACK = "ForeverSensei_" + CLASS.capitalize()
+TSV_NAME = f"{CLASS}_simc_1.60.1.70862.tsv"
+TSV = os.path.join(ROOT, "research", TSV_NAME)
+SPELLS = os.path.join(ROOT, PACK, "Data", "Spells.lua")
+OUT = os.path.join(ROOT, PACK, "Data", "Ranks.lua")
+VERIFIED = CFG["verified"]
 
 
 def spells():
@@ -32,14 +67,20 @@ def ranks():
         rows = list(csv.DictReader(f, delimiter="\t"))
     out, problems = {}, []
     for key, name, first, src in spells():
-        if src != "simc":
+        if src != "simc" and key not in CFG["extra"]:
             continue  # one id from a Wowhead Forever spell page, no rank data in the dump
         found = sorted(
             (int(r["rank"][5:]), int(r["id"]), re.match(r"\d*", r["level"] or "").group(0))
             for r in rows
-            if r["name"] == name and re.fullmatch(r"Rank \d+", r["rank"] or "") and (r["resource"] or "").strip()
-            and not r["passive"] and "Shaman Spells" in (r["labels"] or "")
+            if r["name"] == name and re.fullmatch(r"Rank \d+", r["rank"] or "")
+            and ((r["resource"] or "").strip() or name in CFG["free"]) and not r["passive"] and (CFG["label"] in (r["labels"] or "") or name in CFG["unlabelled"])
         )
+        found = sorted(found + CFG["extra"].get(key, []))
+        byRank = {}
+        for n, i, lv in found:
+            if n not in byRank or (n == 1 and i == first):
+                byRank[n] = (n, i, lv)
+        found = [byRank[n] for n in sorted(byRank)]
         if len(found) < 2:
             continue
         if [n for n, _, _ in found] != list(range(1, len(found) + 1)):
@@ -51,10 +92,15 @@ def ranks():
 
 
 def render(data):
+    extra = [
+        f"-- {key} rank {n} ({i}, level {lv}) is not in the dump; verified on its Wowhead Forever tooltip (wh_tt)."
+        for key in sorted(CFG["extra"]) for n, i, lv in CFG["extra"][key]
+    ]
     lines = [
-        "-- ForeverSensei_Shaman/Data/Ranks.lua: every learnable rank's spell id, rank 1 first. GENERATED by tools/research/gen_ranks.py",
-        "-- from research/shaman_simc_1.60.1.70862.tsv (source: simc; do not edit by hand). Spells with one rank are absent.",
+        f"-- {PACK}/Data/Ranks.lua: every learnable rank's spell id, rank 1 first. GENERATED by tools/research/gen_ranks.py",
+        f"-- from research/{TSV_NAME} (source: simc; do not edit by hand). Spells with one rank are absent.",
         "-- The comment after each list gives the level each rank is learned at.",
+        *extra,
         "local _, P = ...",
         "",
         "local R = {}",
@@ -79,7 +125,8 @@ def main():
     if "--check" in sys.argv:
         current = open(OUT, encoding="utf-8").read() if os.path.exists(OUT) else ""
         if current != text:
-            print("gen_ranks: ForeverSensei_Shaman/Data/Ranks.lua is out of date (run python3 tools/research/gen_ranks.py)")
+            flag = "" if CLASS == "shaman" else f" --class {CLASS}"
+            print(f"gen_ranks: {PACK}/Data/Ranks.lua is out of date (run python3 tools/research/gen_ranks.py{flag})")
             sys.exit(1)
         return
     with open(OUT, "w", encoding="utf-8") as f:

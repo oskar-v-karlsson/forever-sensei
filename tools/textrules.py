@@ -12,11 +12,13 @@ EXTRA_NAMES = [
     "Hearthstone", "Restoration", "Enhancement", "Elemental", "Dual Specialization", "Talented Legacy",
     "Improved Ghost Wolf", "Call of Earth", "Call of Fire", "Call of Water", "Call of Air", "Forever",
     "Ctrl+C", "Shift", "/sensei",
+    "Protection", "Retribution", "Forbearance", "Symbol of Divinity", "Symbol of Kings", "Anticipation",
 ]
 
 # English word (regex, case-insensitive) → Japanese that must appear. Glossary terms (WFJ) and our UI terms.
 REQUIRED_TERMS = [
     (r"\bshamans?\b", "シャーマン"),
+    (r"\bpaladins?\b", "パラディン"),
     (r"\btrainers?\b", "トレーナー"),
     (r"\btotems?\b", "トーテム"),
     (r"\btalents?\b", "タレント"),

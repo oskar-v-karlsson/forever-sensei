@@ -47,11 +47,12 @@ Layout.SLOTS = {}
 for i = 1, 120 do table.insert(Layout.SLOTS, i) end
 for i = 145, 180 do table.insert(Layout.SLOTS, i) end
 
-local macroKeys -- macro name → spell key, or "@kind" for the item macros
+local macroKeys -- macro name → spell key, "@kind" for the item macros, "!id" for the multi-spell macros
 local function macroKeyOf(name)
   if not macroKeys then
     macroKeys = {}
     for key, m in pairs(L().macros) do macroKeys[m] = key end
+    for id, c in pairs(L().combos) do macroKeys[c.macro] = "!" .. id end
     for kind, d in pairs(ns.ItemData.kinds) do macroKeys[d.macro] = "@" .. kind end
   end
   return name and macroKeys[name]
@@ -113,11 +114,19 @@ function Layout.DesiredItem(kind)
   return { kind = "macro", item = kind, macro = d.macro, name = d.label }
 end
 
+-- A multi-spell macro (L.combos: the paladin's opener) is always a macro, available once its "needs" spell is known.
+function Layout.DesiredCombo(id)
+  local c = L().combos[id]
+  if not c or not Spells.IsKnown(Spells.Get(c.needs)) then return nil end
+  return { kind = "macro", combo = id, macro = c.macro, name = ns.T(c.label) }
+end
+
 -- The desired action of a planned slot. → desired or nil
 -- standIn: the spell this slot holds until its own spell is learned (Lightning Shield on X before Water Shield).
 -- after: the slot is only used once that spell is known (Lightning Shield's clickable slot after Water Shield).
 function Layout.DesiredFor(s)
   if s.item then return Layout.DesiredItem(s.item) end
+  if s.combo then return Layout.DesiredCombo(s.combo) end
   if s.after and not Spells.IsKnown(Spells.Get(s.after)) then return nil end
   local d = Layout.Desired(Spells.Get(s.spell))
   if not d and s.standIn then d = Layout.Desired(Spells.Get(s.standIn)) end
@@ -160,11 +169,18 @@ function Layout.MacroBody(entry)
   return (layout.macroBodies[kind]:gsub("{(%w+)}", function(k) return vars[k] end))
 end
 
--- Create or update the character macro for a spell. → macro index or nil
-function Layout.EnsureMacro(entry)
-  local name = L().macros[entry.key]
-  if not name then return nil end
-  local body = Layout.MacroBody(entry)
+-- A multi-spell macro's text: its body with {var} = the spells of its vars (as their own macros name them).
+function Layout.ComboBody(id)
+  local c = L().combos[id]
+  local vars = {}
+  for var, key in pairs(c.vars) do
+    local e = Spells.Get(key)
+    if e then vars[var] = Layout.MacroSpellName(e) end
+  end
+  return (c.body:gsub("{(%w+)}", function(k) return vars[k] end))
+end
+
+local function writeMacro(name, body)
   local icon = "INV_MISC_QUESTIONMARK"
   local ok, idx = call(API.macroIndex, name)
   if ok and idx and idx > 0 then
@@ -178,15 +194,25 @@ function Layout.EnsureMacro(entry)
   return nil
 end
 
+-- Create or update the character macro for a spell. → macro index or nil
+function Layout.EnsureMacro(entry)
+  local name = L().macros[entry.key]
+  if not name then return nil end
+  return writeMacro(name, Layout.MacroBody(entry))
+end
+
+-- Create or update a multi-spell macro. → macro index or nil
+function Layout.EnsureComboMacro(id)
+  return writeMacro(L().combos[id].macro, Layout.ComboBody(id))
+end
+
 -- Bring the existing spell macros up to date (rank, targeting mode). Never creates macros (only the layout does).
 -- Call only out of combat. → number of macros changed
 function Layout.RefreshMacros()
   local n = 0
-  for key, name in pairs(L().macros) do
+  local function refresh(name, body)
     local ok, idx = call(API.macroIndex, name)
     if ok and type(idx) == "number" and idx > 0 then
-      local entry = Spells.Get(key)
-      local body = Layout.MacroBody(entry)
       local okI, _, _, cur = call(API.macroInfo, idx)
       if not okI or cur ~= body then
         call(API.editMacro, idx, name, "INV_MISC_QUESTIONMARK", body)
@@ -194,6 +220,8 @@ function Layout.RefreshMacros()
       end
     end
   end
+  for key, name in pairs(L().macros) do refresh(name, Layout.MacroBody(Spells.Get(key))) end
+  for id, c in pairs(L().combos) do refresh(c.macro, Layout.ComboBody(id)) end
   return n
 end
 
@@ -217,6 +245,17 @@ local function placeDesired(slot, d)
       put(slot)
     end
     return true, "item"
+  end
+  if d.combo then
+    local idx = Layout.EnsureComboMacro(d.combo)
+    if idx then
+      call(API.pickupMacro, idx)
+      put(slot)
+      return true, false
+    end
+    call(API.pickupSpell, Spells.CurrentID(Spells.Get(L().combos[d.combo].needs)))
+    put(slot)
+    return true, "spell"
   end
   if d.kind == "macro" then
     local idx = Layout.EnsureMacro(d.entry)
@@ -302,7 +341,11 @@ function Layout.BuildPlan(onlyKey)
   for _, s in ipairs(layout.slots) do
     local d = Layout.DesiredFor(s)
     -- A spell learned "after" another (Lightning Shield after Water Shield) moves with it, so it is not lost.
-    if d and (not onlyKey or (d.entry and d.entry.key == onlyKey) or s.after == onlyKey) then targets[s.slot] = d end
+    -- A multi-spell macro comes with the spell it needs (the opener with Swift Judgement).
+    if d and (not onlyKey or (d.entry and d.entry.key == onlyKey) or s.after == onlyKey
+      or (s.combo and layout.combos[s.combo].needs == onlyKey)) then
+      targets[s.slot] = d
+    end
   end
 
   -- Displaced actions go to empty free slots: the spare buttons (bar 4, then the keyed spares of bar 5 and bar 2) first,

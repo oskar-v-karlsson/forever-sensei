@@ -110,7 +110,7 @@ function Verify.Run()
     local cur = ns.Layout.Current(slot.slot)
     local okB, action = false, nil
     if slot.key then okB, action = ns.Call("GetBindingAction", slot.key) end
-    add(string.format("  slot %3d %-24s now: %-28s %s", slot.slot, slot.spell or ("@" .. slot.item), ns.Layout.Label(cur),
+    add(string.format("  slot %3d %-24s now: %-28s %s", slot.slot, slot.spell or (slot.item and ("@" .. slot.item)) or ("!" .. slot.combo), ns.Layout.Label(cur),
       slot.key and (slot.key .. "=" .. tostring(okB and action or "?")) or ""))
   end
   for _, bar in ipairs(layout.bars) do
@@ -127,6 +127,11 @@ function Verify.Run()
   for _, key in ipairs({ "CTRL-2", "CTRL-R", "CTRL-X", "SHIFT-BUTTON4", "CTRL-BUTTON4" }) do
     local ok, action = ns.Call("GetBindingAction", key)
     add(string.format("  key %s = %s", key, ok and tostring(action) or "?"))
+  end
+  -- Keys the spec leaves on their game default (the paladin's Ctrl+1-4 on the stance bar).
+  for _, key in ipairs(layout.keepDefault or {}) do
+    local ok, action = ns.Call("GetBindingAction", key)
+    add(string.format("  default key %s = %s", key, ok and tostring(action) or "?"))
   end
   -- In-game question: does "/cast Name" in a macro cast the highest rank? GetMacroSpell tells which id it casts.
   -- A body that also casts other spells (a macroVars {var}, like NS + Healing Wave's {heal}) is not compared.
@@ -152,6 +157,19 @@ function Verify.Run()
         line = nil
       elseif okM and casts and bestId and casts ~= bestId and not castsOthers(key) then
         bad(line .. "  (macro does not cast the highest rank)")
+        line = nil
+      end
+    end
+    if line then add(line) end
+  end
+  -- Multi-spell macros (the paladin's opener): does one press cast every spell? Only the game can tell.
+  for id, c in pairs(layout.combos) do
+    local ok, idx = ns.Call("GetMacroIndexByName", c.macro)
+    local line = string.format("  combo macro %s (%s): %s", c.macro, id, ok and tostring(idx) or "error")
+    if ok and type(idx) == "number" and idx > 0 then
+      local okI, _, _, curBody = ns.Call("GetMacroInfo", idx)
+      if okI and curBody ~= ns.Layout.ComboBody(id) then
+        bad(line .. "  (macro body is not up to date)")
         line = nil
       end
     end

@@ -40,6 +40,13 @@ function ns.T(id, vars)
   return text
 end
 
+-- The active pack's folder when it owns id (pack texts can share ids, e.g. guide.role.p1), else nil.
+function ns.TextPack(id)
+  local p = packTexts("en")
+  if p ~= nil and p[id] ~= nil then return ns.class.name end
+  return nil
+end
+
 function ns.HasText(id)
   local p = packTexts("en")
   return ns.Locales.en[id] ~= nil or (p ~= nil and p[id] ~= nil)
