@@ -147,6 +147,13 @@ function UI.SpellIcon(parent, size)
     self.tex:SetTexture(tex or 134400)
     if self.tex.SetDesaturated then self.tex:SetDesaturated(entry ~= nil and not ns.Spells.IsKnown(entry)) end
   end
+  -- A button of the layout without a skill (a spare key or the player's own button): a dark square.
+  function b:SetEmpty()
+    self.entry, self.spellID, self.itemID = nil, nil, nil
+    self.tex:SetTexture(nil)
+    if self.tex.SetColorTexture then self.tex:SetColorTexture(0.12, 0.12, 0.12, 0.8) end
+    if self.tex.SetDesaturated then self.tex:SetDesaturated(false) end
+  end
   -- Item slot of the layout (a potion or elixir kind): the best one in the bags, grey when there is none.
   function b:SetItemKind(kind)
     local d = ns.Items.Get(kind)

@@ -86,7 +86,13 @@ local function icon(frame, i, x, y, size, entry)
   b:SetSize(size, size)
   b:ClearAllPoints()
   b:SetPoint("TOPLEFT", x, -y)
-  if type(entry) == "string" then b:SetItemKind(entry) else b:SetSpell(entry) end
+  if entry == false then
+    b:SetEmpty()
+  elseif type(entry) == "string" then
+    b:SetItemKind(entry)
+  else
+    b:SetSpell(entry)
+  end
   return b
 end
 
@@ -166,34 +172,45 @@ renderers.layout = function(frame)
   local n = 0
   for bi, bar in ipairs(layout.bars) do
     y = y + label(frame, bi, y, ns.T("ui.bar." .. bar.id), 13, "gold") + 4
-    -- Bar 5 holds the Ctrl keys (buttons 1-6) and the mouse keys (7-12, long labels like "Shift+Mouse 4"): two rows.
-    local twoRows = bar.id == "bar5"
+    -- Action Bar 3: the clicked buttons (1-6), then the mouse keys (7-12, long labels like "Shift+Mouse 4") in a
+    -- second row. Keyed bars show all 12 buttons, empty ones (spare keys, the player's 5) as dark squares with their
+    -- key, so the plain, Shift and Ctrl rows line up key by key.
+    local twoRows = bar.id == "bar3"
+    local byButton = {}
     for _, s in ipairs(layout.slots) do
-      if s.bar == bar.id then
+      if s.bar == bar.id then byButton[s.button] = s end
+    end
+    for i = 1, 12 do
+      local s = byButton[i]
+      local key = s and s.key or (bar.keys and bar.keys[i]) or nil
+      if s or key then
         n = n + 1
-        local second = twoRows and s.button > 6
+        local second = twoRows and i > 6
         local step = second and 80 or 46
-        local x = ((second and s.button - 6 or s.button) - 1) * step
+        local x = ((second and i - 6 or i) - 1) * step
         local rowY = second and y + 58 or y
-        local e = s.spell and Spells.Get(s.spell)
+        local e = s and s.spell and Spells.Get(s.spell)
         if e and s.standIn and not Spells.IsKnown(e) then e = Spells.Get(s.standIn) end
-        icon(frame, n, x + (step - 46) / 2, rowY, 38, s.item or e)
+        icon(frame, n, x + (step - 46) / 2, rowY, 38, s and (s.item or e) or false)
         local keyText = pool(frame, "key", n, function() return UI.Text(frame, 10, "gold") end)
         keyText:SetWidth(step)
         keyText:SetJustifyH("CENTER")
         keyText:ClearAllPoints()
         keyText:SetPoint("TOPLEFT", x - 4, -(rowY + 40))
-        keyText:SetText(s.key and layout.KeyLabel(s.key) or "")
+        keyText:SetText(key and layout.KeyLabel(key) or "")
       end
     end
     y = y + (twoRows and 116 or 58)
   end
-  local names = {}
+  local names, book = {}, {}
   for key, kind in pairs(layout.noSlot) do
     if kind == "totembar" then table.insert(names, Spells.Get(key).name) end
+    if kind == "spellbook" then table.insert(book, Spells.Get(key).name) end
   end
   table.sort(names)
-  y = y + label(frame, 10, y, ns.T("ui.layout.nobar", { names = table.concat(names, ", ") }), 12, "grey") + 8
+  table.sort(book)
+  y = y + label(frame, 10, y, ns.T("ui.layout.nobar", { names = table.concat(names, ", ") }), 12, "grey") + 4
+  y = y + label(frame, 11, y, ns.T("ui.layout.nobook", { names = table.concat(book, ", ") }), 12, "grey") + 8
   y = y + paragraph(frame, 4, y, "ui.layout.items") + 12
 
   button(frame, 1, 0, y, ns.T("ui.btn.applyall"), 200, function() ns.Layout.Preview() end)

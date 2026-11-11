@@ -226,12 +226,14 @@ Z, X; side mouse buttons; Shift with any of these).
 
 - **No modifier:** `ACTIONBUTTON1-12` (main bar, slots 1-12).
 - **Shift:** `MULTIACTIONBAR1BUTTON1-12`, which is Action Bar 2 (MultiBarBottomLeft, page 6, slots 61-72).
-- **Ctrl (new):** `MULTIACTIONBAR5BUTTON1-12`, which is **Action Bar 6** (`MultiBar5`, page 13, slots
-  145-156, shown with the setting `PROXY_SHOW_ACTIONBAR_6`).
-  - Use the same column order as the main bar, so Ctrl+Q sits under Q.
-- **Mouse buttons (new):** `MULTIACTIONBAR6BUTTON1-12`, which is Action Bar 7 (`MultiBar6`, page 14, slots
-  157-168).
-  - Button 1 is Mouse4 and button 2 is Mouse5. Buttons 3-4 are Shift+Mouse4/5, and buttons 5-6 are Ctrl+Mouse4/5.
+- **Ctrl (new):** `MULTIACTIONBAR5BUTTON1-12` is **Action Bar 6** (`MultiBar5`, page 13, slots 145-156, setting
+  `PROXY_SHOW_ACTIONBAR_6`), and `MULTIACTIONBAR6BUTTON1-12` is Action Bar 7 (`MultiBar6`, slots 157-168).
+  ForeverSensei 0.4.0 used them, but they show up in the middle of the screen, so from 0.4.1 they are retired.
+- **As implemented (0.4.3, layout 5):**
+  - Ctrl = `MULTIACTIONBAR4BUTTON1-12`, Action Bar 5 (MultiBarLeft, slots 37-48, shown at the right edge). It mirrors
+    Action Bar 2: button i has Ctrl where Action Bar 2 has Shift (1, 2, 3, 4, 5, Q, E, R, F, Z, X, C).
+  - Mouse buttons = `MULTIACTIONBAR2BUTTON7-12`, the right half of Action Bar 3 (MultiBarBottomRight, slots 55-60):
+    Mouse4, Mouse5, Shift+Mouse4, Shift+Mouse5, Ctrl+Mouse4, Ctrl+Mouse5.
 - **Key strings** (`Blizzard_FrameXML/BindingUtil.lua`):
   - The mouse buttons are `BUTTON4` and `BUTTON5`.
   - Chords are written ALT-CTRL-SHIFT-key, e.g. `CTRL-Q` and `SHIFT-BUTTON4`.
@@ -262,10 +264,10 @@ The client files list every binding name but not its default key (`wm` says the 
 | Shift+1-5 | ACTIONPAGE1-5 (bar paging) | yes |
 | Shift+Q/E/R/F/Z/X/C | none expected | yes |
 | **Ctrl+Q/E/F/Z/C** | none expected | **new** |
-| Ctrl+R | TOGGLEFPS (framerate display), likely | not touched |
+| Ctrl+R | TOGGLEFPS (framerate display), likely | from 0.4.3: empty Action Bar 5 button |
 | **Mouse4 / Mouse5, also with Shift and Ctrl** | none expected | **new** |
 | **Ctrl+1** | SHAPESHIFTBUTTON1 (stance bar) | **new**: a shaman's only stance-bar spell is expected to be Ghost Wolf, which has Ctrl+C anyway (verify) |
-| Ctrl+2-0 | SHAPESHIFTBUTTON2-10 | not touched (Ctrl+5 is Erika's) |
+| Ctrl+2-0 | SHAPESHIFTBUTTON2-10 | from 0.4.3: Ctrl+2-4 get empty Action Bar 5 buttons; Ctrl+5 is Erika's; Ctrl+6-0 not touched |
 
 ## Q5: Mouseover macros
 
@@ -518,7 +520,7 @@ does fit ("help this player").
 | **Shields** | X | Already one key: Lightning Shield until 20, then Water Shield. |
 | **Healthstone** | C | Next to the Mana Potion on Z, but a different concept (health), so not in the mana family. |
 | **Totem presets** | Call of the Ancestors, Call of the Spirits | 1 has only three variants. The two extra presets are clicked next to Call of the Elements. |
-| **Fire totems** | Searing Shift+R | Searing is the only keyed Fire totem; Magma is rare for a healer. Ctrl+R keeps its default. |
+| **Fire totems** | Searing Shift+R | Searing is the only keyed Fire totem; Magma is rare for a healer. Ctrl+R stays an empty button (0.4.3). |
 
 ### Top keys
 
@@ -541,8 +543,9 @@ Abbreviations: **MO** = mouseover macro; *(lvl)* = the level the spell becomes a
 
 ### Grid
 
-Bindings: plain = main bar (`ACTIONBUTTON`); Shift = Action Bar 2 (`MULTIACTIONBAR1BUTTON`); Ctrl = Action Bar 6
-(`MULTIACTIONBAR5BUTTON`); Mouse4/5 with and without modifiers = Action Bar 7 (`MULTIACTIONBAR6BUTTON1-6`).
+Bindings (as implemented in 0.4.3): plain = main bar (`ACTIONBUTTON`); Shift = Action Bar 2 (`MULTIACTIONBAR1BUTTON`);
+Ctrl = Action Bar 5 (`MULTIACTIONBAR4BUTTON`, same button order as Shift); Mouse4/5 with and without modifiers =
+Action Bar 3 buttons 7-12 (`MULTIACTIONBAR2BUTTON7-12`). The proposal first used Action Bars 6 and 7; they are retired.
 
 | Base key | Plain | Shift | Ctrl |
 |---|---|---|---|
@@ -594,8 +597,9 @@ Bindings: plain = main bar (`ACTIONBUTTON`); Shift = Action Bar 2 (`MULTIACTIONB
 | Ctrl+Mouse4, Ctrl+Mouse5 | Poison, Disease Cleansing Totem | (clickable) | the group version of the cure; usually in the set | `wh_abil` |
 | Ctrl+C | Ghost Wolf | (clickable) | the player's decision; outdoors only | user, `simc` 2645 |
 
-**Spare:** Shift+2, Shift+4, Shift+X, Ctrl+X, Shift+C. Ctrl+2-4 and Ctrl+R keep their defaults. **5, Shift+5 and
-Ctrl+5 are Erika's own**: the addon never binds them.
+**Spare:** Shift+2, Shift+4, Shift+X, Shift+C, Ctrl+2, Ctrl+3, Ctrl+4, Ctrl+R, Ctrl+X. From 0.4.3 they are bound to
+their empty button, so the plain, Shift and Ctrl rows have all 12 keys (user decision, "Full Ctrl row that mirrors the
+Shift bar"). **5, Shift+5 and Ctrl+5 are Erika's own**: the addon never binds them.
 
 ## Diff against layout v2 (ForeverSensei 0.3.0)
 
@@ -640,7 +644,7 @@ totems stay put.
 
 | Spell or item | Reason |
 |---|---|
-| Rockbiter, Flametongue, Frostbrand and Windfury Weapon | weapon buffs that last long; cast before the pull |
+| Rockbiter, Flametongue and Windfury Weapon | weapon buffs that last long; cast before the pull |
 | Minor Arcane Elixir (`FS_ELIXIR`) | long buff, next to the weapon buffs (decided in 0.3.0) |
 | Healing Potion (`FS_HEALPOT`) | C covers it when there is no Healthstone |
 | Lightning Shield (after 20) | replaced by Water Shield on X |
@@ -650,10 +654,12 @@ totems stay put.
 | Magma Totem, Fire Nova | AoE damage; rare for a healer |
 | Flametongue Totem | rare |
 | Frost, Fire and Nature Resistance Totem, Windwall Totem | boss-specific; picked in a Totem Bar set |
-| Sentry Totem, Far Sight | scouting; not used in dungeons |
+| Sentry Totem, Far Sight | scouting; not used in dungeons. **Spellbook only** from 0.4.3 (no button) |
 | Call of the Ancestors, Call of the Spirits | a second and third preset (e.g. a boss set), clicked next to Call of the Elements |
 | Ancestral Spirit (optional MO dead macro) | 10 s cast, after a death; out of combat |
-| Astral Recall, Water Walking, Water Breathing | travel; out of combat |
+| Astral Recall | travel; out of combat |
+| Water Walking, Water Breathing | travel; out of combat. **Spellbook only** from 0.4.3 (no button) |
+| Frostbrand Weapon | solo imbue that slows runners; a healer uses Rockbiter or Flametongue. **Spellbook only** from 0.4.3 |
 | Bandages (optional) | see Q7 |
 | Reincarnation | passive; offered by the death dialog |
 
@@ -672,8 +678,10 @@ New in this proposal:
 Not touched:
 - **5, Shift+5 and Ctrl+5**: Erika's own. Layout v2 put Earthbind on Shift+5; the implementation must remove
   only that addon binding and leave anything Erika puts there.
-- Ctrl+R (probably the framerate display), Ctrl+2-0 (the stance bar), Ctrl+X.
-- Alt with any key.
+- Ctrl+6-0 (the stance bar), Alt with any key.
+
+Replaced from 0.4.3 (full Ctrl row, bound to empty Action Bar 5 buttons): Ctrl+2-4 (stance bar buttons 2-4), Ctrl+R
+(probably the framerate display) and Ctrl+X. The preview warns about the stance and framerate keys.
 
 Verify all of these with the `/run` lines in Q4. Apply-layout already backs up and can undo bindings.
 
@@ -806,4 +814,4 @@ Notes:
 - **Healing Stream Totem はキーなし。** Call of the Elements でまとめて置くので、手で置くことはあまりない。
 - **Ctrl はあまり使わないもの用。** Ghost Wolf（Ctrl+C）は屋外でだけ使えるので、ダンジョンではほとんど使わない。
 - **R とマウスのボタン4はレベル40まで空いている。** Chain Heal と Riptide を覚えたら、そこに置く。後でキーを変えなくていいように、先に場所を決めておく。
-- **めったに使わない呪文はキーなし。** Ancestral Spirit・Astral Recall・Water Walking などは、クリック用のバーに置く。
+- **めったに使わない呪文はキーなし。** Ancestral Spirit・Astral Recall などは、クリック用のバーに置く。Far Sight・Sentry Totem・Water Breathing・Water Walking・Frostbrand Weapon はバーに置かず、呪文書から使う。

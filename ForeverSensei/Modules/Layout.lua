@@ -301,8 +301,8 @@ function Layout.BuildPlan(onlyKey)
     if d and (not onlyKey or (d.entry and d.entry.key == onlyKey) or s.after == onlyKey) then targets[s.slot] = d end
   end
 
-  -- Displaced actions go to empty free slots: the spare buttons (bar 3, then bar 2) first, then slots reserved for
-  -- spells the player does not know yet, bar 4 then bar 3, right to left.
+  -- Displaced actions go to empty free slots: the spare buttons (bar 4, then the keyed spares of bar 5 and bar 2) first,
+  -- then slots reserved for spells the player does not know yet, bar 4 then bar 3, right to left.
   local free = {}
   for _, s in ipairs(layout.spare) do
     if Layout.Current(s.slot) == nil then table.insert(free, s) end
@@ -353,11 +353,25 @@ function Layout.BuildPlan(onlyKey)
       end
     end
   end
-  -- Buttons that layout 2 used and that are spare now: clear them if they still hold that layout's spell.
+  -- Spare buttons with a key (Shift+2, Ctrl+R, ...), full apply only: bound to their empty button, so every key of
+  -- the Shift and Ctrl bars works the same way.
+  if not onlyKey then
+    for _, s in ipairs(layout.spare) do
+      if s.key then
+        local ok, action = call(API.bindingAction, s.key)
+        action = ok and action ~= "" and action or nil
+        if action ~= s.binding then
+          table.insert(plan.binds, { key = s.key, binding = s.binding, old = action, name = ns.T("ui.preview.sparekey") })
+        end
+      end
+    end
+  end
+  -- Buttons that earlier layouts used and that are spare now: clear them if they still hold that layout's spell and
+  -- the spell has its new place or lives in the spellbook now.
   if not onlyKey then
     for slot, key in pairs(layout.old) do
       local cur = not layout.own[slot] and Layout.Current(slot)
-      if cur and cur.planKey == key and placedElsewhere(key) then
+      if cur and cur.planKey == key and (placedElsewhere(key) or layout.noSlot[key] == "spellbook") then
         local spare
         for _, sp in ipairs(layout.spare) do
           if sp.slot == slot then spare = sp end
@@ -552,14 +566,16 @@ function Layout.Undo(record)
   end)
 end
 
--- Notes on default bindings a plan replaces: the stance bar on Ctrl+1, the framerate display on Ctrl+R, the mouse
--- side buttons. → list of text lines (no duplicates)
+-- Notes on default bindings a plan replaces: the stance bar on Ctrl+1-4, the framerate display on Ctrl+R, the mouse
+-- side buttons. → list of text lines, one per kind (its keys joined: "Ctrl+1, Ctrl+2")
 function Layout.Warnings(plan)
-  local out, seen = {}, {}
-  local function add(id, vars)
-    if seen[id] then return end
-    seen[id] = true
-    table.insert(out, ns.T(id, vars))
+  local order, keys = {}, {}
+  local function add(id, key)
+    if not keys[id] then
+      keys[id] = {}
+      table.insert(order, id)
+    end
+    if key then table.insert(keys[id], L().KeyLabel(key)) end
   end
   for _, b in ipairs(plan.binds) do
     local id = L().defaultWarn[b.key]
@@ -567,9 +583,11 @@ function Layout.Warnings(plan)
       if b.old:match("^SHAPESHIFTBUTTON") then id = "ui.preview.warn.stance" end
       if b.old == "TOGGLEFPS" then id = "ui.preview.warn.fps" end
     end
-    if id then add(id, { key = L().KeyLabel(b.key) }) end
+    if id then add(id, b.key) end
     if b.key:match("BUTTON%d$") then add("ui.preview.warn.mouse") end
   end
+  local out = {}
+  for _, id in ipairs(order) do table.insert(out, ns.T(id, { key = table.concat(keys[id], ", ") })) end
   return out
 end
 

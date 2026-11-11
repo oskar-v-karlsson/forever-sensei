@@ -186,6 +186,7 @@ function methods:NumLines() return 0 end
 function methods:IsOwned() return false end
 function methods:GetTexture() return self.__texture end
 function methods:SetTexture(t) self.__texture = t end
+function methods:SetColorTexture(r, g, b, a) self.__texture = "color" end
 
 function CreateFrame(kind, name, parent, template)
   local o = new(kind, name, parent)

@@ -372,8 +372,8 @@ def check_static():
             problem(f"layout: macro for unplaced spell {k}")
         if len(m) > 16:
             problem(f"layout: macro name {m} too long")
-    # The approved grid (research/keybind-layout.md (a) at ecf40ec; layout 4 keeps the keys and moves the Ctrl and mouse
-    # buttons to Action Bar 5): every key holds exactly this.
+    # The approved grid (research/keybind-layout.md (a) at ecf40ec; layout 5 keeps the keys, makes Action Bar 5 the
+    # Ctrl mirror of Action Bar 2 and moves the mouse buttons to Action Bar 3 7-12): every key holds exactly this.
     grid = {
         "1": "totemic_call", "2": "flame_shock", "3": "lightning_bolt", "4": "chain_lightning",
         "Q": "earth_shock", "E": "lesser_healing_wave", "R": "chain_heal", "F": "healing_wave",
@@ -391,8 +391,17 @@ def check_static():
     for k in sorted(set(grid) | set(by_key)):
         if by_key.get(k) != grid.get(k):
             problem(f"layout: key {k} must be {grid.get(k)}, has {by_key.get(k)}")
-    if allowed != set(grid):
-        problem(f"layout: allowedKeys must be exactly the grid's keys (diff {sorted(allowed ^ set(grid))})")
+    # Keyed bars bind every button, also those without a skill (spare keys), so the plain, Shift and Ctrl rows match.
+    spare_keys = {x["key"] for x in layout["spare"] if x.get("key")}
+    if spare_keys & set(grid):
+        problem(f"layout: spare key also in the grid {sorted(spare_keys & set(grid))}")
+    for x in layout["spare"]:
+        b = next(b for b in layout["bars"] if b["id"] == x["bar"])
+        want = (b.get("keys") or [None] * 12)[x["button"] - 1] or None
+        if x.get("key") != want or (want and x.get("binding") != b["binding"] % x["button"]):
+            problem(f"layout: spare slot {x['slot']} key {x.get('key')} is not its bar's key {want}")
+    if allowed != set(grid) | spare_keys:
+        problem(f"layout: allowedKeys must be exactly the grid's and spare keys (diff {sorted(allowed ^ (set(grid) | spare_keys))})")
     # Lightning Shield stands in on X until Water Shield is learned, then moves to its own clickable button.
     x = next((s for s in slots if s.get("key") == "X"), {})
     ls = next((s for s in slots if s.get("spell") == "lightning_shield"), {})
@@ -405,26 +414,32 @@ def check_static():
         problem("layout: an own key is in allowedKeys")
     bars = {b["id"]: b for b in layout["bars"]}
     spare_slots = {x["slot"] for x in layout["spare"]}
-    for bid in ("main", "bar2"):
+    for bid in ("main", "bar2", "bar5"):
         own = bars[bid]["first"] + 4
         if own in seen_slot or own in spare_slots:
             problem(f"layout: own button {own} ({bid} 5) is planned or spare")
         if bars[bid]["keys"][4] not in layout["ownKeys"]:
             problem(f"layout: {bid} button 5 key must be an own key")
-    if sorted(int(x) for x in (layout.get("own") or {})) != [bars["main"]["first"] + 4, bars["bar2"]["first"] + 4]:
-        problem("layout: own slots must be exactly main 5 and bar2 5 (5 and Shift+5)")
+    if sorted(int(x) for x in (layout.get("own") or {})) != sorted(bars[b]["first"] + 4 for b in ("main", "bar2", "bar5")):
+        problem("layout: own slots must be exactly main 5, bar2 5 and bar5 5 (5, Shift+5 and Ctrl+5)")
     for b in layout["bars"]:
-        mine = {"main": {"5"}, "bar2": {"SHIFT-5"}}.get(b["id"], set())
+        mine = {"main": {"5"}, "bar2": {"SHIFT-5"}, "bar5": {"CTRL-5"}}.get(b["id"], set())
         if (set(layout["ownKeys"]) - mine) & set(b.get("keys") or []):
-            problem(f"layout: bar {b['id']} lists an own key (Ctrl+5 is on no bar)")
-    # The Ctrl keys and the mouse buttons live on Action Bar 5 (MultiBarLeft, shown at the right edge). Action Bars 6
-    # and 7 (layout 3) showed up in the middle of the screen: they are retired, never used or shown again.
+            problem(f"layout: bar {b['id']} lists another bar's own key")
+    # Action Bar 5 (MultiBarLeft, shown at the right edge) is the Ctrl mirror of Action Bar 2: button i has Ctrl where
+    # bar 2 has Shift. The mouse buttons use Action Bar 3 7-12. Action Bars 6 and 7 (layout 3) showed up in the middle
+    # of the screen: they are retired, never used or shown again.
     b5 = bars.get("bar5", {})
-    want_keys = ["CTRL-1", "CTRL-Q", "CTRL-E", "CTRL-F", "CTRL-Z", "CTRL-C",
-                 "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]
+    want_keys = [k.replace("SHIFT-", "CTRL-") for k in bars["bar2"]["keys"]]
+    if not all(k.startswith("SHIFT-") for k in bars["bar2"]["keys"]) or len(want_keys) != 12:
+        problem("layout: bar2 must have 12 Shift keys")
     if (b5.get("first"), b5.get("binding"), b5.get("setting"), b5.get("keys")) != (
             37, "MULTIACTIONBAR4BUTTON%d", "PROXY_SHOW_ACTIONBAR_5", want_keys):
-        problem("layout: bar5 must be first 37, MULTIACTIONBAR4BUTTON%d, PROXY_SHOW_ACTIONBAR_5 with the Ctrl and mouse keys")
+        problem("layout: bar5 must be first 37, MULTIACTIONBAR4BUTTON%d, PROXY_SHOW_ACTIONBAR_5 with bar2's keys as Ctrl")
+    mouse = ["BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]
+    b3keys = [k or None for k in (bars.get("bar3", {}).get("keys") or [])]
+    if b3keys != [None] * 6 + mouse or bars.get("bar3", {}).get("binding") != "MULTIACTIONBAR2BUTTON%d":
+        problem("layout: bar3 buttons 7-12 must hold the mouse keys (MULTIACTIONBAR2BUTTON), 1-6 no key")
     retired = {(r.get("id"), r.get("first"), r.get("binding"), r.get("setting"), r.get("own"))
                for r in layout.get("retired") or []}
     if retired != {("bar6", 145, "MULTIACTIONBAR5BUTTON%d", "PROXY_SHOW_ACTIONBAR_6", 5),
@@ -482,7 +497,7 @@ def check_static():
     for slot_, key in (layout.get("old") or {}).items():
         if int(slot_) not in spare_slots or key not in keys:
             problem(f"layout: old slot {slot_} ({key}) must be spare now and a spell")
-    if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 4:
+    if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 5:
         problem("layout: version missing (bump it when slots or keys change)")
 
     # --- items ------------------------------------------------------------------------------------------------

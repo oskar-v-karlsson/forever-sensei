@@ -1,4 +1,4 @@
--- Data/Shaman/Layout.lua: the fixed slot and key plan (layout version 4, ForeverSensei 0.4.1).
+-- Data/Shaman/Layout.lua: the fixed slot and key plan (layout version 5, ForeverSensei 0.4.3).
 -- Spec: research/keybind-layout.md (approved). The level-60 dungeon-healer layout comes first; lower levels use a
 -- subset of it, and a key never moves once its spell is learned (a reserved key stays empty until then).
 -- Rules from the pull walkthroughs in the spec:
@@ -20,20 +20,26 @@
 --   a clickable bar), C Healthstone else Healing Potion (FS_HEALTH, next to the Mana Potion), Shift+3 Purge,
 --   Ctrl+C Ghost Wolf (the player's decision).
 -- * 5, Shift+5 and Ctrl+5 belong to the player: never planned, never bound, never cleared.
--- * Spare: Shift+2, Shift+4, Shift+X, Shift+C (bound to their empty buttons). Ctrl+2-4, Ctrl+R, Ctrl+X and Ctrl+5
---   are not bound, so they keep their defaults (Ctrl+2-5 stance bar, Ctrl+R probably the framerate display).
+-- * Spare keys: Shift+2, Shift+4, Shift+X, Shift+C, Ctrl+2, Ctrl+3, Ctrl+4, Ctrl+R and Ctrl+X. They are bound to
+--   their empty buttons anyway, so every key of the Shift and Ctrl bars works the same way and the bars look alike
+--   (the player's choice in 0.4.3). Ctrl+2-4 replace stance-bar buttons and Ctrl+R the framerate display; the
+--   preview says so.
 -- Bars (Blizzard_ActionBar in the Forever UI code; slot = (page - 1) * 12 + button):
 --   plain = main bar ACTIONBUTTON (1-12); Shift = Action Bar 2 MULTIACTIONBAR1BUTTON (page 6, 61-72);
---   Ctrl and mouse = Action Bar 5 MULTIACTIONBAR4BUTTON (MultiBarLeft, page 4, 37-48, at the right edge of the
---   screen): buttons 1-6 Ctrl+1, Ctrl+Q, Ctrl+E, Ctrl+F, Ctrl+Z, Ctrl+C; buttons 7-12 Mouse4, Mouse5, Shift+Mouse4,
+--   Ctrl = Action Bar 5 MULTIACTIONBAR4BUTTON (MultiBarLeft, page 4, 37-48, at the right edge of the screen). Bar 5
+--   mirrors bar 2: button n has the Ctrl version of button n's key (Ctrl+1, 2, 3, 4, 5, Q, E, R, F, Z, X, C), so the
+--   three keyed bars line up key by key.
+--   Mouse = Action Bar 3 MULTIACTIONBAR2BUTTON (page 5, 49-60) buttons 7-12: Mouse4, Mouse5, Shift+Mouse4,
 --   Shift+Mouse5, Ctrl+Mouse4, Ctrl+Mouse5 (key strings BUTTON4/BUTTON5, Blizzard_FrameXML/BindingUtil). A key can be
---   bound to any button, so the 12 Ctrl and mouse spells share one bar that is shown anyway.
---   Layout 3 (0.4.0) used Action Bars 6 and 7 for them; those bars sat in the middle of the screen, so the player did
---   not want them. The addon never turns them on again: a full apply clears layout 3's spells there, hides both
---   bars and unbinds keys that still point at them (L.retired).
---   Action Bars 3 (page 5, 49-60) and 4 (page 3, 25-36) hold the clickable, unkeyed buttons: bar 3 weapon imbues,
---   long buffs and potions; bar 4 out-of-combat spells, situational totems and the extra Totem Bar presets.
---   Things moved out of a planned slot go to the spare buttons (bar 3, then bar 2) first.
+--   bound to any button; the six mouse spells sit together as one block on a bar that is shown anyway, and Riptide's
+--   and Nature's Swiftness' cooldowns are visible there.
+--   Layout 3 (0.4.0) used Action Bars 6 and 7 for the Ctrl and mouse spells; those bars sat in the middle of the
+--   screen, so the player did not want them. The addon never turns them on again: a full apply clears layout 3's
+--   spells there, hides both bars and unbinds keys that still point at them (L.retired).
+--   Action Bar 3 buttons 1-6 hold the weapon imbues and long buffs with the potion and elixir macros; Action Bar 4
+--   (page 3, 25-36) holds out-of-combat spells, situational totems and the extra Totem Bar presets. Both are clicked.
+--   To make room for the mouse block (0.4.3), the rarest out-of-combat spells have no bar slot (L.noSlot "spellbook").
+--   Things moved out of a planned slot go to the spare buttons (bar 3, bar 4, bar 5, then bar 2) first.
 -- Plan entries: a spell key; "@kind" an item macro (Data/Items.lua); "-" a spare button; "#" the player's own button.
 local _, ns = ...
 
@@ -50,10 +56,10 @@ end
 L.bars = {
   { id = "main", first = 1,   binding = "ACTIONBUTTON%d",          setting = nil,                      keys = KEYS },
   { id = "bar2", first = 61,  binding = "MULTIACTIONBAR1BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_2", keys = withMod("SHIFT-") },
-  { id = "bar5", first = 37,  binding = "MULTIACTIONBAR4BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_5",
-    keys = { "CTRL-1", "CTRL-Q", "CTRL-E", "CTRL-F", "CTRL-Z", "CTRL-C",
+  { id = "bar5", first = 37,  binding = "MULTIACTIONBAR4BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_5", keys = withMod("CTRL-") },
+  { id = "bar3", first = 49,  binding = "MULTIACTIONBAR2BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_3",
+    keys = { false, false, false, false, false, false,
       "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5" } },
-  { id = "bar3", first = 49,  binding = "MULTIACTIONBAR2BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_3" },
   { id = "bar4", first = 25,  binding = "MULTIACTIONBAR3BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_4" },
 }
 
@@ -68,13 +74,14 @@ L.retired = {
 }
 
 -- Bumped when slots or keys change: players who had the older layout get a one-time notice (Modules/Layout.lua).
-L.version = 4
+L.version = 5
 
--- Every key the plan binds. Only planned buttons get a key.
+-- Every key the plan binds: the planned buttons' keys and the spare keyed buttons' keys.
 L.allowedKeys = {
   "1", "2", "3", "4", "Q", "E", "R", "F", "Z", "X", "C",
-  "SHIFT-1", "SHIFT-3", "SHIFT-Q", "SHIFT-E", "SHIFT-R", "SHIFT-F", "SHIFT-Z",
-  "CTRL-1", "CTRL-Q", "CTRL-E", "CTRL-F", "CTRL-Z", "CTRL-C",
+  "SHIFT-1", "SHIFT-2", "SHIFT-3", "SHIFT-4", "SHIFT-Q", "SHIFT-E", "SHIFT-R", "SHIFT-F", "SHIFT-Z", "SHIFT-X",
+  "SHIFT-C",
+  "CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F", "CTRL-Z", "CTRL-X", "CTRL-C",
   "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5",
 }
 
@@ -94,28 +101,37 @@ local plan = {
     "mana_spring_totem", "-", "-",
   },
   bar5 = {
-    "totemic_recall", "earthbind_totem", "stoneclaw_totem", "grounding_totem", "mana_tide_totem", "ghost_wolf",
-    "riptide", "natures_swiftness", "cure_poison", "cure_disease", "poison_cleansing_totem", "disease_cleansing_totem",
+    "totemic_recall", "-", "-", "-", "#",
+    "earthbind_totem", "stoneclaw_totem", "-", "grounding_totem",
+    "mana_tide_totem", "-", "ghost_wolf",
   },
   bar3 = {
-    "rockbiter_weapon", "flametongue_weapon", "frostbrand_weapon", "windfury_weapon",
-    "@elixir", "@healpot", "strength_of_earth_totem", "healing_stream_totem",
-    { "lightning_shield", after = "water_shield" }, "fire_nova",
+    "rockbiter_weapon", "flametongue_weapon", { "lightning_shield", after = "water_shield" }, "windfury_weapon",
+    "@elixir", "@healpot",
+    "riptide", "natures_swiftness", "cure_poison", "cure_disease", "poison_cleansing_totem", "disease_cleansing_totem",
   },
   bar4 = {
-    "ancestral_spirit", "astral_recall", "water_walking", "water_breathing", "far_sight", "windfury_totem",
-    "grace_of_air_totem", "magma_totem", "call_of_the_ancestors", "call_of_the_spirits", "flametongue_totem",
-    "sentry_totem",
+    "ancestral_spirit", "astral_recall", "strength_of_earth_totem", "healing_stream_totem", "fire_nova",
+    "windfury_totem", "grace_of_air_totem", "magma_totem", "call_of_the_ancestors", "call_of_the_spirits",
+    "flametongue_totem", "-",
   },
 }
 
 -- Spells without a bar slot: resistance totems and Windwall are situational (Totem Bar or spellbook);
--- Reincarnation is passive.
+-- Reincarnation is passive. "spellbook" (0.4.3, to make room for the mouse block on Action Bar 3): spells a dungeon
+-- healer almost never casts, all out of combat: Far Sight and Sentry Totem (scouting), Water Breathing and Water
+-- Walking (travel; a few swims a week), Frostbrand Weapon (a solo imbue against runners; a healer uses Rockbiter,
+-- Flametongue or Windfury).
 L.noSlot = {
   frost_resistance_totem = "totembar",
   fire_resistance_totem = "totembar",
   nature_resistance_totem = "totembar",
   windwall_totem = "totembar",
+  far_sight = "spellbook",
+  sentry_totem = "spellbook",
+  water_breathing = "spellbook",
+  water_walking = "spellbook",
+  frostbrand_weapon = "spellbook",
   reincarnation = "passive",
 }
 
@@ -153,22 +169,30 @@ L.macroBodies = {
   nshw_click = "#showtooltip {spell}\n/cast {spell}\n/cast [help,nodead][@player] {heal}",
 }
 
--- Layout 2 (0.3.0) put these spells in buttons that are spare now. A full apply clears such a button when it still
--- holds that spell and the spell has its new place, so no duplicates are left (undoable like everything else).
--- The player's own buttons 5 and Shift+5 (Earth Shock and Earthbind Totem in layout 2) are left alone.
+-- Earlier layouts put these spells in buttons that are spare now. A full apply clears such a button when it still
+-- holds that spell and the spell has its new place (or now lives in the spellbook), so no duplicates are left
+-- (undoable like everything else). Layout 2 (0.3.0): bar 2. Layout 4 (0.4.1-0.4.2): Action Bar 5 buttons that are
+-- spare Ctrl keys now, and Sentry Totem's old button on bar 4. The player's own buttons are left alone, also when
+-- an old layout put a spell there (5 and Shift+5 in layout 2, Ctrl+5 = Mana Tide Totem in layout 4).
 L.old = {
-  [59] = "totemic_recall",
-  [60] = "ghost_wolf",
   [62] = "cure_disease",
   [64] = "frost_shock",
   [71] = "mana_tide_totem",
   [72] = "call_of_the_elements",
+  [38] = "earthbind_totem",
+  [39] = "stoneclaw_totem",
+  [40] = "grounding_totem",
+  [44] = "natures_swiftness",
+  [47] = "poison_cleansing_totem",
+  [36] = "sentry_totem",
 }
 
 -- Keys whose default binding the preview explains (expected defaults, research/keybind-layout.md Q4).
 L.defaultWarn = {
   ["CTRL-1"] = "ui.preview.warn.stance",
   ["CTRL-2"] = "ui.preview.warn.stance",
+  ["CTRL-3"] = "ui.preview.warn.stance",
+  ["CTRL-4"] = "ui.preview.warn.stance",
   ["CTRL-R"] = "ui.preview.warn.fps",
 }
 
@@ -176,7 +200,7 @@ L.slots = {}
 L.bySpell = {}
 L.byItem = {}
 L.own = {}   -- slot → true
-L.spare = {} -- unplanned buttons: first choice for things moved out of a planned slot (bar 3 first)
+L.spare = {} -- unplanned buttons: first choice for things moved out of a planned slot. key: spare keyed buttons
 local spareByBar = {}
 for _, bar in ipairs(L.bars) do
   spareByBar[bar.id] = {}
@@ -186,11 +210,13 @@ for _, bar in ipairs(L.bars) do
     if what == "#" then
       L.own[slotNo] = true
     elseif what == "-" then
-      table.insert(spareByBar[bar.id], { bar = bar.id, button = i, slot = slotNo })
+      local key = bar.keys and bar.keys[i] or nil
+      table.insert(spareByBar[bar.id], { bar = bar.id, button = i, slot = slotNo, key = key,
+        binding = key and string.format(bar.binding, i) or nil })
     else
       local opts = type(what) == "table" and what or {}
       if type(what) == "table" then what = what[1] end
-      local key = bar.keys and bar.keys[i]
+      local key = bar.keys and bar.keys[i] or nil
       local item = what:match("^@(%w+)$")
       local slot = {
         bar = bar.id,
