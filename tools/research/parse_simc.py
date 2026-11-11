@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
-"""Parse a SimulationCraft SpellDataDump class file (e.g. simc-forever shaman.txt)
-into a TSV used as research evidence for ForeverSensei_Shaman/Data.
+"""Parse a SimulationCraft SpellDataDump class file (e.g. simc-forever shaman.txt or paladin.txt)
+into a TSV used as research evidence for the class packs (ForeverSensei_<Class>/Data).
 
-Usage: python3 tools/research/parse_simc.py <shaman.txt> [out.tsv]
-Source: https://github.com/simulationcraft/simc-forever/blob/HEAD/SpellDataDump/shaman.txt
+Usage: python3 tools/research/parse_simc.py <class.txt> [out.tsv]
+Source: https://github.com/simulationcraft/simc-forever/tree/HEAD/SpellDataDump (one file per class)
+
+The last columns were added for the paladin research (0.6.0): gcd (empty = off the global cooldown),
+category cooldown, stacks and the buff tooltip. Columns are read by name, so older TSVs still work.
 """
 import re
 import sys
 
 FIELDS = ["id", "name", "rank", "level", "passive", "talent", "cast", "cooldown",
-          "resource", "range", "duration", "labels", "description"]
+          "resource", "range", "duration", "labels", "description",
+          "gcd", "category_cooldown", "stacks", "tooltip"]
 
 
 def parse(text):
@@ -43,6 +47,10 @@ def parse(text):
             "duration": field("Duration"),
             "labels": field("Labels"),
             "description": field("Description").replace("\t", " "),
+            "gcd": field("GCD"),
+            "category_cooldown": field("Category Cooldown"),
+            "stacks": field("Stacks"),
+            "tooltip": field("Tooltip").replace("\t", " "),
         }
 
 
