@@ -11,7 +11,7 @@ local APIS = {
   "GetActionInfo", "GetActionText", "PickupAction", "PlaceAction", "ClearCursor",
   "PickupMacro", "GetMacroIndexByName", "GetMacroInfo", "GetMacroSpell", "CreateMacro", "EditMacro",
   "C_Item.PickupItem", "C_Item.GetItemNameByID",
-  "GetBindingAction", "SetBinding", "SaveBindings", "GetCurrentBindingSet",
+  "GetBindingAction", "GetBindingKey", "SetBinding", "SaveBindings", "GetCurrentBindingSet",
   "Settings.GetValue", "Settings.SetValue",
   "C_ClassTalents.GetActiveConfigID", "C_Traits.GetConfigInfo", "C_Traits.GetTreeNodes", "C_Traits.GetNodeInfo",
   "C_Traits.GetEntryInfo", "C_Traits.GetDefinitionInfo", "C_Traits.GetTreeCurrencyInfo",

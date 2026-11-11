@@ -1,4 +1,4 @@
--- Data/Shaman/Layout.lua: the fixed slot and key plan (layout version 3, ForeverSensei 0.4.0).
+-- Data/Shaman/Layout.lua: the fixed slot and key plan (layout version 4, ForeverSensei 0.4.1).
 -- Spec: research/keybind-layout.md (approved). The level-60 dungeon-healer layout comes first; lower levels use a
 -- subset of it, and a key never moves once its spell is learned (a reserved key stays empty until then).
 -- Rules from the pull walkthroughs in the spec:
@@ -20,17 +20,20 @@
 --   a clickable bar), C Healthstone else Healing Potion (FS_HEALTH, next to the Mana Potion), Shift+3 Purge,
 --   Ctrl+C Ghost Wolf (the player's decision).
 -- * 5, Shift+5 and Ctrl+5 belong to the player: never planned, never bound, never cleared.
--- * Spare: Shift+2, Shift+4, Shift+X, Shift+C (bound to their empty buttons). Ctrl+2-4, Ctrl+R and Ctrl+X are not
---   bound, so they keep their defaults (Ctrl+2-4 stance bar, Ctrl+R probably the framerate display).
+-- * Spare: Shift+2, Shift+4, Shift+X, Shift+C (bound to their empty buttons). Ctrl+2-4, Ctrl+R, Ctrl+X and Ctrl+5
+--   are not bound, so they keep their defaults (Ctrl+2-5 stance bar, Ctrl+R probably the framerate display).
 -- Bars (Blizzard_ActionBar in the Forever UI code; slot = (page - 1) * 12 + button):
 --   plain = main bar ACTIONBUTTON (1-12); Shift = Action Bar 2 MULTIACTIONBAR1BUTTON (page 6, 61-72);
---   Ctrl = Action Bar 6 MULTIACTIONBAR5BUTTON (MultiBar5, page 13, 145-156) in the main bar's column order;
---   mouse = Action Bar 7 MULTIACTIONBAR6BUTTON (MultiBar6, page 14, 157-168): buttons 1-6 are Mouse4, Mouse5,
---   Shift+Mouse4, Shift+Mouse5, Ctrl+Mouse4, Ctrl+Mouse5 (key strings BUTTON4/BUTTON5, Blizzard_FrameXML/BindingUtil).
---   A hidden bar may not fire its bindings, so the layout turns Action Bars 6 and 7 on (PROXY_SHOW_ACTIONBAR_6/7).
---   Action Bars 3 (page 5, 49-60), 4 (page 3, 25-36) and 5 (page 4, 37-48) hold the clickable, unkeyed buttons:
---   bar 3 weapon imbues, long buffs and potions; bar 4 out-of-combat spells and situational totems; bar 5 the extra
---   Totem Bar presets and spare buttons (things moved out of a planned slot go there first).
+--   Ctrl and mouse = Action Bar 5 MULTIACTIONBAR4BUTTON (MultiBarLeft, page 4, 37-48, at the right edge of the
+--   screen): buttons 1-6 Ctrl+1, Ctrl+Q, Ctrl+E, Ctrl+F, Ctrl+Z, Ctrl+C; buttons 7-12 Mouse4, Mouse5, Shift+Mouse4,
+--   Shift+Mouse5, Ctrl+Mouse4, Ctrl+Mouse5 (key strings BUTTON4/BUTTON5, Blizzard_FrameXML/BindingUtil). A key can be
+--   bound to any button, so the 12 Ctrl and mouse spells share one bar that is shown anyway.
+--   Layout 3 (0.4.0) used Action Bars 6 and 7 for them; those bars sat in the middle of the screen, so the player did
+--   not want them. The addon never turns them on again: a full apply clears layout 3's spells there, hides both
+--   bars and unbinds keys that still point at them (L.retired).
+--   Action Bars 3 (page 5, 49-60) and 4 (page 3, 25-36) hold the clickable, unkeyed buttons: bar 3 weapon imbues,
+--   long buffs and potions; bar 4 out-of-combat spells, situational totems and the extra Totem Bar presets.
+--   Things moved out of a planned slot go to the spare buttons (bar 3, then bar 2) first.
 -- Plan entries: a spell key; "@kind" an item macro (Data/Items.lua); "-" a spare button; "#" the player's own button.
 local _, ns = ...
 
@@ -47,16 +50,23 @@ end
 L.bars = {
   { id = "main", first = 1,   binding = "ACTIONBUTTON%d",          setting = nil,                      keys = KEYS },
   { id = "bar2", first = 61,  binding = "MULTIACTIONBAR1BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_2", keys = withMod("SHIFT-") },
-  { id = "bar6", first = 145, binding = "MULTIACTIONBAR5BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_6", keys = withMod("CTRL-") },
-  { id = "bar7", first = 157, binding = "MULTIACTIONBAR6BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_7",
-    keys = { "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5" } },
+  { id = "bar5", first = 37,  binding = "MULTIACTIONBAR4BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_5",
+    keys = { "CTRL-1", "CTRL-Q", "CTRL-E", "CTRL-F", "CTRL-Z", "CTRL-C",
+      "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5" } },
   { id = "bar3", first = 49,  binding = "MULTIACTIONBAR2BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_3" },
   { id = "bar4", first = 25,  binding = "MULTIACTIONBAR3BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_4" },
-  { id = "bar5", first = 37,  binding = "MULTIACTIONBAR4BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_5" },
+}
+
+-- Bars the addon no longer uses (layout 3 put the Ctrl and mouse spells there). A full apply hides them, clears the
+-- plan's spells from them and unbinds keys bound to their buttons; the clean-up button empties them. own: layout 3's
+-- Ctrl+5 button (the player's), which a full apply leaves alone.
+L.retired = {
+  { id = "bar6", first = 145, binding = "MULTIACTIONBAR5BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_6", own = 5 },
+  { id = "bar7", first = 157, binding = "MULTIACTIONBAR6BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_7" },
 }
 
 -- Bumped when slots or keys change: players who had the older layout get a one-time notice (Modules/Layout.lua).
-L.version = 3
+L.version = 4
 
 -- Every key the plan binds. Only planned buttons get a key.
 L.allowedKeys = {
@@ -81,12 +91,8 @@ local plan = {
     "frost_shock", "stoneskin_totem", "searing_totem", "tremor_totem",
     "mana_spring_totem", "-", "-",
   },
-  bar6 = {
-    "totemic_recall", "-", "-", "-", "#",
-    "earthbind_totem", "stoneclaw_totem", "-", "grounding_totem",
-    "mana_tide_totem", "-", "ghost_wolf",
-  },
-  bar7 = {
+  bar5 = {
+    "totemic_recall", "earthbind_totem", "stoneclaw_totem", "grounding_totem", "mana_tide_totem", "ghost_wolf",
     "riptide", "natures_swiftness", "cure_poison", "cure_disease", "poison_cleansing_totem", "disease_cleansing_totem",
   },
   bar3 = {
@@ -96,10 +102,8 @@ local plan = {
   },
   bar4 = {
     "ancestral_spirit", "astral_recall", "water_walking", "water_breathing", "far_sight", "windfury_totem",
-    "grace_of_air_totem", "magma_totem", "-", "-", "flametongue_totem", "sentry_totem",
-  },
-  bar5 = {
-    "-", "call_of_the_ancestors", "call_of_the_spirits",
+    "grace_of_air_totem", "magma_totem", "call_of_the_ancestors", "call_of_the_spirits", "flametongue_totem",
+    "sentry_totem",
   },
 }
 
@@ -151,11 +155,8 @@ L.macroBodies = {
 -- holds that spell and the spell has its new place, so no duplicates are left (undoable like everything else).
 -- The player's own buttons 5 and Shift+5 (Earth Shock and Earthbind Totem in layout 2) are left alone.
 L.old = {
-  [37] = "totemic_call",
   [59] = "totemic_recall",
   [60] = "ghost_wolf",
-  [33] = "poison_cleansing_totem",
-  [34] = "disease_cleansing_totem",
   [62] = "cure_disease",
   [64] = "frost_shock",
   [71] = "mana_tide_totem",
@@ -173,7 +174,7 @@ L.slots = {}
 L.bySpell = {}
 L.byItem = {}
 L.own = {}   -- slot → true
-L.spare = {} -- unplanned buttons: first choice for things moved out of a planned slot (bar 5 first)
+L.spare = {} -- unplanned buttons: first choice for things moved out of a planned slot (bar 3 first)
 local spareByBar = {}
 for _, bar in ipairs(L.bars) do
   spareByBar[bar.id] = {}
@@ -205,7 +206,7 @@ for _, bar in ipairs(L.bars) do
     end
   end
 end
-for _, id in ipairs({ "bar5", "bar4", "bar3", "bar7", "bar6", "bar2" }) do
+for _, id in ipairs({ "bar3", "bar4", "bar5", "bar2" }) do
   for _, s in ipairs(spareByBar[id]) do table.insert(L.spare, s) end
 end
 

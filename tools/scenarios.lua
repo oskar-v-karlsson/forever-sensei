@@ -71,7 +71,8 @@ return function(ns, lang)
   -- Full layout (mouseover macros): preview, apply, check, undo, check.
   STUB.level = 60
   for id in pairs(STUB.names) do STUB.known[id] = true end
-  -- Buttons 5, Shift+5 and Ctrl+5 are the player's own (slots 5, 65, 149): the layout never touches them.
+  -- Buttons 5 and Shift+5 (slots 5, 65) and the keys 5, Shift+5, Ctrl+5 are the player's own; so is layout 3's Ctrl+5
+  -- button on the retired Action Bar 6 (slot 149): a full apply never touches them.
   STUB.actions = { [1] = { "spell", 403 }, [2] = { "item", 6948 }, [7] = { "spell", 331 }, [13] = { "spell", 324 },
     [5] = { "item", 6948 }, [65] = { "spell", 324 }, [149] = { "spell", 403 } }
   STUB.bindings = { ["Q"] = "STRAFELEFT", ["E"] = "STRAFERIGHT", ["1"] = "ACTIONBUTTON1", ["SHIFT-1"] = "ACTIONPAGE1",
@@ -132,6 +133,9 @@ return function(ns, lang)
     for _, bar in ipairs(L.bars) do
       if bar.setting and STUB.settings[bar.setting] ~= true then fail(mode .. ": " .. bar.id .. " not shown") end
     end
+    for _, bar in ipairs(L.retired) do
+      if STUB.settings[bar.setting] then fail(mode .. ": retired " .. bar.id .. " is shown") end
+    end
   end
 
   ns.settings.targeting = "mouseover"
@@ -178,17 +182,91 @@ return function(ns, lang)
   if STUB.cursor then fail("cursor not empty after undo") end
   table.insert(notes, "undo steps: " .. undos)
 
-  -- The Hearthstone was on main button 2 (now Flame Shock): it moved to a spare button of Action Bar 5.
+  -- The Hearthstone was on main button 2 (now Flame Shock): it moved to a spare button of Action Bar 3.
   -- (Checked on the applied layout above through the undo: here only the destination rule.)
   STUB.actions = { [2] = { "item", 6948 } }
   local movePlan = ns.Layout.BuildPlan()
   local mv = movePlan.moves[1]
-  if not mv or mv.from ~= 2 or mv.toSlot.bar ~= "bar5" or mv.to ~= L.spare[1].slot then
-    fail("layout: a displaced action should move to the first spare button of Action Bar 5")
+  if not mv or mv.from ~= 2 or mv.toSlot.bar ~= "bar3" or mv.to ~= L.spare[1].slot then
+    fail("layout: a displaced action should move to the first spare button of Action Bar 3")
   end
-  local needs5 = false
-  for _, bar in ipairs(movePlan.bars) do needs5 = needs5 or bar.id == "bar5" end
-  if not needs5 then fail("layout: Action Bar 5 not shown although something moves there") end
+  local needs3 = false
+  for _, bar in ipairs(movePlan.bars) do needs3 = needs3 or bar.id == "bar3" end
+  if not needs3 then fail("layout: Action Bar 3 not shown although something moves there") end
+
+  -- 0.4.0 (layout 3) players: Action Bars 6 and 7 are shown and hold the Ctrl and mouse spells, and their keys point
+  -- there. A full apply clears those buttons, hides both bars and unbinds stale keys, but keeps the player's own
+  -- Ctrl+5 key and layout 3's Ctrl+5 button (slot 149) and anything that isn't the plan's. Undo restores it all.
+  local function idOf(key) return ns.Spells.CurrentID(ns.Spells.Get(key)) end
+  STUB.actions = { [145] = { "spell", idOf("totemic_recall") }, [157] = { "spell", idOf("riptide") },
+    [149] = { "spell", 403 }, [150] = { "item", 6948 } }
+  STUB.bindings = { ["CTRL-1"] = "MULTIACTIONBAR5BUTTON1", ["BUTTON4"] = "MULTIACTIONBAR6BUTTON1",
+    ["CTRL-2"] = "MULTIACTIONBAR5BUTTON2", ["CTRL-5"] = "MULTIACTIONBAR5BUTTON5" }
+  STUB.settings.PROXY_SHOW_ACTIONBAR_6, STUB.settings.PROXY_SHOW_ACTIONBAR_7 = true, true
+  local function settingsSnap()
+    local t = {}
+    for k, v in pairs(STUB.settings) do t[k] = tostring(v) end
+    return t
+  end
+  local migA, migB = snapshot()
+  local migS = settingsSnap()
+  local migPlan = ns.Layout.BuildPlan()
+  local migText = table.concat(ns.Layout.Describe(migPlan), "\n")
+  if #migPlan.hide ~= 2 or not migText:find(ns.T("ui.preview.hide"), 1, true) then
+    fail("migration: the preview does not list Action Bars 6 and 7 as hidden")
+  end
+  try("migration apply", ns.Layout.Execute, migPlan)
+  checkLayout("mouseover") -- (migration)
+  if STUB.actions[145] or STUB.actions[157] then fail("migration: layout 3 spells left on Action Bars 6/7") end
+  if not (STUB.actions[149] and STUB.actions[149][2] == 403 and STUB.actions[150]) then
+    fail("migration: the player's Ctrl+5 button or a non-plan button on Action Bar 6 was cleared")
+  end
+  if (STUB.bindings["CTRL-2"] or "") ~= "" or STUB.bindings["CTRL-5"] ~= "MULTIACTIONBAR5BUTTON5" then
+    fail("migration: stale Action Bar 6/7 keys not unbound, or the own Ctrl+5 key changed")
+  end
+  if not ns.Layout.IsEmptyPlan(ns.Layout.BuildPlan()) then fail("migration: plan not empty after apply") end
+  try("migration undo", ns.Layout.Undo)
+  local mA, mB = snapshot()
+  ok, why = same(migA, mA)
+  if not ok then fail("migration undo: action slots differ: " .. why) end
+  ok, why = same(migB, mB)
+  if not ok then fail("migration undo: key bindings differ: " .. why) end
+  ok, why = same(migS, settingsSnap())
+  if not ok then fail("migration undo: bar settings differ: " .. why) end
+
+  -- Clean bars: asks first, empties every button of the layout's bars and of Action Bars 6/7 except 5 and Shift+5,
+  -- leaves other bars alone, and Undo puts everything back.
+  STUB.actions = { [1] = { "spell", 403 }, [5] = { "item", 6948 }, [65] = { "spell", 324 }, [30] = { "item", 6948 },
+    [45] = { "spell", 331 }, [149] = { "spell", 403 }, [160] = { "spell", 324 }, [100] = { "spell", 403 } }
+  local clA = snapshot()
+  try("clean", ns.Layout.Clean)
+  local cf = _G.ForeverSenseiConfirm
+  if not cf or not cf:IsShown() or not (cf.text:GetText() or ""):find("6", 1, true) then
+    fail("clean: no confirmation shown")
+  else
+    fits("clean confirm", cf)
+    try("clean confirm", function() cf.yes:Click() end)
+  end
+  for slot in pairs(clA) do
+    local keep = slot == 5 or slot == 65 or slot == 100
+    if (STUB.actions[slot] ~= nil) ~= keep then fail("clean: slot " .. slot .. (keep and " was emptied" or " still set")) end
+  end
+  try("clean undo", ns.Layout.Undo)
+  ok, why = same(clA, (snapshot()))
+  if not ok then fail("clean undo: action slots differ: " .. why) end
+  STUB.actions = { [5] = { "item", 6948 }, [65] = { "spell", 324 } }
+  if cf then cf:Hide() end
+  try("clean nothing", ns.Layout.Clean)
+  if cf and cf:IsShown() then fail("clean: asked although only the own buttons hold something") end
+  -- Something Undo can't restore (a mount) is named in the question.
+  STUB.actions = { [40] = { "summonmount", 7 } }
+  try("clean mount", ns.Layout.Clean)
+  cf = _G.ForeverSenseiConfirm
+  local nr = ns.T("ui.clean.norestore", { list = "" })
+  if not cf or not (cf.text:GetText() or ""):find(nr:sub(1, 20), 1, true) then
+    fail("clean: the question does not name what Undo can't restore")
+  end
+  if cf then cf:Hide() end
 
   -- Place one spell (card button), with something else in its slot → asks first.
   local ch = ns.Spells.Get("chain_heal")

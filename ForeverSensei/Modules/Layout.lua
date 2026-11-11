@@ -26,6 +26,7 @@ local API = {
   pickupItem = { "C_Item.PickupItem", "PickupItem" },
   clearCursor = { "ClearCursor" },
   bindingAction = { "GetBindingAction" },
+  bindingKey = { "GetBindingKey" },
   setBinding = { "SetBinding" },
   saveBindings = { "SaveBindings" },
   bindingSet = { "GetCurrentBindingSet" },
@@ -289,10 +290,10 @@ local function placedElsewhere(planKey)
 end
 
 -- Work out every change. onlyKey limits it to one spell (the card's 配置する button).
--- → plan { place, moves, clears, lost, binds, bars }
+-- → plan { place, moves, clears, lost, binds, bars, hide }
 function Layout.BuildPlan(onlyKey)
   local layout = L()
-  local plan = { place = {}, moves = {}, clears = {}, lost = {}, binds = {}, bars = {} }
+  local plan = { place = {}, moves = {}, clears = {}, lost = {}, binds = {}, bars = {}, hide = {} }
   local targets = {}
   for _, s in ipairs(layout.slots) do
     local d = Layout.DesiredFor(s)
@@ -300,8 +301,8 @@ function Layout.BuildPlan(onlyKey)
     if d and (not onlyKey or (d.entry and d.entry.key == onlyKey) or s.after == onlyKey) then targets[s.slot] = d end
   end
 
-  -- Displaced actions go to empty free slots: the spare buttons of Action Bar 5 first, then slots reserved for spells
-  -- the player does not know yet, bar 4 then bar 3, right to left.
+  -- Displaced actions go to empty free slots: the spare buttons (bar 3, then bar 2) first, then slots reserved for
+  -- spells the player does not know yet, bar 4 then bar 3, right to left.
   local free = {}
   for _, s in ipairs(layout.spare) do
     if Layout.Current(s.slot) == nil then table.insert(free, s) end
@@ -364,8 +365,48 @@ function Layout.BuildPlan(onlyKey)
         if spare then table.insert(plan.clears, { slot = slot, where = spare, label = Layout.Label(cur) }) end
       end
     end
-    table.sort(plan.clears, function(a, b) return a.slot < b.slot end)
   end
+  -- Retired bars (Action Bars 6 and 7, layout 3), full apply only: clear the plan's spells there once they have their
+  -- own slot, hide the bars and unbind keys that still point at their buttons (never the player's own keys).
+  if not onlyKey then
+    for _, bar in ipairs(layout.retired) do
+      for i = 1, 12 do
+        local slot = bar.first + i - 1
+        local cur = i ~= bar.own and Layout.Current(slot)
+        if cur and cur.planKey and placedElsewhere(cur.planKey) then
+          table.insert(plan.clears, { slot = slot, where = { bar = bar.id, button = i, slot = slot }, label = Layout.Label(cur) })
+        end
+      end
+    end
+    local skip = {}
+    for _, b in ipairs(plan.binds) do skip[b.key] = true end
+    for _, k in ipairs(layout.ownKeys) do skip[k] = true end
+    local candidates, seen = {}, {}
+    local function add(k)
+      if type(k) == "string" and k ~= "" and not seen[k] then
+        seen[k] = true
+        table.insert(candidates, k)
+      end
+    end
+    for _, k in ipairs(layout.allowedKeys) do add(k) end
+    for _, bar in ipairs(layout.retired) do
+      for i = 1, 12 do
+        local ok, k1, k2 = call(API.bindingKey, string.format(bar.binding, i))
+        if ok then add(k1); add(k2) end
+      end
+      local ok, shown = call(API.getSetting, bar.setting)
+      if ok and shown == true then table.insert(plan.hide, bar) end
+    end
+    for _, key in ipairs(candidates) do
+      if not skip[key] then
+        local ok, action = call(API.bindingAction, key)
+        if ok and type(action) == "string" and Layout.IsRetiredBinding(action) then
+          table.insert(plan.binds, { key = key, old = action, name = ns.T("ui.preview.none") })
+        end
+      end
+    end
+  end
+  table.sort(plan.clears, function(a, b) return a.slot < b.slot end)
 
   for barId in pairs(barsNeeded) do
     local bar = barById(barId)
@@ -380,6 +421,16 @@ end
 
 function Layout.IsEmptyPlan(plan)
   return #plan.place == 0 and #plan.moves == 0 and #plan.clears == 0 and #plan.binds == 0 and #plan.bars == 0
+    and #(plan.hide or {}) == 0
+end
+
+-- Is this binding action a button of a retired bar ("MULTIACTIONBAR5BUTTON3")?
+function Layout.IsRetiredBinding(action)
+  for _, bar in ipairs(L().retired) do
+    local prefix = bar.binding:gsub("%%d", "")
+    if action:sub(1, #prefix) == prefix and action:sub(#prefix + 1):match("^%d+$") then return true end
+  end
+  return false
 end
 
 -- Is a known spell in its planned slot, with its key bound and its bar shown? nil when it has no slot or is unknown.
@@ -430,6 +481,10 @@ function Layout.Execute(plan)
     else
       ns.UI.Toast(ns.T("ui.bars.hidden", { bar = ns.T("ui.bar." .. bar.id) }), 12)
     end
+  end
+  for _, bar in ipairs(plan.hide or {}) do
+    local ok, old = call(API.getSetting, bar.setting)
+    if call(API.setSetting, bar.setting, false) then backup.bars[bar.setting] = ok and old or false end
   end
   pushBackup(backup)
   if fallback.spell then ns.UI.Toast(ns.T("ui.layout.macrofail"), 12) end
@@ -556,6 +611,10 @@ function Layout.Describe(plan)
     head("ui.preview.bars")
     for _, bar in ipairs(plan.bars) do table.insert(lines, ns.T("ui.bar." .. bar.id)) end
   end
+  if #(plan.hide or {}) > 0 then
+    head("ui.preview.hide")
+    for _, bar in ipairs(plan.hide) do table.insert(lines, ns.T("ui.bar." .. bar.id)) end
+  end
   head("ui.preview.notes")
   for _, w in ipairs(Layout.Warnings(plan)) do table.insert(lines, w) end
   table.insert(lines, ns.T("ui.preview.warn.own"))
@@ -606,6 +665,54 @@ function Layout.Preview()
   end)
   preview:Show()
   ns.UI.Refit(preview)
+end
+
+-- The clean-up button: every button of the bars the full layout uses, and of the retired Action Bars 6 and 7, except
+-- the player's own buttons (5 and Shift+5). → plan with clears only (Execute backs them up, Undo restores them)
+function Layout.BuildCleanPlan()
+  local layout = L()
+  local plan = { place = {}, moves = {}, clears = {}, lost = {}, binds = {}, bars = {}, hide = {} }
+  local function scan(bar)
+    for i = 1, 12 do
+      local slot = bar.first + i - 1
+      local cur = not layout.own[slot] and Layout.Current(slot)
+      if cur then
+        table.insert(plan.clears, { slot = slot, where = { bar = bar.id, button = i, slot = slot }, label = Layout.Label(cur) })
+      end
+    end
+  end
+  for _, bar in ipairs(layout.bars) do scan(bar) end
+  for _, bar in ipairs(layout.retired) do scan(bar) end
+  return plan
+end
+
+-- Undo can put back spells, macros and items; anything else (a mount, a flyout, ...) is named in the question.
+local RESTORABLE = { spell = true, macro = true, item = true }
+
+function Layout.Clean()
+  if ns.InCombat() then
+    ns.UI.Toast(ns.T("ui.combat.later"))
+    return
+  end
+  local plan = Layout.BuildCleanPlan()
+  if #plan.clears == 0 then
+    ns.UI.Toast(ns.T("ui.clean.nothing"))
+    return
+  end
+  local text = ns.T("ui.clean.confirm", { n = #plan.clears })
+  local other = {}
+  for _, c in ipairs(plan.clears) do
+    local cur = Layout.Current(c.slot)
+    if cur and not RESTORABLE[cur.type] then table.insert(other, c.label) end
+  end
+  if #other > 0 then text = text .. "\n\n" .. ns.T("ui.clean.norestore", { list = table.concat(other, ", ") }) end
+  ns.UI.Confirm(text, ns.T("ui.btn.clean"), function()
+    ns.OutOfCombat("clean", function()
+      Layout.Execute(Layout.BuildCleanPlan())
+      ns.UI.Toast(ns.T("ui.clean.done"), 12)
+      if ns.Guide and ns.Guide.Refresh then ns.Guide.Refresh() end
+    end)
+  end)
 end
 
 -- The card's 配置する button: one spell, asks before replacing something else.
@@ -787,6 +894,7 @@ end
 
 ns.Command("apply", function() Layout.Preview() end)
 ns.Command("undo", function() Layout.Undo() end)
+ns.Command("clean", function() Layout.Clean() end)
 
 -- One-time notice after an update that changed the layout (L.version). It only offers the preview: nothing moves
 -- unless the player applies it there (with the usual backup and undo). New characters just get the current version.

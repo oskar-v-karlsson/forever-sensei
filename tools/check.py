@@ -237,6 +237,8 @@ def check_static():
             problem(f"guide.{sec['id']}: more paragraphs in text than in Data/Shaman/Guide.lua")
     for bar in layout["bars"]:
         needed.add(f"ui.bar.{bar['id']}")
+    for bar in layout.get("retired") or []:
+        needed.add(f"ui.bar.{bar['id']}")
     for kind in set(layout["noSlot"].values()):
         needed.add(f"ui.where.{kind}")
     for code in py(ns.Feedback.REASONS):
@@ -370,7 +372,8 @@ def check_static():
             problem(f"layout: macro for unplaced spell {k}")
         if len(m) > 16:
             problem(f"layout: macro name {m} too long")
-    # The approved grid (layout version 3, research/keybind-layout.md (a) at ecf40ec): every key holds exactly this.
+    # The approved grid (research/keybind-layout.md (a) at ecf40ec; layout 4 keeps the keys and moves the Ctrl and mouse
+    # buttons to Action Bar 5): every key holds exactly this.
     grid = {
         "1": "totemic_call", "2": "flame_shock", "3": "lightning_bolt", "4": "chain_lightning",
         "Q": "earth_shock", "E": "lesser_healing_wave", "R": "chain_heal", "F": "healing_wave",
@@ -402,20 +405,38 @@ def check_static():
         problem("layout: an own key is in allowedKeys")
     bars = {b["id"]: b for b in layout["bars"]}
     spare_slots = {x["slot"] for x in layout["spare"]}
-    for bid in ("main", "bar2", "bar6"):
+    for bid in ("main", "bar2"):
         own = bars[bid]["first"] + 4
         if own in seen_slot or own in spare_slots:
             problem(f"layout: own button {own} ({bid} 5) is planned or spare")
         if bars[bid]["keys"][4] not in layout["ownKeys"]:
             problem(f"layout: {bid} button 5 key must be an own key")
-    want_bars = {
-        "bar6": (145, "MULTIACTIONBAR5BUTTON%d", "PROXY_SHOW_ACTIONBAR_6"),
-        "bar7": (157, "MULTIACTIONBAR6BUTTON%d", "PROXY_SHOW_ACTIONBAR_7"),
-    }
-    for bid, (first, binding, setting) in want_bars.items():
-        b = bars.get(bid, {})
-        if (b.get("first"), b.get("binding"), b.get("setting")) != (first, binding, setting):
-            problem(f"layout: {bid} must be first {first}, {binding}, {setting}")
+    if sorted(int(x) for x in (layout.get("own") or {})) != [bars["main"]["first"] + 4, bars["bar2"]["first"] + 4]:
+        problem("layout: own slots must be exactly main 5 and bar2 5 (5 and Shift+5)")
+    for b in layout["bars"]:
+        mine = {"main": {"5"}, "bar2": {"SHIFT-5"}}.get(b["id"], set())
+        if (set(layout["ownKeys"]) - mine) & set(b.get("keys") or []):
+            problem(f"layout: bar {b['id']} lists an own key (Ctrl+5 is on no bar)")
+    # The Ctrl keys and the mouse buttons live on Action Bar 5 (MultiBarLeft, shown at the right edge). Action Bars 6
+    # and 7 (layout 3) showed up in the middle of the screen: they are retired, never used or shown again.
+    b5 = bars.get("bar5", {})
+    want_keys = ["CTRL-1", "CTRL-Q", "CTRL-E", "CTRL-F", "CTRL-Z", "CTRL-C",
+                 "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]
+    if (b5.get("first"), b5.get("binding"), b5.get("setting"), b5.get("keys")) != (
+            37, "MULTIACTIONBAR4BUTTON%d", "PROXY_SHOW_ACTIONBAR_5", want_keys):
+        problem("layout: bar5 must be first 37, MULTIACTIONBAR4BUTTON%d, PROXY_SHOW_ACTIONBAR_5 with the Ctrl and mouse keys")
+    retired = {(r.get("id"), r.get("first"), r.get("binding"), r.get("setting"), r.get("own"))
+               for r in layout.get("retired") or []}
+    if retired != {("bar6", 145, "MULTIACTIONBAR5BUTTON%d", "PROXY_SHOW_ACTIONBAR_6", 5),
+                   ("bar7", 157, "MULTIACTIONBAR6BUTTON%d", "PROXY_SHOW_ACTIONBAR_7", None)}:
+        problem("layout: retired must be exactly Action Bars 6 and 7")
+    for b in layout["bars"]:
+        if b["first"] >= 145 or b.get("setting") in ("PROXY_SHOW_ACTIONBAR_6", "PROXY_SHOW_ACTIONBAR_7") \
+                or re.match(r"MULTIACTIONBAR[56]BUTTON", b.get("binding") or ""):
+            problem(f"layout: bar {b['id']} uses retired Action Bar 6 or 7")
+    for s in slots:
+        if s["slot"] >= 145:
+            problem(f"layout: slot {s['slot']} is on retired Action Bar 6 or 7")
     for s in slots:
         b = bars[s["bar"]]
         want = (b.get("keys") or [None] * 12)[s["button"] - 1] if s["button"] <= len(b.get("keys") or []) else None
@@ -454,11 +475,11 @@ def check_static():
     n_macros = len(layout["macros"]) + len(items["kinds"])
     if n_macros > 15:
         problem(f"layout: {n_macros} addon macros (keep it at 15 or fewer of the 30 character macros)")
-    # Layout 2 leftovers are cleared only from buttons that are spare now.
+    # Earlier layouts' leftovers are cleared only from buttons that are spare now.
     for slot_, key in (layout.get("old") or {}).items():
         if int(slot_) not in spare_slots or key not in keys:
             problem(f"layout: old slot {slot_} ({key}) must be spare now and a spell")
-    if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 3:
+    if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 4:
         problem("layout: version missing (bump it when slots or keys change)")
 
     # --- items ------------------------------------------------------------------------------------------------

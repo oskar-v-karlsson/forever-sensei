@@ -382,6 +382,14 @@ end
 
 -- Bindings and settings -----------------------------------------------------------------------------
 function GetBindingAction(key) return STUB.bindings[key] or "" end
+function GetBindingKey(action)
+  local keys = {}
+  for k, a in pairs(STUB.bindings) do
+    if a == action then table.insert(keys, k) end
+  end
+  table.sort(keys)
+  return unpack(keys)
+end
 function SetBinding(key, action) STUB.bindings[key] = action; return true end
 function SaveBindings() end
 function GetCurrentBindingSet() return 2 end

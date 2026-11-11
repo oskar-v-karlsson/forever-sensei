@@ -166,24 +166,27 @@ renderers.layout = function(frame)
   local n = 0
   for bi, bar in ipairs(layout.bars) do
     y = y + label(frame, bi, y, ns.T("ui.bar." .. bar.id), 13, "gold") + 4
+    -- Bar 5 holds the Ctrl keys (buttons 1-6) and the mouse keys (7-12, long labels like "Shift+Mouse 4"): two rows.
+    local twoRows = bar.id == "bar5"
     for _, s in ipairs(layout.slots) do
       if s.bar == bar.id then
         n = n + 1
-        -- Bar 7 has long key labels ("Shift+Mouse 4") and only 6 keyed buttons.
-        local step = bar.id == "bar7" and 80 or 46
-        local x = (s.button - 1) * step
+        local second = twoRows and s.button > 6
+        local step = second and 80 or 46
+        local x = ((second and s.button - 6 or s.button) - 1) * step
+        local rowY = second and y + 58 or y
         local e = s.spell and Spells.Get(s.spell)
         if e and s.standIn and not Spells.IsKnown(e) then e = Spells.Get(s.standIn) end
-        icon(frame, n, x + (step - 46) / 2, y, 38, s.item or e)
+        icon(frame, n, x + (step - 46) / 2, rowY, 38, s.item or e)
         local keyText = pool(frame, "key", n, function() return UI.Text(frame, 10, "gold") end)
         keyText:SetWidth(step)
         keyText:SetJustifyH("CENTER")
         keyText:ClearAllPoints()
-        keyText:SetPoint("TOPLEFT", x - 4, -(y + 40))
+        keyText:SetPoint("TOPLEFT", x - 4, -(rowY + 40))
         keyText:SetText(s.key and layout.KeyLabel(s.key) or "")
       end
     end
-    y = y + 58
+    y = y + (twoRows and 116 or 58)
   end
   local names = {}
   for key, kind in pairs(layout.noSlot) do
@@ -196,7 +199,9 @@ renderers.layout = function(frame)
   button(frame, 1, 0, y, ns.T("ui.btn.applyall"), 200, function() ns.Layout.Preview() end)
   local undo = button(frame, 2, 210, y, ns.T("ui.btn.undo"), 140, function() ns.Layout.Undo() end)
   if undo.SetEnabled then undo:SetEnabled(ns.Layout.CanUndo() and true or false) end
+  button(frame, 5, 360, y, ns.T("ui.btn.clean"), 180, function() ns.Layout.Clean() end)
   y = y + 34
+  y = y + paragraph(frame, 6, y, "ui.layout.clean") + 8
 
   y = y + paragraph(frame, 2, y, "ui.layout.targeting") + 8
   local mode = ns.settings.targeting

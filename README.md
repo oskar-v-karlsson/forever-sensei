@@ -3,7 +3,7 @@
 A Japanese class coach addon for **World of Warcraft: Forever**. Version 1 covers the **Restoration Shaman** healer (made for a Skyborne / Horde player) from level 1 to 60.
 
 - **New skill cards (新しいスキル):** when you learn a skill, a card explains in Japanese what it does, when to use it, where it goes on your bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
-- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot and key, planned for a level-60 dungeon healer, so a key never moves as you level. Only keys near WASD are used: `1-4`, `Q E R F`, `Z X C`, the same keys with Shift or Ctrl, and the two mouse side buttons. The heals have keys without a modifier (`F`, `E`, `R`, Mouse 4, Mouse 5), and spells for the same job share one key with Shift and Ctrl (e.g. `1` / `Shift+1` / `Ctrl+1` move your totems). `5`, `Shift+5` and `Ctrl+5` are yours: the addon never touches them. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them.
+- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot and key, planned for a level-60 dungeon healer, so a key never moves as you level. Only keys near WASD are used: `1-4`, `Q E R F`, `Z X C`, the same keys with Shift or Ctrl, and the two mouse side buttons. The heals have keys without a modifier (`F`, `E`, `R`, Mouse 4, Mouse 5), and spells for the same job share one key with Shift and Ctrl (e.g. `1` / `Shift+1` / `Ctrl+1` move your totems). `5`, `Shift+5` and `Ctrl+5` are yours: the addon never touches them. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them. **バーを空にする** first empties the bars the layout uses (except your `5` buttons), so nothing of your own is left in between.
 - **New ranks:** the game does not put a new rank on the bars, so the addon upgrades bar buttons to the highest rank automatically (after combat if you are fighting), with a toast and **元に戻す** to keep the old rank. It can be turned off in the settings. Healing macros are checked to cast the highest rank too.
 - **Healing targeting:** mouseover healing macros, or plain spells for click-target healing. One setting switches between them.
 - **Talent advisor (タレント):** when you have an unspent point, it shows the next talent from the Mobalytics build with a short reason, plus the full order.
@@ -41,6 +41,7 @@ To update, delete the old `ForeverSensei` folder and put the new one in its plac
 1. Type `/sensei`, or click the minimap button, or use the addon compartment (the AddOns button at the minimap). The guide opens.
 2. Open **キー配置** (layout), choose how to pick a healing target (**マウスオーバーで回復** or **ターゲットを回復**), then press **すべて配置** to see the preview.
 3. The preview lists every slot and key that changes. Press **適用** to apply. `/sensei undo` or the **元に戻す** button restores the old bars and keys.
+   To start from empty bars, press **バーを空にする** first (`/sensei clean`). It asks first, empties Action Bars 1-5 except `5` and `Shift+5` (and Action Bars 6 and 7 if anything is left there), and saves the bars, so **元に戻す** puts them back.
 
    Note: the full layout binds `Q`/`E` (strafe by default), `Shift+1-4` (bar paging by default), `Ctrl+1` (first stance-bar button, e.g. Ghost Wolf) and the mouse side buttons. The preview warns about this.
 4. Play. New skills show a card out of combat. Cards wait until combat ends, and bar or key changes started in combat are applied when it ends.
@@ -55,6 +56,7 @@ The game's 12.x API hides health, cooldowns and auras from addons in combat, so 
 | `/sensei skills` | Skill list by level: learned, not learned, and slot. **カード** opens the skill's card. |
 | `/sensei layout` | Key layout tab |
 | `/sensei apply` / `/sensei undo` | Apply the full layout (with preview) / restore the backup |
+| `/sensei clean` | Empty the bars the full layout uses, except `5` and `Shift+5` (asks first; **元に戻す** restores) |
 | `/sensei talents` | Talent advice; `/sensei order` shows the full order |
 | `/sensei trainer` | Skills available at the trainer for your level |
 | `/sensei card <Spell>` | Show the card for a spell (English name, e.g. `/sensei card Chain Heal`) |
@@ -86,16 +88,18 @@ The plan is in [research/keybind-layout.md](research/keybind-layout.md) (pull wa
 | Mouse 4 | Riptide | Cure Poison | Poison Cleansing Totem |
 | Mouse 5 | Nature's Swiftness + Healing Wave | Cure Disease | Disease Cleansing Totem |
 
-- Plain keys are the main bar, Shift keys Action Bar 2, Ctrl keys Action Bar 6 and the mouse buttons Action Bar 7. **すべて配置** turns on Action Bars 2-7, because a hidden bar may not react to its keys.
+- Plain keys are the main bar and Shift keys Action Bar 2. The Ctrl keys and the mouse buttons share Action Bar 5 (at the right edge of the screen): buttons 1-6 are `Ctrl+1`, `Ctrl+Q`, `Ctrl+E`, `Ctrl+F`, `Ctrl+Z`, `Ctrl+C`, buttons 7-12 `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5`. **すべて配置** turns on Action Bars 2-5, because a hidden bar may not react to its keys.
+- Action Bars 6 and 7 are not used. Version 0.4.0 put the Ctrl and mouse spells there, in the middle of the screen. **すべて配置** now clears those spells from them, hides both bars and removes keys that still point at their buttons (not your `Ctrl+5`).
 - A key whose spell you learn later (e.g. Chain Heal and Riptide at 40) stays empty until then. Keys never move.
 - The keys with `–` are left free. `Shift+2`, `Shift+4`, `Shift+X` and `Shift+C` are bound to empty buttons; the Ctrl ones keep the game's defaults.
 - **Mouse side buttons:** leave them as the default Button 4 and Button 5 in your mouse software (no "back/forward" or other remapping), so the game sees `BUTTON4` and `BUTTON5`.
 - Totem flow in a dungeon: `1` Totemic Call at every pull brings your totems along; `Shift+1` Call of the Elements when the 5-minute totems run out (about every few pulls) and after a wipe; `Shift+R` Searing at every pull (it lasts 30-55 s); `Ctrl+1` Totemic Recall when you leave. Before level 22 (no Call of the Elements yet), put down Stoneskin and Searing by hand.
 
-Bars 3, 4 and 5 have no keys. They hold click-only buttons:
-- bar 3: weapon imbues, the Arcane Elixir and Healing Potion buttons, Strength of Earth, Healing Stream Totem, Lightning Shield (after Water Shield) and Fire Nova;
-- bar 4: Ancestral Spirit, Astral Recall, Water Walking, Water Breathing, Far Sight and the situational totems;
-- bar 5 (Action Bar 5, at the right edge of the screen): the Call of the Ancestors and Call of the Spirits totem sets, and spare buttons. Anything that was on a planned slot moves to the spare buttons first.
+Bars 3 and 4 have no keys. They hold click-only buttons:
+- bar 3: weapon imbues, the Arcane Elixir and Healing Potion buttons, Strength of Earth, Healing Stream Totem, Lightning Shield (after Water Shield), Fire Nova and two spare buttons;
+- bar 4: Ancestral Spirit, Astral Recall, Water Walking, Water Breathing, Far Sight, the situational totems, and the Call of the Ancestors and Call of the Spirits totem sets.
+
+Anything that was on a planned slot moves to the spare buttons first (bar 3, then the free Shift buttons of Action Bar 2).
 
 The item buttons are character macros the addon keeps up to date: `FS_MANA` (Mana Potion), `FS_HEALTH` (Healthstone, else Healing Potion), `FS_HEALPOT` (Healing Potion) and `FS_ELIXIR` (Arcane Elixir, e.g. Minor Arcane Elixir). Each uses the best one of its kind in your bags that your level allows. They are only changed out of combat (after looting, or when combat ends). With none in the bags, the button keeps a fixed icon. The items are listed in `ForeverSensei/Data/Items.lua`.
 
@@ -125,7 +129,7 @@ These cannot be tested outside the game. Please go through them once, then paste
 2. [ ] **Font, fresh launch:** fully quit the game and start it again (not `/reload`). Japanese shows in the guide and cards, with no boxes or `?`. Test once with WFJ enabled and once without.
 3. [ ] Learning a skill at the trainer (or a level-up skill) shows a card out of combat. Hovering the icon shows the game tooltip.
 4. [ ] **配置する** on a card puts the skill in its slot and binds the key, and asks first if the slot is used.
-5. [ ] **すべて配置:** the preview is shown, **適用** changes the bars and keys, Action Bars 2-7 become visible, and `/reload` keeps everything. `5`, `Shift+5` and `Ctrl+5` and their buttons are unchanged.
+5. [ ] **すべて配置:** the preview is shown, **適用** changes the bars and keys, Action Bars 2-5 become visible (6 and 7 stay hidden), and `/reload` keeps everything. `5`, `Shift+5` and `Ctrl+5` and their buttons are unchanged.
 6. [ ] **元に戻す** / `/sensei undo` restores the old bars and keys.
 7. [ ] Mouseover mode: hovering a party frame and pressing `F` (or Mouse 4 for Riptide) heals that player. With no mouseover, it heals the target. With no friendly target, it heals you.
 8. [ ] Switching to **ターゲットを回復** replaces the macros with plain spells in the same slots, and back again.
@@ -139,12 +143,14 @@ These cannot be tested outside the game. Please go through them once, then paste
 16. [ ] **Layout notice (update from 0.3.0 or older):** with the old layout on the bars, the first login after updating shows the message about the new layout once. **すべて配置** opens the preview, and nothing changes until **適用**. The message does not come back after `/reload`.
 17. [ ] After **すべて配置**: `1` Totemic Call, `Shift+1` Call of the Elements and `Ctrl+1` Totemic Recall work; `Shift+E`, `Shift+R`, `Shift+F` put down Stoneskin, Searing and Tremor. Note the mana cost of Call of the Elements with a full set.
 18. [ ] **Potions:** `Z` drinks the best mana potion in the bags. Loot or buy a better one: the button changes to it after combat (or right away out of combat). The healing potion and Arcane Elixir buttons on bar 3 work by clicking. With none in the bags, the buttons show a potion icon (no question mark). `/sensei verify` lists `FS_MANA`, `FS_HEALTH`, `FS_HEALPOT` and `FS_ELIXIR` under [Layout] with no `bad` lines.
-19. [ ] **Ctrl and mouse keys:** Action Bars 6 and 7 are shown after **すべて配置**, and every Ctrl key and `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5` cast their spells. The mouse side buttons are set to the default Button 4/5 in the mouse software. `/sensei verify` shows the bindings of `CTRL-2`, `CTRL-R`, `CTRL-X`, `SHIFT-BUTTON4`, `CTRL-BUTTON4` and of `5`, `SHIFT-5`, `CTRL-5`.
+19. [ ] **Ctrl and mouse keys:** after **すべて配置**, Action Bar 5 at the right edge holds the Ctrl spells (buttons 1-6) and the mouse spells (7-12), and every Ctrl key and `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5` cast their spells. The mouse side buttons are set to the default Button 4/5 in the mouse software. `/sensei verify` shows the bindings of `CTRL-2`, `CTRL-R`, `CTRL-X`, `SHIFT-BUTTON4`, `CTRL-BUTTON4` and of `5`, `SHIFT-5`, `CTRL-5`.
 20. [ ] **Ctrl+1 over the stance bar:** with Ghost Wolf on the stance bar, `Ctrl+1` casts Totemic Recall (not Ghost Wolf), and `Ctrl+C` casts Ghost Wolf.
 21. [ ] **Macros:** `Q` (FS_ES) during your own cast stops it and interrupts at once. `Mouse 5` (FS_NSHW) casts an instant Healing Wave in one press, and a normal one while Nature's Swiftness is on cooldown. `Shift+3` (FS_PURGE) purges the enemy under the mouse.
 22. [ ] **Healthstone:** `C` uses a Healthstone if you have one, else the best Healing Potion. Check whether the Healthstone and potions share a cooldown.
 23. [ ] **Levelling:** below level 20, `X` holds Lightning Shield; after learning Water Shield and **配置する**, `X` holds Water Shield and Lightning Shield moves to bar 3. A key whose spell is not learned yet stays empty.
 24. [ ] **Totem Bar:** the addon does not set up the Totem Bar (3 pages of 4 totems for Call of the Elements/Ancestors/Spirits). Set it up by hand and check that Call of the Elements puts down that set.
+25. [ ] **Update from 0.4.0:** with the 0.4.0 layout applied (Action Bars 6 and 7 in the middle of the screen), the first login shows the layout message once. **すべて配置** lists Action Bars 6 and 7 under the bars to hide; after **適用** they are gone, the Ctrl and mouse keys work from Action Bar 5, and nothing is left over the character. **元に戻す** brings bars 6 and 7 back as they were.
+26. [ ] **バーを空にする:** put a few things of your own on Action Bars 1-5 and on `5` and `Shift+5`. The button asks first; after confirming, Action Bars 1-5 are empty except `5` and `Shift+5`, and the other bars are unchanged. **元に戻す** puts everything back. Out of combat only: in combat it says to try again after the fight.
 
 ## Translation reports
 
