@@ -45,7 +45,8 @@ Sources that disagree:
 Types:
 - **React**: cast the moment something happens. It needs a fast key that works while moving.
 - **Pull**: cast at every pull or every few pulls.
-- **Set-up**: cast once per dungeon, per wipe, or per ~5 minutes.
+- **Set-up**: cast between pulls, about every 5 minutes (when the 5-minute totems run out), after a wipe, or once
+  per dungeon.
 - **Cast**: a spell with a cast time, used while standing still, so reach matters less.
 - **OOC**: out of combat or travel.
 
@@ -57,12 +58,12 @@ Cast, cooldown and cost are rank 1, from `simc`, or from `wh_tt` for spells miss
 | Lightning Bolt | 1 | 1.5 s / – / 15 | often, when healing need is light | Cast | 3 |
 | Rockbiter Weapon | 1 | instant / – / 15 | before the dungeon, weapon buff | OOC | none |
 | Earth Shock | 4 | instant / 6 s / 30, 2 s lockout | the interrupt for dangerous casts | React | Q |
-| Stoneskin Totem | 4 | instant / – / 30, 5 min, Earth | every pull (Erika's habit) | Pull | Shift+E |
+| Stoneskin Totem | 4 | instant / – / 30, 5 min, Earth | every pull before 20 (Erika's habit); from 20 in the Call of the Elements set, and by hand after Tremor replaced it | Pull | Shift+E |
 | Earthbind Totem | 6 | instant / 15 s / 6% base mana, 45 s, Earth | rare: runners, kiting | React | Shift+5 |
 | Stoneclaw Totem | 8 | instant / 30 s / 15, 15 s, Earth | rare: enemies hitting the healer | React | Ctrl+E |
 | Lightning Shield | 8 | instant / – / 45, 10 min | levels 8-19 only, replaced by Water Shield | Set-up | X until 20 |
 | Flame Shock | 10 | instant / 6 s / 55, 12 s DoT | often when DPSing; instant, usable while moving | React/DPS | 4 |
-| Searing Totem | 10 | instant / – / 25, **30 s**, Fire | every pull (Erika's habit; it only lasts 30 s) | Pull | Shift+R |
+| Searing Totem | 10 | instant / – / 25, **30 s** (55 s at the top rank), Fire | every pull (Erika's habit; it only lasts 30-55 s) | Pull | Shift+R |
 | Flametongue Weapon | 10 | instant / – / 30 | before the dungeon | OOC | none |
 | Strength of Earth Totem | 10 | instant / – / 25, 5 min, Earth | instead of Stoneskin for melee groups | Set-up | none (Totem Bar set) |
 | Fire Nova | 12 | instant / 10 s / 65 | rare for a healer: AoE around the Fire totem | DPS | none |
@@ -70,7 +71,7 @@ Cast, cooldown and cost are rank 1, from `simc`, or from `wh_tt` for spells miss
 | Ancestral Spirit | 12 | 10 s / – / 90% base mana | after a death or wipe | OOC | none |
 | Cure Poison | 16 | instant / – / 9% base mana | often in poison dungeons | React | 1 |
 | Tremor Totem | 18 | instant / – / 60, 5 min, Earth | fear, charm and sleep fights (Erika uses it a lot) | React | Shift+F |
-| Call of the Elements | 20 | 3 s / – / none / GCD | start of the dungeon and after a wipe | Set-up | Shift+C |
+| Call of the Elements | 20 | 3 s / – / none / GCD | between pulls whenever the 5-minute totems run out (about every 5 minutes, i.e. every few pulls), and after a wipe | Set-up | Shift+C |
 | Frost Shock | 20 | instant / 6 s / 115, 8 s slow | rare: slow a runner or a chaser | React | Ctrl+Q |
 | Totemic Recall | 20 | instant / – / returns 25% of the totems' mana | after the last pull, before a long run | OOC | Ctrl+C |
 | Frostbrand Weapon | 20 | instant / – / 60 | solo only | OOC | none |
@@ -119,6 +120,20 @@ Cast, cooldown and cost are rank 1, from `simc`, or from `wh_tt` for spells miss
 | Totemic Call (437009) | 22 | instant | **30 s** | 25% base mana, 30 yd | relocates your active totems to your location |
 | Totemic Recall (36936) | 20 | instant | none | returns 25% of the mana of each totem it destroys | dismisses all your totems |
 
+### Totem durations (`simc`, all ranks; checked 2026-11-11)
+
+| Duration | Totems |
+|---|---|
+| 5 min (300 s) | Stoneskin, Strength of Earth, Tremor, Healing Stream, Mana Spring, Poison Cleansing, Disease Cleansing, Windfury, Grace of Air, Windwall, Sentry, Flametongue Totem, and the Frost, Fire and Nature Resistance totems |
+| 30-55 s by rank (30, 35, 40, 45, 50, 55 s) | Searing |
+| 45 s | Earthbind, Grounding |
+| 20 s | Magma |
+| 15 s | Stoneclaw |
+| 13 s | Mana Tide |
+
+So even the long totems run out about every 5 minutes. In a dungeon that is every few pulls, not once per run.
+Totemic Call only moves totems that are still up; it does not renew them.
+
 ### One totem per element (`wh_tt` "Tools:" line)
 
 - **Earth:** Stoneskin, Earthbind, Stoneclaw, Strength of Earth, Tremor.
@@ -138,14 +153,16 @@ Cast, cooldown and cost are rank 1, from `simc`, or from `wh_tt` for spells miss
 
 ### Recommended dungeon flow for Erika
 
-1. **Start of the dungeon, or after a wipe:** press **Call of the Elements** (Shift+C) once. The 3 s cast places
-   the whole set.
+1. **Before a pull, whenever the 5-minute totems have run out (about every 5 minutes, i.e. every few pulls), and
+   after a wipe:** press **Call of the Elements** (Shift+C). The 3 s cast places the whole set again.
+   - Watch the totem icons (Totem Bar or the totem timers by the player frame): when they are gone or almost
+     gone, recast the set between pulls instead of Totemic Call.
    - Suggested set 1: Stoneskin + Searing + Healing Stream (Mana Spring from 26) + an Air totem
      (Windfury for a melee group from 32, otherwise Grace of Air from 42).
-2. **Every pull:**
-   - Press **Totemic Call** (Shift+Q) where the group fights. The 5-minute totems come with you at 25% base
-     mana, which is cheaper and faster than recasting them.
-   - Press **Searing Totem** (Shift+R). It only lasts 30 s, so it is gone by the next pull anyway.
+2. **Every pull in between:**
+   - Press **Totemic Call** (Shift+Q) where the group fights. The 5-minute totems that are still up come with
+     you at 25% base mana, which is cheaper and faster than recasting them (30 s cooldown).
+   - Press **Searing Totem** (Shift+R). It only lasts 30-55 s, so it is gone by the next pull anyway.
 3. **React:**
    - Tremor (Shift+F) against fear, charm and sleep. It replaces Stoneskin until you press Stoneskin (Shift+E)
      again.
@@ -328,11 +345,11 @@ Abbreviations: **MO** = mouseover macro; *(lvl)* = the level it becomes availabl
 | Shift+5 | Earthbind Totem *(6)* | rare: runners | `wh_abil` |
 | Shift+Q | **Totemic Call** *(22)* | used at every pull, so it gets the easiest Shift key | `wh_tt`, `moba` |
 | Shift+E | Stoneskin Totem *(4)* | her pull totem, kept | Erika, `wh_abil` |
-| Shift+R | Searing Totem *(10)* | her pull totem (30 s), kept | Erika, `wh_tt` |
+| Shift+R | Searing Totem *(10)* | her pull totem (30-55 s by rank), kept | Erika, `simc` |
 | Shift+F | Tremor Totem *(18)* | fear, charm and sleep; she uses it a lot; kept | Erika, `wh_abil` |
 | Shift+Z | Mana Tide Totem *(25)* | above the Mana Potion: the mana column | `simc`, `moba` |
 | Shift+X | Grounding Totem *(30)* | above the shield: the protection column | `wh_abil` |
-| Shift+C | Call of the Elements *(20)* | a 3 s set-up cast, once per dungeon or wipe, so a stretch key is fine | `wh_tt`, `moba` |
+| Shift+C | Call of the Elements *(20)* | a 3 s set-up cast between pulls, about every 5 minutes (every few pulls) and after a wipe; cast standing still out of combat, so a stretch key is fine | `wh_tt`, `moba`, `simc` durations |
 
 ### Ctrl (Action Bar 6, `MULTIACTIONBAR5BUTTON`): rare but keyed
 
@@ -441,7 +458,9 @@ Notes:
 - Her pull totems on Shift+E (Stoneskin), Shift+R (Searing) and Shift+F (Tremor).
 - Mana Potion on Z.
 - Call of the Elements stays on Shift+C. The player's example ("Call of the Elements is on C") refers to this
-  key. It is a 3 s set-up cast used once per dungeon or wipe, not per pull, so a stretch key is right for it.
+  key. It is a 3 s set-up cast used between pulls about every 5 minutes (when the 5-minute totems run out) and
+  after a wipe, not at every pull. It is never a reaction and is cast standing still out of combat, so a
+  stretch key still fits. The every-pull key, Totemic Call, gets Shift+Q.
   What was wrong was that **Totemic Call** and **Totemic Recall** had no key. They now get Shift+Q (every pull)
   and Ctrl+C.
 
@@ -513,8 +532,8 @@ Notes:
 - **Nature's Swiftnessはマウスのボタン4に移した。** 1回押すだけでNature's SwiftnessとHealing Waveを続けて使う、緊急用のマクロにする。
 - **Earth ShockをQに移した。** 敵の詠唱の中断は急ぐので、一番押しやすいキーに置いた。回復の詠唱中でも、止めてすぐに使える。
 - **トーテムは今まで通りShiftにまとめた。** 毎回置くStoneskin Totem・Searing Totem・Tremor Totemのキーは変わらない。
-- **Totemic CallをShift+Qに置いた。** 今出しているトーテムを自分の場所に移す呪文で、クールダウンは30秒。次の敵の所に進むたびに使おう。トーテムを全部置き直すより、マナも時間もかからない。Searing Totemは30秒で消えるので、毎回置き直そう。
-- **Call of the ElementsはShift+Cのまま。** 3秒の詠唱で最大4つのトーテムを一度に置く。ダンジョンの最初と全滅の後に1回使えば十分。
+- **Totemic CallをShift+Qに置いた。** 今出しているトーテムを自分の場所に移す呪文で、クールダウンは30秒。次の敵の所に進むたびに使おう。トーテムを全部置き直すより、マナも時間もかからない。ただし、消えたトーテムは戻らない。Searing Totemは30〜55秒で消えるので、毎回置き直そう。
+- **Call of the ElementsはShift+Cのまま。** 3秒の詠唱で最大4つのトーテムを一度に置く。長く続くトーテムも5分で消えるので、約5分ごと（数回の戦闘ごと）と全滅の後に、戦闘の合間に使おう。毎回の戦闘で使う必要はない。
 - **Totemic RecallはCtrl+C（Call of the Elementsの下）。** ダンジョンを出る時にトーテムを消して、マナを少し取り戻す。
 - **同じ列には同じ種類を置いた。** 1の列は毒、2の列は病気、Zの列はポーションなどのアイテム、Xの列は守り。
 - **Ctrlのキーはあまり使わない呪文用。**
