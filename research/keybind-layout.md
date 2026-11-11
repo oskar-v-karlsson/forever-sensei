@@ -9,6 +9,7 @@ Scope:
 - She moves with WASD, has small hands and two mouse side buttons.
 - Allowed keys are now 1-5, Q, E, R, F, Z, X and C, with no modifier, Shift or Ctrl, plus Button4 and Button5
   (also with modifiers).
+- **5 stays free in all variants** (5, Shift+5, Ctrl+5) for Erika's own use (the player's decision).
 
 ## Sources
 
@@ -60,30 +61,30 @@ Cast, cooldown and cost are rank 1, from `simc`, or from `wh_tt` for spells miss
 | Rockbiter Weapon | 1 | instant / – / 15 | before the dungeon, weapon buff | OOC | none |
 | Earth Shock | 4 | instant / 6 s / 30, 2 s lockout | the interrupt for dangerous casts | React | Q |
 | Stoneskin Totem | 4 | instant / – / 30, 5 min, Earth | every pull before 20 (Erika's habit); from 20 in the Call of the Elements set, and by hand after Tremor replaced it | Pull | Shift+E |
-| Earthbind Totem | 6 | instant / 15 s / 6% base mana, 45 s, Earth | rare: runners, kiting | React | Shift+5 |
+| Earthbind Totem | 6 | instant / 15 s / 6% base mana, 45 s, Earth | rare: runners, kiting | React | Ctrl+Q |
 | Stoneclaw Totem | 8 | instant / 30 s / 15, 15 s, Earth | rare: enemies hitting the healer | React | Ctrl+E |
-| Lightning Shield | 8 | instant / – / 45, 10 min | levels 8-19 only, replaced by Water Shield | Set-up | 1 until 20 |
-| Flame Shock | 10 | instant / 6 s / 55, 12 s DoT | often when DPSing; instant, usable while moving | React/DPS | Shift+Q |
+| Lightning Shield | 8 | instant / – / 45, 10 min | levels 8-19 only, replaced by Water Shield | Set-up | X until 20 |
+| Flame Shock | 10 | instant / 6 s / 55, 12 s DoT | often when DPSing; instant, usable while moving | React/DPS | 2 |
 | Searing Totem | 10 | instant / – / 25, **30 s** (55 s at the top rank), Fire | every pull (Erika's habit; it only lasts 30-55 s) | Pull | Shift+R |
 | Flametongue Weapon | 10 | instant / – / 30 | before the dungeon | OOC | none |
 | Strength of Earth Totem | 10 | instant / – / 25, 5 min, Earth | instead of Stoneskin for melee groups | Set-up | none (Totem Bar set) |
 | Fire Nova | 12 | instant / 10 s / 65 | rare for a healer: AoE around the Fire totem | DPS | none |
 | Purge | 12 | instant / – / 10% base mana | sometimes: enemy buffs | React | Shift+3 |
 | Ancestral Spirit | 12 | 10 s / – / 90% base mana | after a death or wipe | OOC | none |
-| Cure Poison | 16 | instant / – / 9% base mana | often in poison dungeons | React | Shift+1 |
+| Cure Poison | 16 | instant / – / 9% base mana | often in poison dungeons | React | Shift+Mouse4 |
 | Tremor Totem | 18 | instant / – / 60, 5 min, Earth | fear, charm and sleep fights (Erika uses it a lot) | React | Shift+F |
-| Call of the Elements | 20 | 3 s / – / none / GCD | between pulls whenever the 5-minute totems run out (about every 5 minutes, i.e. every few pulls), and after a wipe | Set-up | Shift+X |
-| Frost Shock | 20 | instant / 6 s / 115, 8 s slow | rare: slow a runner or a chaser | React | Ctrl+Q |
-| Totemic Recall | 20 | instant / – / returns 25% of the totems' mana | after the last pull, before a long run | OOC | Ctrl+X |
+| Call of the Elements | 20 | 3 s / – / none / GCD | between pulls whenever the 5-minute totems run out (about every 5 minutes, i.e. every few pulls), and after a wipe | Set-up | Shift+1 |
+| Frost Shock | 20 | instant / 6 s / 115, 8 s slow | rare: slow a runner or a chaser | React | Shift+Q |
+| Totemic Recall | 20 | instant / – / returns 25% of the totems' mana | after the last pull, before a long run | OOC | Ctrl+1 |
 | Frostbrand Weapon | 20 | instant / – / 60 | solo only | OOC | none |
 | Ghost Wolf | 20 | 3 s / – / 100, outdoors only | none: Erika's talent path has no Improved Ghost Wolf, so it cannot be used indoors | OOC (questing) | Ctrl+C |
 | Healing Stream Totem | 20 | instant / – / 40, 5 min, Water | part of the pull set; swap with Mana Spring | Set-up | none (in the Call of the Elements set) |
 | Lesser Healing Wave | 20 | 1.5 s / – / 105 | the fast emergency heal | React (cast) | E |
-| Water Shield | 20 (talent) | instant / – / none, 10 min, 3 globes | refresh between pulls or in gaps | Set-up | 1 |
-| Totemic Call | 22 | instant / 30 s / 25% base mana | every pull: moves the totems to you | Pull | X |
+| Water Shield | 20 (talent) | instant / – / none, 10 min, 3 globes | refresh between pulls or in gaps | Set-up | X |
+| Totemic Call | 22 | instant / 30 s / 25% base mana | every pull: moves the totems to you | Pull | 1 |
 | Water Breathing | 22 | – | never in a dungeon | OOC | none |
-| Cure Disease | 22 | instant / – / 9% base mana | often in disease dungeons | React | Shift+2 |
-| Poison Cleansing Totem | 22 | instant / – / 10% base mana, Water | poison-heavy fights | React | Ctrl+1 |
+| Cure Disease | 22 | instant / – / 9% base mana | often in disease dungeons | React | Shift+Mouse5 |
+| Poison Cleansing Totem | 22 | instant / – / 10% base mana, Water | poison-heavy fights | React | Ctrl+Mouse4 |
 | Frost Resistance Totem | 24 | instant / – / 75, Fire | rare, boss-specific | Set-up | none (Totem Bar) |
 | Mana Tide Totem | 25 (talent) | instant / 5 min / 10, 13 s, Water | long fights, low mana | React | Ctrl+Z |
 | Magma Totem | 26 | instant / – / 230, 20 s, Fire | rare for a healer: big packs | DPS | none |
@@ -103,7 +104,7 @@ Cast, cooldown and cost are rank 1, from `simc`, or from `wh_tt` for spells miss
 | Windfury Totem | 32 | instant / – / 115, Air | melee groups, through the Totem Bar set | Set-up | none |
 | Sentry Totem | 34 | instant / – / 65, Air | never | OOC | none |
 | Windwall Totem | 36 | instant / – / 115, Air | rare, ranged-heavy fights | Set-up | none (Totem Bar) |
-| Disease Cleansing Totem | 38 | instant / – / 10% base mana, Water | disease-heavy fights | React | Ctrl+2 |
+| Disease Cleansing Totem | 38 | instant / – / 10% base mana, Water | disease-heavy fights | React | Ctrl+Mouse5 |
 | Call of the Spirits | 40 | 3 s / – / none | a third preset (boss set) | Set-up | none (next to CotE) |
 | Chain Heal | 40 | 2.5 s / – / 260, 3 targets | constant from 40: the main group heal | Cast | R |
 | Riptide | 40 (talent) | instant / 12 s / 150, 15 s HoT, +25% Chain Heal | on cooldown on the tank; usable while moving | React | Mouse4 |
@@ -155,26 +156,26 @@ Totemic Call only moves totems that are still up; it does not renew them.
 ### Recommended dungeon flow for Erika
 
 1. **Before a pull, whenever the 5-minute totems have run out (about every 5 minutes, i.e. every few pulls), and
-   after a wipe:** press **Call of the Elements** (Shift+X). The 3 s cast places the whole set again.
+   after a wipe:** press **Call of the Elements** (Shift+1). The 3 s cast places the whole set again.
    - Watch the totem icons (Totem Bar or the totem timers by the player frame): when they are gone or almost
      gone, recast the set between pulls instead of Totemic Call.
    - Suggested set 1: Stoneskin + Searing + Healing Stream (Mana Spring from 26) + an Air totem
      (Windfury for a melee group from 32, otherwise Grace of Air from 42).
 2. **Every pull in between:**
-   - Press **Totemic Call** (X) where you will stand to heal. The 5-minute totems that are still up come with
+   - Press **Totemic Call** (1) where you will stand to heal. The 5-minute totems that are still up come with
      you at 25% base mana, which is cheaper and faster than recasting them (30 s cooldown).
    - Press **Searing Totem** (Shift+R). It only lasts 30-55 s, so it is gone by the next pull anyway.
 3. **React:**
    - Tremor (Shift+F) against fear, charm and sleep. It replaces Stoneskin until you press Stoneskin (Shift+E)
      again.
    - Grounding (Ctrl+F) against a dangerous caster.
-   - Poison or Disease Cleansing (Ctrl+1, Ctrl+2): for a poison- or disease-heavy dungeon, put it in the Water
+   - Poison or Disease Cleansing (Ctrl+Mouse4, Ctrl+Mouse5): for a poison- or disease-heavy dungeon, put it in the Water
      slot of the Totem Bar set (`wh_abil`: usually better than casting the cures). The keys are for swapping it in
-     by hand. Cure Poison and Cure Disease (Shift+1, Shift+2) are for the player the totem misses.
+     by hand. Cure Poison and Cure Disease (Shift+Mouse4, Shift+Mouse5) are for the player the totem misses.
    - Mana Tide (Ctrl+Z) when your mana is low in a long fight. It is a Water totem too, so press Mana Spring
      (Shift+Z) again when Mana Tide ends (13 s).
-   - Earthbind (Shift+5) for runners.
-4. **Leaving:** press **Totemic Recall** (Ctrl+X) to get some mana back.
+   - Frost Shock (Shift+Q) for one runner, Earthbind (Ctrl+Q) for several.
+4. **Leaving:** press **Totemic Recall** (Ctrl+1) to get some mana back.
 
 Before level 22 there is no Totemic Call. At those levels, cast Stoneskin and Searing by hand at each pull, as
 Erika does now.
@@ -230,7 +231,7 @@ Z, X; side mouse buttons; Shift with any of these).
   - Use the same column order as the main bar, so Ctrl+Q sits under Q.
 - **Mouse buttons (new):** `MULTIACTIONBAR6BUTTON1-12`, which is Action Bar 7 (`MultiBar6`, page 14, slots
   157-168).
-  - Button 1 is Mouse4 and button 2 is Mouse5. Buttons 3-6 are kept for Shift+ and Ctrl+Mouse4/5 (spare).
+  - Button 1 is Mouse4 and button 2 is Mouse5. Buttons 3-4 are Shift+Mouse4/5, and buttons 5-6 are Ctrl+Mouse4/5.
 - **Key strings** (`Blizzard_FrameXML/BindingUtil.lua`):
   - The mouse buttons are `BUTTON4` and `BUTTON5`.
   - Chords are written ALT-CTRL-SHIFT-key, e.g. `CTRL-Q` and `SHIFT-BUTTON4`.
@@ -246,7 +247,7 @@ The client files list every binding name but not its default key (`wm` says the 
 
 ```
 /run for _,k in ipairs({"Q","E","R","F","Z","X","C","SHIFT-1","SHIFT-5"}) do print(k,GetBindingAction(k)) end
-/run for _,k in ipairs({"CTRL-1","CTRL-2","CTRL-Q","CTRL-E","CTRL-F","CTRL-Z","CTRL-X","CTRL-C","BUTTON4","BUTTON5"}) do print(k,GetBindingAction(k)) end
+/run for _,k in ipairs({"CTRL-1","CTRL-Q","CTRL-E","CTRL-F","CTRL-Z","CTRL-C","BUTTON4","BUTTON5","SHIFT-BUTTON4","SHIFT-BUTTON5","CTRL-BUTTON4","CTRL-BUTTON5"}) do print(k,GetBindingAction(k)) end
 ```
 
 | Key | Expected default | Already replaced by layout v2? |
@@ -260,11 +261,11 @@ The client files list every binding name but not its default key (`wm` says the 
 | C | TOGGLECHARACTER0 (character window) | yes; the C button on the micro menu still opens it |
 | Shift+1-5 | ACTIONPAGE1-5 (bar paging) | yes |
 | Shift+Q/E/R/F/Z/X/C | none expected | yes |
-| **Ctrl+Q/E/F/Z/X/C** | none expected | **new** |
+| **Ctrl+Q/E/F/Z/C** | none expected | **new** |
 | Ctrl+R | TOGGLEFPS (framerate display), likely | not touched |
-| **Mouse4 / Mouse5** | none expected | **new** |
-| **Ctrl+1, Ctrl+2** | SHAPESHIFTBUTTON1-2 (stance bar) | **new**: a shaman's only stance-bar spell is expected to be Ghost Wolf, which has Ctrl+C anyway (verify) |
-| Ctrl+3-0 | SHAPESHIFTBUTTON3-10 | not touched |
+| **Mouse4 / Mouse5, also with Shift and Ctrl** | none expected | **new** |
+| **Ctrl+1** | SHAPESHIFTBUTTON1 (stance bar) | **new**: a shaman's only stance-bar spell is expected to be Ghost Wolf, which has Ctrl+C anyway (verify) |
+| Ctrl+2-0 | SHAPESHIFTBUTTON2-10 | not touched (Ctrl+5 is Erika's) |
 
 ## Q5: Mouseover macros
 
@@ -274,7 +275,7 @@ makes these in mouseover mode, using the highest rank.
 | Spell | Macro? | Why |
 |---|---|---|
 | Healing Wave, Lesser Healing Wave, Chain Heal, Riptide | yes (already) | heal the party frame under the cursor |
-| Cure Poison, Cure Disease | yes (already) | cure the party member under the cursor without changing target |
+| Cure Poison, Cure Disease (Shift+Mouse4/5) | yes (already) | cure the party member under the cursor without changing target; the thumb is already on the side buttons for the heals |
 | Nature's Swiftness + Healing Wave (Mouse5) | yes (new) | `#showtooltip Healing Wave` / `/cast Nature's Swiftness` / `/cast [@mouseover,help,nodead][help,nodead][@player] Healing Wave` |
 | Earth Shock (Q) | yes (new), harmful form | `/stopcasting` / `/cast [@mouseover,harm,nodead][] Earth Shock`. Interrupts the enemy under the cursor, or else your target, even mid-heal. |
 | Purge (Shift+3) | yes (new), harmful form | `/cast [@mouseover,harm,nodead][] Purge` |
@@ -291,10 +292,10 @@ makes these in mouseover mode, using the highest rank.
 ## Q6: Level progression and the shield key
 
 - **The level-60 layout comes first.** Lower levels use a subset of it, and a key never moves after its spell is
-  learned. The only planned exception is the **shield key 1**:
+  learned. The only planned exception is the **shield key X**:
   - Lightning Shield (8) is the only shield until **Water Shield** (talent, level 20).
   - They don't stack: only one elemental shield can be active (`moba`). Both last 10 minutes.
-  - At 20 the new-skill card for Water Shield puts it on 1, and Lightning Shield moves to a clickable bar.
+  - At 20 the new-skill card for Water Shield puts it on X, and Lightning Shield moves to a clickable bar.
     `moba` warns not to swap Water Shield for Lightning Shield out of habit, and the move supports that.
   - A one-key macro (`/cast Water Shield` then `/cast Lightning Shield`) was rejected:
     - Before 20 it prints an error for the unknown spell.
@@ -303,7 +304,8 @@ makes these in mouseover mode, using the highest rank.
 - **Families** (see "Families" below) keep their base key at every level. A family member that comes later fills
   its own variant, and nothing else moves.
 - **Empty top keys while levelling** (see "Top keys" below): R and Mouse4 wait for Chain Heal and Riptide (40),
-  and Mouse5 waits for Nature's Swiftness (30).
+  Mouse5 waits for Nature's Swiftness (30), and 1 waits for Totemic Call (22). Erika (26) already has Totemic
+  Call.
 - **Snapshots** are in section (d).
 
 ## Q7: Items
@@ -311,8 +313,8 @@ makes these in mouseover mode, using the highest rank.
 | Item | Key | Why |
 |---|---|---|
 | Mana Potion (`FS_MANA`, best in the bags) | **Z** | her most used consumable; stays where it is |
-| Healthstone, else the best Healing Potion (one macro, e.g. `FS_HEALTH`) | **2** | Healthstones come from warlocks, 2 min cooldown (`wh_tt`): Minor 5512 (also 19004), Lesser 5511, Healthstone 5509, Greater 5510, Major 9421. The red potion alone is rare for Erika, but with a warlock's Healthstone this is her personal emergency button: rarely pressed, but then within a second and often while running. In a panic a top key without a modifier is faster and harder to miss. **Verify in game** whether Healthstones and potions share a cooldown. |
-| Healing Potion (`FS_HEALPOT`) | none, clickable | as now; 2 covers it when there is no Healthstone |
+| Healthstone, else the best Healing Potion (one macro, e.g. `FS_HEALTH`) | **C** | Healthstones come from warlocks, 2 min cooldown (`wh_tt`): Minor 5512 (also 19004), Lesser 5511, Healthstone 5509, Greater 5510, Major 9421. The red potion alone is rare for Erika, but with a warlock's Healthstone this is her personal emergency button. It is rarely pressed, so it does not get a top key: C sits next to the Mana Potion on Z (the bottom row holds what keeps her going), and it has no modifier, which is harder to miss in a panic. C is a stretch, so she presses it standing still or with a short stop. **Verify in game** whether Healthstones and potions share a cooldown. |
+| Healing Potion (`FS_HEALPOT`) | none, clickable | as now; C covers it when there is no Healthstone |
 | Minor Arcane Elixir (`FS_ELIXIR`) | none, clickable | next to the weapon imbues and long buffs, as decided for 0.3.0 |
 | Bandages (Linen 1251, Silk 6450, Heavy Mageweave 8545, Runecloth 14529, Heavy Runecloth 14530) | none | They need First Aid and are an 8 s channel that damage breaks. A healer heals herself with spells. Optional clickable slot for solo. |
 
@@ -333,10 +335,10 @@ A pack of 3-5 mobs, one or two of them casters.
 
 | Phase | Spell (key): presses | Why |
 |---|---|---|
-| Between pulls | Water Shield (1): 1 every 1-2 pulls | globes are used when she is hit and when her spells crit; refresh in safe gaps (`wh_tt`, `moba`) |
-| | Call of the Elements (Shift+X): 1 every 3-5 pulls | the 5-minute totems run out (`simc` durations); also after a wipe |
+| Between pulls | Water Shield (X): 1 every 1-2 pulls | globes are used when she is hit and when her spells crit; refresh in safe gaps (`wh_tt`, `moba`) |
+| | Call of the Elements (Shift+1): 1 every 3-5 pulls | the 5-minute totems run out (`simc` durations); also after a wipe |
 | | Mana Potion (Z): 0 | drinking between pulls is free |
-| Pull start | Totemic Call (X): 1 | brings the 5-minute totems that are still up to where she stands (`wh_tt`), so she presses it once she has stopped at her healing spot |
+| Pull start | Totemic Call (1): 1 | brings the 5-minute totems that are still up to where she stands (`wh_tt`), so she presses it once she has stopped at her healing spot |
 | | Searing Totem (Shift+R): 1 | lasts 30-55 s, so it is gone by the next pull (`simc`) |
 | | Riptide (Mouse4): 1 | on the tank as the pack arrives (`wh_abil`) |
 | During | Chain Heal (R): 4-8 | the main group heal; several players take damage on trash (`wh_abil`, `moba`) |
@@ -344,19 +346,19 @@ A pack of 3-5 mobs, one or two of them casters.
 | | Riptide (Mouse4): 1-2 more | 12 s cooldown; also boosts the next Chain Heal on that target by 25% (`wh_tt`) |
 | | Lesser Healing Wave (E): 1-3 | a spike on someone (`wh_abil`) |
 | | Earth Shock (Q): 1-2 | interrupt a caster's heal or big spell (`wh_tt`: interrupt + 2 s lockout) |
-| | Flame Shock (Shift+Q), Lightning Bolt (3): 0-3 together | when healing need is light (`moba`) |
-| | Tremor (Shift+F), Purge (Shift+3), cures (Shift+1/2): 0-1 each | only in packs that fear, buff or poison |
+| | Flame Shock (2), Lightning Bolt (3): 0-3 together | when healing need is light (`moba`) |
+| | Tremor (Shift+F), Purge (Shift+3), cures (Shift+Mouse4/5): 0-1 each | only in packs that fear, buff or poison |
 | Emergency | Nature's Swiftness + Healing Wave (Mouse5): about 1 pull in 5 | 3 min cooldown (`wh_tt`) |
-| | Healthstone / Healing Potion (2): rare | when she is the one about to die |
+| | Healthstone / Healing Potion (C): rare | when she is the one about to die |
 | | Mana Tide (Ctrl+Z), Mana Potion (Z): 0-1 | in long chains of pulls without a break |
-| After | nothing, or Ancestral Spirit (clickable) after a death | Totemic Recall (Ctrl+X) only when leaving the dungeon |
+| After | nothing, or Ancestral Spirit (clickable) after a death | Totemic Recall (Ctrl+1) only when leaving the dungeon |
 
 ### Level 60, boss (a Scholomance or Stratholme boss, judgment)
 
 | Phase | Spell (key): presses | Why |
 |---|---|---|
-| Before | Call of the Elements (Shift+X) or a boss preset (Call of the Spirits, clickable): 1 | fresh totems for the whole fight |
-| | Water Shield (1): 1 | start with all 3 globes |
+| Before | Call of the Elements (Shift+1) or a boss preset (Call of the Spirits, clickable): 1 | fresh totems for the whole fight |
+| | Water Shield (X): 1 | start with all 3 globes |
 | Pull | Riptide (Mouse4), Searing (Shift+R): 1 each | as on trash |
 | During | Riptide (Mouse4): 10-15 | on cooldown on the tank: 12 s over 2-3 min |
 | | Healing Wave (F): 10-15; Chain Heal (R): 5-15 | single target on the tank; Chain Heal when the boss hits the group |
@@ -364,7 +366,7 @@ A pack of 3-5 mobs, one or two of them casters.
 | | Searing (Shift+R): 2-4 more | it runs out after 30-55 s |
 | | Earth Shock (Q): 0-3 | only if the boss casts something interruptible |
 | | Tremor (Shift+F): 0-1 | only if the boss fears, charms or sleeps |
-| | Water Shield (1): 0-1 | if the globes are gone mid-fight |
+| | Water Shield (X): 0-1 | if the globes are gone mid-fight |
 | Emergency | Mana Tide (Ctrl+Z): 1; Mana Potion (Z): 1; NS + Healing Wave (Mouse5): 0-1 | a long fight costs more mana than trash |
 | After | Ancestral Spirit (clickable) if someone died | out of combat |
 
@@ -379,16 +381,16 @@ A pack of 3-5 mobs, one or two of them casters.
 
 ### Level 26, trash pull (Shadowfang Keep 22-30 or Blackfathom Deeps 22-32, `wh_dng`), Erika now
 
-- **Pull start:** Totemic Call (X) 1 and Searing (Shift+R) 1.
-  - Before 22, or when the set has run out: Call of the Elements (Shift+X), or Stoneskin (Shift+E) by hand.
+- **Pull start:** Totemic Call (1) 1 and Searing (Shift+R) 1.
+  - Before 22, or when the set has run out: Call of the Elements (Shift+1), or Stoneskin (Shift+E) by hand.
 - **During:**
   - Healing Wave (F) 3-5: the main heal; there is no Chain Heal yet.
   - Lesser Healing Wave (E) 1-2.
   - Earth Shock (Q) 0-2.
-  - Flame Shock (Shift+Q) and Lightning Bolt (3) 1-3 together.
-- **Emergency:** Mana Tide (Ctrl+Z), Mana Potion (Z), Healthstone / Healing Potion (2).
-- **Water Shield (1):** every 1-2 pulls.
-- **The keys she uses now are F, E, Q, 1, 3, X, Shift+Q and Shift+R.** They are the same keys she will use at 60,
+  - Flame Shock (2) and Lightning Bolt (3) 1-3 together.
+- **Emergency:** Mana Tide (Ctrl+Z), Mana Potion (Z), Healthstone / Healing Potion (C).
+- **Water Shield (X):** every 1-2 pulls.
+- **The keys she uses now are F, E, Q, 1, 2, 3, Shift+R and X.** They are the same keys she will use at 60,
   so nothing has to be relearned when Chain Heal and Riptide arrive.
 
 ## Frequency × urgency (level 60, from the walkthroughs)
@@ -396,8 +398,10 @@ A pack of 3-5 mobs, one or two of them casters.
 How the columns work:
 - **Urgency:** *very high* means it must land within about a second; *high* means within a GCD or two; *low* means
   set-up or filler.
-- **Most pulls:** pressed in most level-60 trash pulls. This decides whether a spell may take a top key.
-- **Top keys** are tiers 1 and 2: Mouse4/5, Q, E, R, F, 1, 2, 3 and Shift+Q/E/R/F (13 keys).
+- **Most pulls:** pressed **in combat** in most level-60 trash pulls. This decides whether a spell may take a top
+  key. Spells pressed only between pulls (Water Shield, Call of the Elements) don't count.
+- **Top keys** are tiers 1 and 2 without the Shift+Mouse buttons: Mouse4/5, Q, E, R, F, 1, 2, 3 and
+  Shift+Q/E/R/F (13 keys).
 - Frequency and urgency decide which spell gets a top key, which family gets which base key, and which family
   member gets the easiest variant (plain, then Shift, then Ctrl). See "Families" below.
 
@@ -409,29 +413,71 @@ How the columns work:
 | Lesser Healing Wave | 1-3 | 2-5 | yes | very high | E (1) |
 | Earth Shock (interrupt) | 1-2 | 0-3 | yes (caster packs) | very high | Q (1) |
 | Searing Totem | 1 | 3-5 | yes | low-medium | Shift+R (2) |
+| Totemic Call | 1 | 0 | yes, as the pack arrives | low; pressed standing at the healing spot | 1 (2) |
 | Lightning Bolt | 0-3 | 0-3 | yes (most pulls have a quiet moment) | low | 3 (2) |
-| Flame Shock | 0-2 | 0-2 | yes; instant, also while moving | low | Shift+Q (2) |
-| Water Shield | 1 per 1-2 pulls | 1-2 | yes | low | 1 (2) |
-| Totemic Call | 1 | 0 | yes | low; pressed **standing still** at the healing spot | X (4) |
+| Flame Shock | 0-2 | 0-2 | yes; instant, also while moving | low | 2 (2) |
 | NS + Healing Wave | about 1 pull in 5 | 0-1 | **no** (3 min cooldown) | very high | Mouse5 (1), exception |
-| Healthstone / Healing Potion | rare | 0-1 | **no** | very high, often while running | 2 (2), exception |
 | Tremor Totem | 0-1 | 0-1 | **no** (only fear, charm or sleep packs) | high when needed | Shift+F (2), exception |
+| Frost Shock | rare | 0 | **no** | high when needed: a runner brings the next pack | Shift+Q (2), exception |
 | Stoneskin Totem | 0-1 | 0 | **no** (in the set; by hand after Tremor) | low | Shift+E (2), exception |
-| Call of the Elements | 1 per 3-5 pulls | 1 | no | low (3 s cast out of combat) | Shift+X (4) |
+| Cure Poison, Cure Disease | 0-4 in some dungeons | 0-3 | no (dungeon-specific; the cleansing totem covers most of it, `wh_abil`) | medium | Shift+Mouse4, Shift+Mouse5 (2) |
+| Water Shield | 1 per 1-2 pulls, **between pulls** | 0-1 | no (not in combat) | low | X (4) |
+| Healthstone / Healing Potion | rare | 0-1 | no | very high, but rare | C (4) |
+| Call of the Elements | 1 per 3-5 pulls, between pulls | 1 | no | low (3 s cast out of combat) | Shift+1 (3) |
 | Mana Potion | 0-1 | 1 | no | medium | Z (3) |
 | Mana Tide Totem | 0-1 | 1 | no | medium | Ctrl+Z (4) |
 | Mana Spring Totem (by hand) | after each Mana Tide | 1 | no (in the set) | low | Shift+Z (4) |
-| Cure Poison, Cure Disease | 0-4 in some dungeons | 0-3 | no (dungeon-specific; the cleansing totem covers most of it, `wh_abil`) | medium | Shift+1, Shift+2 (3) |
 | Purge | 0-1 | 0-1 | no | medium | Shift+3 (3) |
 | Chain Lightning | 0-1 | 0 | no (2.5 s, expensive for a healer) | low | 4 (3) |
-| Frost Shock | rare | 0 | no | medium | Ctrl+Q (3) |
+| Earthbind Totem | rare | 0 | no | medium | Ctrl+Q (3) |
 | Stoneclaw Totem | rare | 0 | no | medium | Ctrl+E (3) |
+| Poison, Disease Cleansing Totem (by hand) | rare (usually in the set) | 0-1 | no | low | Ctrl+Mouse4, Ctrl+Mouse5 (3) |
 | Grounding Totem | rare | 0-1 | no | high when needed | Ctrl+F (4) |
-| Earthbind Totem | rare | 0 | no | medium | Shift+5 (5) |
-| Poison, Disease Cleansing Totem (by hand) | rare (usually in the set) | 0-1 | no | low | Ctrl+1, Ctrl+2 (5) |
-| Totemic Recall | once per dungeon | 0 | no | low | Ctrl+X (5) |
+| Totemic Recall | once per dungeon | 0 | no | low | Ctrl+1 (5) |
 | Ghost Wolf | 0 (outdoors only) | 0 | no | low | Ctrl+C (4), the player's decision |
 | Healing Stream Totem (by hand) | rare | 0 | no (in the set) | low | none |
+
+## What goes on 1 and 2
+
+The player's decision: plain 1 and plain 2 must hold spells she presses **in combat in most pulls**. Water Shield
+(refreshed between pulls) and Healthstone (rare) leave them; 3 Lightning Bolt and 4 Chain Lightning stay; 5 stays
+free in all variants for Erika.
+
+Only nine spells are pressed in combat in most level-60 pulls (table above). Seven already sit on top keys that
+should not change (R, F, Mouse4, E, Q, Shift+R, 3). The other two were **Totemic Call (X)** and **Flame Shock
+(Shift+Q)**. So 1 and 2 can only be filled by moving something; these two cost the least.
+
+| Option | 1 | 2 | Gain | Cost |
+|---|---|---|---|---|
+| **A (chosen)** | Totemic Call (family from X) | Flame Shock (from Shift+Q) | All nine most-pull spells on top keys. The moving-totems family stays together and every member gets an equal or easier key (X → 1: tier 4 → 2; Shift+X → Shift+1: 4 → 3; Ctrl+X → Ctrl+1: 5 → 5). 2-3-4 becomes a damage row. | Shift+Q must be refilled (Frost Shock); the shocks are no longer one family (see "Families"). |
+| **B (runner-up, close)** | Totemic Call (family from X) | Searing Totem (from Shift+R) | Searing is pressed more than Flame Shock (1 per pull, 3-5 per boss). The pull opener becomes 1 then 2. | Breaks Erika's own Shift+R habit. Shift+R then needs a new spell, and Flame Shock stays on Shift+Q away from Lightning Bolt. |
+| C | Earth Shock | Flame Shock | shocks on the number row | the interrupt loses its tier-1 key, and Q gets something rarer |
+| D | a heal (e.g. Lesser Healing Wave) | a heal | – | moves a heal from a tier-1 key to a tier-2 key and leaves the tier-1 key for something rarer |
+| E | Riptide or NS + Healing Wave from the mouse | – | – | the thumb buttons keep the cursor on the party frames; nothing is better there |
+
+**Why A over B:** both fill 1 and 2 with spells from most pulls. A keeps all of Erika's Shift totem keys and
+builds a clear damage row: when healing is quiet she presses 2 (Flame Shock, instant DoT), then 3 (Lightning
+Bolt), and 4 (Chain Lightning) for a big pack. B's gain (a few more Searing presses on a plain key) is smaller
+than the cost of changing a habit she asked for. If Erika prefers B: Searing moves to 2, Flame Shock goes back to
+Shift+Q, Shift+R takes Frost Shock (the runner exception), and Earthbind stays on Ctrl+Q. Nothing else changes.
+
+**Where the displaced spells go:**
+- **Water Shield → X** (Lightning Shield on X at 8-19). It is refreshed every 1-2 pulls between pulls, standing
+  still, so a stretch key costs nothing. It stays keyed rather than clickable because she presses it often. With
+  Z (Mana Potion) and C (Healthstone) the bottom row holds what keeps her going.
+- **Healthstone / Healing Potion → C** (the player's suggestion). Next to the Mana Potion on Z, with no modifier.
+  It is rarely pressed, so it doesn't earn a top key. Alternative: Shift+2 (spare, tier 2) is faster to reach in
+  a panic, but has no link to the other consumables.
+- **Cures → Shift+Mouse4/5, cleansing totems → Ctrl+Mouse4/5.** With 1 and 2 holding unrelated spells, the
+  poison and disease families no longer fit on 1 and 2. On the mouse buttons they do: Mouse4 is the poison column
+  and Mouse5 the disease column. Plain heals the party member under the cursor, Shift cures that same player
+  (mouseover), and Ctrl drops the totem that cures the whole group. Both cures gain reach (tier 3 → 2), and the
+  totems too (tier 5 → 3).
+  - Risk: if Shift is still held after a Shift totem, Mouse4 casts Cure Poison instead of Riptide. That wastes a
+    press but does no harm.
+  - Runner-up: a "dispel" family on X (X Cure Poison, Shift+X Cure Disease, Ctrl+X Purge) with Water Shield on
+    Shift+C. It fits by concept, but the cures fall to tier 4-5.
+- **Frost Shock → Shift+Q**, and **Earthbind → Ctrl+Q** (it had to leave Shift+5).
 
 ## Families
 
@@ -442,54 +488,52 @@ which is easier to find in a hurry than three unrelated keys.
 Rules used:
 - Frequency and urgency decide which family gets which base key, and which member gets the easiest variant
   (plain, then Shift, then Ctrl).
-- **A rare family never takes the plain variant of a top key.** Putting the cures on plain 1 and 2 was the
-  rejected mistake. Rare families use the Shift and Ctrl variants of a base key, and the plain variant keeps a
-  most-pressed spell that is not part of the family.
+- **A rare family never takes the plain variant of a top key.**
+- **The plain variant must fit the family** (the player's rule for 1 and 2). Where it doesn't, the family moves.
 
 ### Grouped
 
 | Family | Base key | Plain | Shift | Ctrl | Reason |
 |---|---|---|---|---|---|
-| **Moving totems** | X | Totemic Call *(22)*: every pull | Call of the Elements *(20)*: every 3-5 pulls and after a wipe | Totemic Recall *(20)*: once, when leaving | All three put down, move or remove the whole set. Order by frequency. All three are cast **standing still**: Totemic Call moves the totems to where you stand, so you press it once you have stopped at your healing spot; Call of the Elements is a 3 s cast; Recall is out of combat. So X's weakness (you stop moving to press it) costs nothing here. Plain X was free, and Ctrl+X already held Recall. |
-| **Shocks** | Q | Earth Shock *(4)*: the interrupt | Flame Shock *(10)*: filler damage | Frost Shock *(20)*: a rare slow | Instant spells on an enemy, each on a 6 s cooldown (`simc`). Order by urgency. Flame Shock keeps a tier-2 key (Shift+Q, was 4 in v2), and Frost Shock gets a better one (Ctrl+Q, tier 3, was Shift+4, tier 4). |
-| **Mana** | Z | Mana Potion | Mana Spring Totem *(26)* | Mana Tide Totem *(25)* | Everything that gives mana back. Mana Tide is a Water totem, so it replaces Mana Spring, and Mana Spring is pressed again when Mana Tide ends (13 s): the two are pressed together. Shift+Z and Ctrl+Z are the same tier, so Mana Spring keeps its v2 key. |
-| **Poison** | 1 | (Water Shield, not in the family) | Cure Poison *(16)*, MO | Poison Cleansing Totem *(22)* | Cure one player, or put the totem down for the whole group (`wh_abil`). Rare, so it stays off plain 1. |
-| **Disease** | 2 | (Healthstone, not in the family) | Cure Disease *(22)*, MO | Disease Cleansing Totem *(38)* | As above. Shift+1 and Shift+2 are unchanged from v2. |
-| **Totems against physical damage** | E | (Lesser Healing Wave) | Stoneskin Totem *(4)* | Stoneclaw Totem *(8)* | Earth totems against melee: less damage taken, or enemies pulled off you. Stoneskin is unchanged (Erika's habit). |
-| **Totems against enemy spells** | F | (Healing Wave) | Tremor Totem *(18)* | Grounding Totem *(30)* | Tremor breaks fear, charm and sleep; Grounding takes a harmful spell. Tremor is unchanged (Erika's habit). |
+| **Moving totems** | 1 | Totemic Call *(22)*: every pull | Call of the Elements *(20)*: every 3-5 pulls and after a wipe | Totemic Recall *(20)*: once, when leaving | All three put down, move or remove the whole set. Order by frequency. Moved from X to 1 so that plain 1 holds a most-pull spell; every member gets an equal or easier key. |
+| **Stop an enemy** | Q | Earth Shock *(4)*: stop its cast | Frost Shock *(20)*: stop one runner | Earthbind Totem *(6)*: slow several | Order by urgency. The interrupt keeps the tier-1 key. A runner brings the next pack, so Frost Shock is the more urgent slow. |
+| **Damage while healing is quiet** | 2, 3, 4 (plain neighbours) | 2 Flame Shock *(10)*, 3 Lightning Bolt *(1)*, 4 Chain Lightning *(32)* | – | – | Pressed left to right: the instant DoT first, then Lightning Bolt, and Chain Lightning for a big pack (`moba`). Like the heals, this family is a row of plain keys, not one base key. |
+| **Mana** | Z | Mana Potion | Mana Spring Totem *(26)* | Mana Tide Totem *(25)* | Everything that gives mana back. Mana Tide is a Water totem, so it replaces Mana Spring, and Mana Spring is pressed again when Mana Tide ends (13 s). Unchanged. |
+| **Help the player under the cursor: poison** | Mouse4 | Riptide *(40)*, MO | Cure Poison *(16)*, MO | Poison Cleansing Totem *(22)* | The thumb button acts on the party frame under the cursor: heal, cure that player, or cure the whole group. |
+| **Help the player under the cursor: disease** | Mouse5 | NS + Healing Wave *(30)*, MO | Cure Disease *(22)*, MO | Disease Cleansing Totem *(38)* | As above. |
+| **Totems against physical damage** | E | (Lesser Healing Wave) | Stoneskin Totem *(4)* | Stoneclaw Totem *(8)* | Unchanged. Stoneskin is Erika's habit. |
+| **Totems against enemy spells** | F | (Healing Wave) | Tremor Totem *(18)* | Grounding Totem *(30)* | Unchanged. Tremor is Erika's habit. |
 
-### Not grouped (reach wins)
+On E and F the plain key is a heal, not part of the totem family. That is kept on purpose: E and F are the best
+keys for heals, and the Shift variants are where Erika asked for her totems. On the mouse buttons the plain heal
+does fit ("help this player").
 
-| Family | Keys | Why it is not on one base key |
+### Not grouped
+
+| Spells | Keys | Why |
 |---|---|---|
 | **Heals** | F, E, R, Mouse4, Mouse5 (all plain) | The five most-pressed and most urgent spells. On one base key, two of them would need Shift or Ctrl. Their shared rule instead: **every heal is a key without a modifier.** |
-| **Damage fillers** | 3 Lightning Bolt, 4 Chain Lightning | Neighbours already. Chain Lightning on Shift+3 would push Purge off a key she knows, for a spell she rarely casts. Flame Shock joins the shocks. |
-| **Shields** | 1 | Already one key: Lightning Shield until 20, then Water Shield. |
-| **Health** | 2 | Healthstone / Healing Potion alone on a top key (urgency). It is not in the mana family because it answers a different problem. |
-| **Totem presets** | Call of the Ancestors, Call of the Spirits | X has only three variants. The two extra presets are clicked next to Call of the Elements. |
-| **Runners** | Frost Shock Ctrl+Q, Earthbind Shift+5 | Frost Shock goes with the shocks; Earthbind is rare and keeps its v2 key. |
+| **Shocks by name** | Earth Q, Frost Shift+Q, Flame 2 | Grouped by what they do instead: Flame Shock is damage and joins the damage row; Earth and Frost Shock stop an enemy. |
+| **Purge** | Shift+3 | Unchanged since v2. It could join "stop an enemy", but Q has only three variants, and a runner (Frost Shock) is more urgent than an enemy buff. |
+| **Shields** | X | Already one key: Lightning Shield until 20, then Water Shield. |
+| **Healthstone** | C | Next to the Mana Potion on Z, but a different concept (health), so not in the mana family. |
+| **Totem presets** | Call of the Ancestors, Call of the Spirits | 1 has only three variants. The two extra presets are clicked next to Call of the Elements. |
 | **Fire totems** | Searing Shift+R | Searing is the only keyed Fire totem; Magma is rare for a healer. Ctrl+R keeps its default. |
 
 ### Top keys
 
-- **10 spells are pressed in most level-60 pulls.** Nine of them are on top keys.
-- **The tenth, Totemic Call, is on plain X (tier 4).** That follows the family (the player's request): it is
-  pressed standing still at the healing spot, so the stretch to X is not a reaction-time cost.
-- **That leaves 4 top keys for the most urgent of the rest** (exceptions):
-  - **Mouse5, NS + Healing Wave:** used in only about 1 pull in 5, but it is the "someone dies in the next
-    second" button, a mouseover on the frame under the cursor.
-  - **2, Healthstone / Healing Potion:** rare, but when the healer is about to die it must land within a second,
-    often while running. In a panic a top key with no modifier is hardest to miss. (If the player prefers, it can
-    go back to C and 2 stays free; nothing else changes.)
+- **9 spells are pressed in combat in most level-60 pulls. All nine are on top keys.**
+- **The 4 other top keys hold the most urgent of the rest** (exceptions):
+  - **Mouse5, NS + Healing Wave:** about 1 pull in 5, but it is the "someone dies in the next second" button.
   - **Shift+F, Tremor:** only in some dungeons, but a feared tank is an emergency. Erika's habit.
+  - **Shift+Q, Frost Shock:** rare, but a runner must be stopped before it reaches the next pack.
   - **Shift+E, Stoneskin:** the weakest top key. In the set from 20; by hand after Tremor (both are Earth
     totems), and at every pull before 20. Erika's habit.
-- **Empty top keys while levelling (at 26, Erika now):**
+- **Empty top keys while levelling (Erika is 26):**
   - **R and Mouse4 stay empty for 14 levels,** until Chain Heal and Riptide at 40. From 40 they are the
     most-pressed heals; anything put there now would have to move at 40, exactly when healing gets harder.
   - **Mouse5 stays empty for 4 levels,** until Nature's Swiftness at 30.
-- **E is filled now and stays filled:** Lesser Healing Wave moves from C to E. In v2, E waited for Riptide (40),
-  which left the more urgent heal on a stretch key for 20 levels.
+  - **1 is empty until 22** (Totemic Call). Erika already has it.
 
 ## (a) Proposed layout
 
@@ -498,24 +542,24 @@ Abbreviations: **MO** = mouseover macro; *(lvl)* = the level the spell becomes a
 ### Grid
 
 Bindings: plain = main bar (`ACTIONBUTTON`); Shift = Action Bar 2 (`MULTIACTIONBAR1BUTTON`); Ctrl = Action Bar 6
-(`MULTIACTIONBAR5BUTTON`); Mouse4/5 = Action Bar 7 (`MULTIACTIONBAR6BUTTON`).
+(`MULTIACTIONBAR5BUTTON`); Mouse4/5 with and without modifiers = Action Bar 7 (`MULTIACTIONBAR6BUTTON1-6`).
 
 | Base key | Plain | Shift | Ctrl |
 |---|---|---|---|
-| 1 | Water Shield *(20)* (Lightning Shield *(8)* until then) | Cure Poison, MO *(16)* | Poison Cleansing Totem *(22)* |
-| 2 | Healthstone, else Healing Potion (`FS_HEALTH`) | Cure Disease, MO *(22)* | Disease Cleansing Totem *(38)* |
+| 1 | Totemic Call *(22)* | Call of the Elements *(20)* | Totemic Recall *(20)* |
+| 2 | Flame Shock *(10)* | – | – (stance bar default) |
 | 3 | Lightning Bolt *(1)* | Purge, MO harm *(12)* | – (stance bar default) |
 | 4 | Chain Lightning *(32)* | – | – (stance bar default) |
-| 5 | – | Earthbind Totem *(6)* | – (stance bar default) |
-| Q | Earth Shock, `/stopcasting` + MO harm *(4)* | Flame Shock *(10)* | Frost Shock *(20)* |
+| 5 | Erika's own | Erika's own | Erika's own |
+| Q | Earth Shock, `/stopcasting` + MO harm *(4)* | Frost Shock *(20)* | Earthbind Totem *(6)* |
 | E | Lesser Healing Wave, MO *(20)* | Stoneskin Totem *(4)* | Stoneclaw Totem *(8)* |
 | R | Chain Heal, MO *(40)* | Searing Totem *(10)* | – (keeps its default) |
 | F | Healing Wave, MO *(1)* | Tremor Totem *(18)* | Grounding Totem *(30)* |
 | Z | Mana Potion (`FS_MANA`) | Mana Spring Totem *(26)* | Mana Tide Totem *(25)* |
-| X | Totemic Call *(22)* | Call of the Elements *(20)* | Totemic Recall *(20)* |
-| C | – | – | Ghost Wolf *(20)* |
-| Mouse4 | Riptide, MO *(40)* | – | – |
-| Mouse5 | Nature's Swiftness + Healing Wave, MO *(30)* | – | – |
+| X | Water Shield *(20)* (Lightning Shield *(8)* until then) | – | – |
+| C | Healthstone, else Healing Potion (`FS_HEALTH`) | – | Ghost Wolf *(20)* |
+| Mouse4 | Riptide, MO *(40)* | Cure Poison, MO *(16)* | Poison Cleansing Totem *(22)* |
+| Mouse5 | Nature's Swiftness + Healing Wave, MO *(30)* | Cure Disease, MO *(22)* | Disease Cleansing Totem *(38)* |
 
 ### Reason and source per key
 
@@ -527,13 +571,18 @@ Bindings: plain = main bar (`ACTIONBUTTON`); Shift = Action Bar 2 (`MULTIACTIONB
 | Mouse4 | Riptide | E | instant, 12 s cooldown: the thumb casts it on the cursor's frame while WASD keeps moving | `wh_tt`, `wh_abil` |
 | Mouse5 | NS + Healing Wave | X (NS alone) | the one-press emergency heal (exception) | `wh_tt`, `moba` |
 | Q | Earth Shock | 5 | the interrupt: most pulls, within a second | `wh_tt`, `moba`, `wm` |
-| 1 | Water Shield | 1 | refreshed every 1-2 pulls in a safe gap | `wh_tt`, `moba` |
-| 2 | Healthstone / Healing Potion | (clickable) | the healer's own emergency (exception) | `wh_tt` items |
-| 3 | Lightning Bolt | 3 | filler damage in most pulls | `wh_abil`, `moba` |
-| 4 | Chain Lightning | Q | rare for a healer; next to Lightning Bolt | `simc` |
+| 1 | Totemic Call | (clickable) | most pulls, as the pack arrives; moving-totems family | `wh_tt`, `moba` |
+| 2 | Flame Shock | 4 | damage row; filler in most pulls, instant | `simc`, `moba` |
+| 3 | Lightning Bolt | 3 | damage row; filler in most pulls | `wh_abil`, `moba` |
+| 4 | Chain Lightning | Q | damage row; rare for a healer | `simc` |
 | Z | Mana Potion | Z | long chains of pulls and bosses | 0.3.0 |
-| Shift+Q | Flame Shock | 4 | shocks family; filler in most pulls, instant | `simc`, `moba` |
-| Ctrl+Q | Frost Shock | Shift+4 | shocks family; rare slow | `wh_abil` |
+| X | Water Shield | 1 | refreshed between pulls, standing still | `wh_tt`, `moba` |
+| C | Healthstone / Healing Potion | (clickable) | the healer's own emergency; next to the Mana Potion | `wh_tt` items |
+| Shift+1 | Call of the Elements | Shift+C | moving-totems family; every 3-5 pulls | `wh_tt`, `simc` durations |
+| Ctrl+1 | Totemic Recall | (clickable) | moving-totems family; once per dungeon | `wh_tt`, `moba` |
+| Shift+3 | Purge | Shift+3 | sometimes, on enemy buffs | `wh_abil`, `moba` |
+| Shift+Q | Frost Shock | Shift+4 | stop-an-enemy family; runners (exception) | `wh_abil` |
+| Ctrl+Q | Earthbind | Shift+5 | stop-an-enemy family; rare | `wh_abil` |
 | Shift+E | Stoneskin | Shift+E | Erika's habit; by hand after Tremor (exception) | Erika, `wh_tt` |
 | Ctrl+E | Stoneclaw | (clickable) | physical-protection family; rare | `wh_abil` |
 | Shift+R | Searing | Shift+R | every pull, and 2-4 more times per boss (30-55 s) | Erika, `simc` |
@@ -541,52 +590,51 @@ Bindings: plain = main bar (`ACTIONBUTTON`); Shift = Action Bar 2 (`MULTIACTIONB
 | Ctrl+F | Grounding | (clickable) | enemy-spell family; rare | `wh_abil` |
 | Shift+Z | Mana Spring | Shift+Z | mana family; pressed again after each Mana Tide | `moba`, `simc` |
 | Ctrl+Z | Mana Tide | Shift+X | mana family; once per boss | `simc`, `moba` |
-| X | Totemic Call | (clickable) | moving-totems family; most pulls, standing still | `wh_tt`, `moba` |
-| Shift+X | Call of the Elements | Shift+C | moving-totems family; every 3-5 pulls | `wh_tt`, `simc` durations |
-| Ctrl+X | Totemic Recall | (clickable) | moving-totems family; once per dungeon | `wh_tt`, `moba` |
-| Shift+1, Shift+2 | Cure Poison, Cure Disease | Shift+1, Shift+2 | poison and disease families; dungeon-specific | `wh_abil` |
-| Ctrl+1, Ctrl+2 | Poison, Disease Cleansing Totem | (clickable) | poison and disease families; usually in the set | `wh_abil` |
-| Shift+3 | Purge | Shift+3 | sometimes, on enemy buffs | `wh_abil`, `moba` |
-| Shift+5 | Earthbind | Shift+5 | rare: runners | `wh_abil` |
+| Shift+Mouse4, Shift+Mouse5 | Cure Poison, Cure Disease | Shift+1, Shift+2 | cure the player under the cursor; dungeon-specific | `wh_abil` |
+| Ctrl+Mouse4, Ctrl+Mouse5 | Poison, Disease Cleansing Totem | (clickable) | the group version of the cure; usually in the set | `wh_abil` |
 | Ctrl+C | Ghost Wolf | (clickable) | the player's decision; outdoors only | user, `simc` 2645 |
 
-**Spare:** 5, C, Shift+4, Shift+C, Shift/Ctrl+Mouse4/5. Ctrl+3-5 and Ctrl+R keep their defaults.
+**Spare:** Shift+2, Shift+4, Shift+X, Ctrl+X, Shift+C. Ctrl+2-4 and Ctrl+R keep their defaults. **5, Shift+5 and
+Ctrl+5 are Erika's own**: the addon never binds them.
 
 ## Diff against layout v2 (ForeverSensei 0.3.0)
 
-**Thirteen keys keep their spell:** 1, 3, R, F, Z, Shift+1/2/3/5, Shift+E/R/F/Z.
+**Nine keys keep their spell:** 3, R, F, Z, Shift+3, Shift+E, Shift+R, Shift+F, Shift+Z.
 
 **Moves:**
 
 | Spell | v2 → new | Does Erika (26) feel it? | Reason |
 |---|---|---|---|
-| Earth Shock | 5 → Q | yes | the interrupt is used in most pulls and must land within a second; 5 is the hardest number |
-| Flame Shock | 4 → Shift+Q | yes | shocks family; a tier-2 key for filler damage in most pulls |
-| Frost Shock | Shift+4 → Ctrl+Q | yes | shocks family; also a better reach (tier 4 → 3) |
+| Water Shield | 1 → X | yes | 1 must hold a spell pressed in combat in most pulls (the player's decision) |
+| Flame Shock | 4 → 2 | yes | damage row 2-3-4; a top key for filler in most pulls |
+| Earth Shock | 5 → Q | yes | the interrupt must land within a second; 5 is now Erika's own |
 | Lesser Healing Wave | C → E | yes | very urgent spike heal in most pulls; C is a stretch key |
-| Call of the Elements | Shift+C → Shift+X | yes | moving-totems family (the player's request) |
-| Mana Tide Totem | Shift+X → Ctrl+Z | yes | mana family; Shift+X goes to Call of the Elements |
-| Healing Stream Totem | Shift+Q → clickable | yes | learned at 20 together with Call of the Elements, so it is in the set from day one; rarely placed by hand |
-| Lightning Shield | 2 → clickable after 20 (on 1 at 8-19) | yes (unused since 20) | can't be active with Water Shield |
-| Chain Lightning | Q → 4 | no (learned at 32) | rare for a healer; it was blocking Q |
+| Call of the Elements | Shift+C → Shift+1 | yes | moving-totems family on 1 |
+| Frost Shock | Shift+4 → Shift+Q | yes | stop-an-enemy family; better reach (tier 4 → 2) |
+| Earthbind Totem | Shift+5 → Ctrl+Q | yes | 5 is now Erika's own; stop-an-enemy family |
+| Cure Poison | Shift+1 → Shift+Mouse4 | yes | cure the player under the cursor; better reach (tier 3 → 2) |
+| Cure Disease | Shift+2 → Shift+Mouse5 | yes | as above |
+| Mana Tide Totem | Shift+X → Ctrl+Z | yes | mana family |
+| Healing Stream Totem | Shift+Q → clickable | yes | in the Call of the Elements set from the day it is learned; rarely placed by hand |
+| Lightning Shield | 2 → clickable after 20 (on X at 8-19) | no (unused since 20) | can't be active with Water Shield |
+| Chain Lightning | Q → 4 | no (learned at 32) | damage row; rare for a healer |
 | Riptide | E → Mouse4 | no (learned at 40) | instant, cast while moving, on the cursor's frame |
 | Nature's Swiftness | X → Mouse5 (as NS + Healing Wave) | no (learned at 30) | one press instead of two in an emergency |
 
-**New keys** (were clickable): Totemic Call X, Totemic Recall Ctrl+X, Healthstone / Healing Potion 2, Poison and
-Disease Cleansing Totem Ctrl+1/2, Stoneclaw Ctrl+E, Grounding Ctrl+F, Ghost Wolf Ctrl+C.
+**New keys** (were clickable): Totemic Call 1, Totemic Recall Ctrl+1, Healthstone / Healing Potion C, Poison and
+Disease Cleansing Totem Ctrl+Mouse4/5, Stoneclaw Ctrl+E, Grounding Ctrl+F, Ghost Wolf Ctrl+C.
 
-For Erika (26), **eight spells she already uses move.** Three of them (Call of the Elements, Mana Tide, Frost
-Shock) move only because of the families. Riptide, Nature's Swiftness and Chain Lightning move before she learns
-them.
+For Erika (26), **eleven spells she already uses move.** That is more than in the previous proposal, because the
+player's three decisions (1 and 2 for in-combat spells, 5 free, Water Shield and Healthstone off 1 and 2) touch
+the keys of eight spells. The three heals and the interrupt that matter most (F, E, R, Q) and her Shift+E/R/F
+totems stay put.
 
-**Changed since the previous proposal (9496e1b):**
-- Totemic Call Shift+Q → X, and Call of the Elements Shift+C → Shift+X (moving-totems family).
-- Flame Shock 2 → Shift+Q, and Frost Shock Shift+4 → Ctrl+Q (shocks family).
-- Mana Tide Shift+X → Ctrl+Z (mana family).
-- Healing Stream Ctrl+Z → clickable.
-- Grounding Ctrl+Q → Ctrl+F (enemy-spell family).
-- Healthstone C → 2 (the top key freed by Flame Shock).
-- Poison and Disease Cleansing Totem: clickable → Ctrl+1 and Ctrl+2.
+**Changed since the previous proposal (26ab460):**
+- Moving-totems family X → 1 (Totemic Call 1, Call of the Elements Shift+1, Totemic Recall Ctrl+1).
+- Flame Shock Shift+Q → 2; Frost Shock Ctrl+Q → Shift+Q; Earthbind Shift+5 → Ctrl+Q.
+- Water Shield 1 → X; Healthstone 2 → C.
+- Cure Poison and Cure Disease Shift+1/2 → Shift+Mouse4/5; cleansing totems Ctrl+1/2 → Ctrl+Mouse4/5.
+- 5 in all variants is left for Erika.
 
 ## (b) Unkeyed, on clickable bars
 
@@ -594,8 +642,8 @@ them.
 |---|---|
 | Rockbiter, Flametongue, Frostbrand and Windfury Weapon | weapon buffs that last long; cast before the pull |
 | Minor Arcane Elixir (`FS_ELIXIR`) | long buff, next to the weapon buffs (decided in 0.3.0) |
-| Healing Potion (`FS_HEALPOT`) | 2 covers it when there is no Healthstone |
-| Lightning Shield (after 20) | replaced by Water Shield on 1 |
+| Healing Potion (`FS_HEALPOT`) | C covers it when there is no Healthstone |
+| Lightning Shield (after 20) | replaced by Water Shield on X |
 | Healing Stream Totem | in the Call of the Elements set from the day it is learned; swap it in with a click between pulls |
 | Strength of Earth Totem | a set-up choice instead of Stoneskin; put it in the Totem Bar set for melee groups |
 | Windfury Totem, Grace of Air Totem | Air totems for melee groups; set up through the Totem Bar |
@@ -613,29 +661,30 @@ them.
 
 Already replaced by layout v2 (no change):
 - Q/E strafe, R reply, F assist (verify), Z sheath, X sit/stand, C character window.
-- Shift+1-5 bar paging.
+- Shift+1-4 bar paging.
 
 New in this proposal:
-- Ctrl+Q, Ctrl+E, Ctrl+F, Ctrl+Z, Ctrl+X and Ctrl+C (no default expected).
-- **Ctrl+1 and Ctrl+2** (stance bar buttons 1 and 2). A shaman's only stance-bar spell is expected to be Ghost
-  Wolf, which is on Ctrl+C anyway. **Verify in game.**
-- Mouse4 and Mouse5 (no default expected).
+- Ctrl+Q, Ctrl+E, Ctrl+F, Ctrl+Z and Ctrl+C (no default expected).
+- **Ctrl+1** (stance bar button 1). A shaman's only stance-bar spell is expected to be Ghost Wolf, which is on
+  Ctrl+C anyway. **Verify in game.**
+- Mouse4 and Mouse5, also with Shift and Ctrl (no default expected).
 
 Not touched:
-- Ctrl+R (probably the framerate display), Ctrl+3-0 (the stance bar).
+- **5, Shift+5 and Ctrl+5**: Erika's own. Layout v2 put Earthbind on Shift+5; the implementation must remove
+  only that addon binding and leave anything Erika puts there.
+- Ctrl+R (probably the framerate display), Ctrl+2-0 (the stance bar), Ctrl+X.
 - Alt with any key.
-- C is spare: the implementation may give it back to the character window.
 
 Verify all of these with the `/run` lines in Q4. Apply-layout already backs up and can undo bindings.
 
 ## (d) Snapshots by level
 
-"–" means the key is reserved but still empty. Spare keys are left out.
+"–" means the key is reserved but still empty. Spare keys and Erika's 5 are left out.
 
 | Key | 10 | 20 | 26 | 30 | 40 | 60 |
 |---|---|---|---|---|---|---|
-| 1 | Lightning Shield | Water Shield | Water Shield | Water Shield | Water Shield | Water Shield |
-| 2 | Healthstone / Healing Potion | Healthstone / Healing Potion | Healthstone / Healing Potion | Healthstone / Healing Potion | Healthstone / Healing Potion | Healthstone / Healing Potion |
+| 1 | – | – | Totemic Call | Totemic Call | Totemic Call | Totemic Call |
+| 2 | Flame Shock | Flame Shock | Flame Shock | Flame Shock | Flame Shock | Flame Shock |
 | 3 | Lightning Bolt | Lightning Bolt | Lightning Bolt | Lightning Bolt | Lightning Bolt | Lightning Bolt |
 | 4 | – | – | – | – | Chain Lightning | Chain Lightning |
 | Q | Earth Shock | Earth Shock | Earth Shock | Earth Shock | Earth Shock | Earth Shock |
@@ -643,27 +692,27 @@ Verify all of these with the `/run` lines in Q4. Apply-layout already backs up a
 | R | – | – | – | – | Chain Heal | Chain Heal |
 | F | Healing Wave | Healing Wave | Healing Wave | Healing Wave | Healing Wave | Healing Wave |
 | Z | Mana Potion | Mana Potion | Mana Potion | Mana Potion | Mana Potion | Mana Potion |
-| X | – | – | Totemic Call | Totemic Call | Totemic Call | Totemic Call |
+| X | Lightning Shield | Water Shield | Water Shield | Water Shield | Water Shield | Water Shield |
+| C | Healthstone / Healing Potion | Healthstone / Healing Potion | Healthstone / Healing Potion | Healthstone / Healing Potion | Healthstone / Healing Potion | Healthstone / Healing Potion |
 | Mouse4 | – | – | – | – | Riptide | Riptide |
 | Mouse5 | – | – | – | NS + Healing Wave | NS + Healing Wave | NS + Healing Wave |
-| Shift+1 | – | Cure Poison | Cure Poison | Cure Poison | Cure Poison | Cure Poison |
-| Shift+2 | – | – | Cure Disease | Cure Disease | Cure Disease | Cure Disease |
+| Shift+1 | – | Call of the Elements | Call of the Elements | Call of the Elements | Call of the Elements | Call of the Elements |
 | Shift+3 | – | Purge | Purge | Purge | Purge | Purge |
-| Shift+5 | Earthbind | Earthbind | Earthbind | Earthbind | Earthbind | Earthbind |
-| Shift+Q | Flame Shock | Flame Shock | Flame Shock | Flame Shock | Flame Shock | Flame Shock |
+| Shift+Q | – | Frost Shock | Frost Shock | Frost Shock | Frost Shock | Frost Shock |
 | Shift+E | Stoneskin | Stoneskin | Stoneskin | Stoneskin | Stoneskin | Stoneskin |
 | Shift+R | Searing | Searing | Searing | Searing | Searing | Searing |
 | Shift+F | – | Tremor | Tremor | Tremor | Tremor | Tremor |
 | Shift+Z | – | – | Mana Spring | Mana Spring | Mana Spring | Mana Spring |
-| Shift+X | – | Call of the Elements | Call of the Elements | Call of the Elements | Call of the Elements | Call of the Elements |
-| Ctrl+1 | – | – | Poison Cleansing | Poison Cleansing | Poison Cleansing | Poison Cleansing |
-| Ctrl+2 | – | – | – | – | Disease Cleansing | Disease Cleansing |
-| Ctrl+Q | – | Frost Shock | Frost Shock | Frost Shock | Frost Shock | Frost Shock |
+| Shift+Mouse4 | – | Cure Poison | Cure Poison | Cure Poison | Cure Poison | Cure Poison |
+| Shift+Mouse5 | – | – | Cure Disease | Cure Disease | Cure Disease | Cure Disease |
+| Ctrl+1 | – | Totemic Recall | Totemic Recall | Totemic Recall | Totemic Recall | Totemic Recall |
+| Ctrl+Q | Earthbind | Earthbind | Earthbind | Earthbind | Earthbind | Earthbind |
 | Ctrl+E | Stoneclaw | Stoneclaw | Stoneclaw | Stoneclaw | Stoneclaw | Stoneclaw |
 | Ctrl+F | – | – | – | Grounding | Grounding | Grounding |
 | Ctrl+Z | – | – | Mana Tide | Mana Tide | Mana Tide | Mana Tide |
-| Ctrl+X | – | Totemic Recall | Totemic Recall | Totemic Recall | Totemic Recall | Totemic Recall |
 | Ctrl+C | – | Ghost Wolf | Ghost Wolf | Ghost Wolf | Ghost Wolf | Ghost Wolf |
+| Ctrl+Mouse4 | – | – | Poison Cleansing | Poison Cleansing | Poison Cleansing | Poison Cleansing |
+| Ctrl+Mouse5 | – | – | – | – | Disease Cleansing | Disease Cleansing |
 | Keys in use | 11 | 19 | 24 | 26 | 30 | 30 |
 
 Notes:
@@ -671,16 +720,17 @@ Notes:
 - Before a potion is in the bags, the macro shows its fallback icon.
 - At 10 the unkeyed buttons are Rockbiter, Flametongue Weapon and Strength of Earth. Grace of Air (42) is the
   last unkeyed spell.
-- Each family fills in as she levels and never moves: X gets Call of the Elements and Totemic Recall at 20 and
-  Totemic Call at 22; Z gets Mana Tide at 25 and Mana Spring at 26.
+- Each family fills in as she levels and never moves: 1 gets Call of the Elements and Totemic Recall at 20 and
+  Totemic Call at 22; Z gets Mana Tide at 25 and Mana Spring at 26; the mouse buttons get their cures at 16 and 22
+  before their heals at 30 and 40.
 
 ## Where this overrides Erika's wishes
 
 **Kept:**
 - Healing Wave on F.
-- Totems on Shift, with her pull totems on Shift+E (Stoneskin), Shift+R (Searing) and Shift+F (Tremor).
+- Her pull totems on Shift+E (Stoneskin), Shift+R (Searing) and Shift+F (Tremor).
 - Mana Potion on Z.
-- Totemic Call, Totemic Recall and Call of the Elements all keyed, now together on X.
+- Totemic Call, Totemic Recall and Call of the Elements all keyed, together on 1.
 - Rare and out-of-combat spells unkeyed.
 
 **Overridden, with the gameplay reason:**
@@ -688,68 +738,72 @@ Notes:
    - C and X are stretch keys (tier 4) for a small hand.
    - Lesser Healing Wave (very urgent) and Nature's Swiftness (the emergency) need the fastest keys, not the
      slowest.
-2. **Shields on 1 and 2 → only Water Shield on 1.**
+2. **Shields on 1 and 2 → only Water Shield, on X.**
    - Lightning Shield can't be active together with Water Shield (`moba`), so after 20 its key was wasted.
+   - Water Shield is refreshed between pulls, so 1 goes to a spell she presses in combat (the player's decision).
 3. **Not every totem is on Shift:**
-   - Totemic Call and Totemic Recall go to X and Ctrl+X, next to Call of the Elements on Shift+X (moving-totems
+   - Totemic Call and Totemic Recall go to 1 and Ctrl+1, around Call of the Elements on Shift+1 (moving-totems
      family).
-   - Mana Tide goes to Ctrl+Z (mana family), Stoneclaw to Ctrl+E, Grounding to Ctrl+F, and the cleansing totems
-     to Ctrl+1 and Ctrl+2, each next to the spells that do the same job.
+   - Mana Tide goes to Ctrl+Z (mana family), Stoneclaw to Ctrl+E, Grounding to Ctrl+F, Earthbind to Ctrl+Q, and
+     the cleansing totems to Ctrl+Mouse4/5, each next to the spells that do the same job.
    - Healing Stream becomes clickable: it is in the Call of the Elements set and rarely placed by hand.
 
 ## Verify in game (for the implementation task)
 
 1. The default actions of the replaced keys: the `/run` lines in Q4.
 2. Action Bars 6 and 7 must be shown for their key bindings to fire, or check that hidden bars work.
-3. `SetMultiCastSpell(<action>, <spellId>)` from an addon, out of combat.
-4. `SetBindingClick` on `MultiCastActionButtonN` (only if needed).
-5. The NS + Healing Wave macro casts both spells in one press. Does `/stopcasting` work in a macro?
-6. Healthstone and potion: shared cooldown or not.
-7. Does Ghost Wolf appear on the stance bar? If it does, Ctrl+1 and Ctrl+2 lose nothing it needs (Ghost Wolf is
-   on Ctrl+C); check that no other shaman spell sits on the stance bar.
-8. The mana cost of Call of the Elements: does the tooltip's "None" really mean only the totems' own cost?
+3. Shift+Mouse4/5 and Ctrl+Mouse4/5 fire their buttons (`SHIFT-BUTTON4` etc.), and holding Shift for a Shift
+   totem doesn't cause too many Cure Poison casts instead of Riptide.
+4. `SetMultiCastSpell(<action>, <spellId>)` from an addon, out of combat.
+5. `SetBindingClick` on `MultiCastActionButtonN` (only if needed).
+6. The NS + Healing Wave macro casts both spells in one press. Does `/stopcasting` work in a macro?
+7. Healthstone and potion: shared cooldown or not.
+8. Does Ghost Wolf appear on the stance bar? If it does, Ctrl+1 loses nothing it needs (Ghost Wolf is on Ctrl+C);
+   check that no other shaman spell sits on the stance bar.
+9. The mana cost of Call of the Elements: does the tooltip's "None" really mean only the totems' own cost?
 
 ## (e) Erika へのまとめ（日本語）
 
-レベル60でダンジョンを回復する時を基準に、キー配置を作り直した。実際の戦闘の流れ（戦闘の合間・戦闘開始・戦闘中・緊急時・戦闘の後）で、どの呪文を何回押すかを数えた。よく押す呪文や急いで使う呪文ほど、押しやすいキーに置いた。さらに、同じ役目の呪文は1つのキーにまとめて、Shift と Ctrl で選ぶようにした。レベルが低い時は、この中で覚えた呪文だけを使う。一度覚えた呪文のキーは、レベルが上がっても変わらない。
+レベル60でダンジョンを回復する時を基準に、キー配置を作り直した。実際の戦闘の流れ（戦闘の合間・戦闘開始・戦闘中・緊急時・戦闘の後）で、どの呪文を何回押すかを数えた。戦闘中によく押す呪文や急いで使う呪文ほど、押しやすいキーに置いた。同じ役目の呪文は1つのキーにまとめて、Shift と Ctrl で選ぶ。レベルが低い時は、この中で覚えた呪文だけを使う。一度覚えた呪文のキーは、レベルが上がっても変わらない。5 は Shift と Ctrl も含めて空けてあるので、好きな物を置いていい。
 
 | キー | そのまま | Shift | Ctrl |
 |---|---|---|---|
-| 1 | Water Shield | Cure Poison | Poison Cleansing Totem |
-| 2 | Healthstone（なければHealing Potion） | Cure Disease | Disease Cleansing Totem |
+| 1 | Totemic Call | Call of the Elements | Totemic Recall |
+| 2 | Flame Shock | – | – |
 | 3 | Lightning Bolt | Purge | – |
 | 4 | Chain Lightning（レベル32から） | – | – |
-| 5 | – | Earthbind Totem | – |
-| Q | Earth Shock | Flame Shock | Frost Shock |
+| 5 | 自由 | 自由 | 自由 |
+| Q | Earth Shock | Frost Shock | Earthbind Totem |
 | E | Lesser Healing Wave | Stoneskin Totem | Stoneclaw Totem |
 | R | Chain Heal（レベル40から） | Searing Totem | – |
 | F | Healing Wave | Tremor Totem | Grounding Totem |
 | Z | Mana Potion | Mana Spring Totem | Mana Tide Totem |
-| X | Totemic Call | Call of the Elements | Totemic Recall |
-| C | – | – | Ghost Wolf |
-| マウスのボタン4 | Riptide（レベル40から） | – | – |
-| マウスのボタン5 | Nature's Swiftness ＋ Healing Wave（レベル30から） | – | – |
+| X | Water Shield | – | – |
+| C | Healthstone（なければHealing Potion） | – | Ghost Wolf |
+| マウスのボタン4 | Riptide（レベル40から） | Cure Poison | Poison Cleansing Totem |
+| マウスのボタン5 | Nature's Swiftness ＋ Healing Wave（レベル30から） | Cure Disease | Disease Cleansing Totem |
 
 同じ役目でまとめたキー:
-- **X＝トーテムを動かす。** X は Totemic Call（毎回の戦闘）、Shift+X は Call of the Elements（約5分ごと）、Ctrl+X は Totemic Recall（ダンジョンを出る時）。どれも立ち止まって使う呪文なので、少し遠いXでも困らない。
-- **Q＝ショック。** Q は Earth Shock（敵の詠唱を中断する）、Shift+Q は Flame Shock、Ctrl+Q は Frost Shock（逃げる敵を遅くする）。
+- **1＝トーテムを動かす。** 1 は Totemic Call（毎回の戦闘の始め）、Shift+1 は Call of the Elements（約5分ごと）、Ctrl+1 は Totemic Recall（ダンジョンを出る時）。
+- **2・3・4＝回復が少ない時のダメージ。** 左から順に押す。まず Flame Shock（2）、次に Lightning Bolt（3）。敵が多い時は Chain Lightning（4）。
+- **Q＝敵を止める。** Q は Earth Shock（敵の詠唱を中断する）、Shift+Q は Frost Shock（逃げる敵を1体遅くする）、Ctrl+Q は Earthbind Totem（近くの敵をまとめて遅くする）。
 - **Z＝マナ。** Z は Mana Potion、Shift+Z は Mana Spring Totem、Ctrl+Z は Mana Tide Totem。Mana Tide Totem が消えたら（13秒）、Mana Spring Totem をもう一度置こう。
-- **1＝毒、2＝病気。** Shift で味方1人を治す（Cure Poison・Cure Disease）。Ctrl でパーティー全体を治すトーテムを置く。
+- **マウスのボタン＝カーソルの下の味方を助ける。** そのまま押すと回復、Shift で毒や病気を治す、Ctrl でパーティー全体を治すトーテムを置く。ボタン4は毒、ボタン5は病気。
 - **E＝物理ダメージから守るトーテム、F＝敵の呪文に対抗するトーテム。** Shift+E Stoneskin と Shift+F Tremor は今まで通り。
 
 主な理由:
+- **1 と 2 には、戦闘中にほぼ毎回押す呪文を置いた。** Water Shield は戦闘の合間にかけ直すだけなので X に、Healthstone はたまにしか使わないので C に移した。
 - **回復は全部、Shift なしのキー。** F・E・R・マウスのボタン4・5。一番よく押して、一番急ぐ呪文だから。レベル60の普通の戦闘では、Chain Heal（R）を4〜8回、Healing Wave（F）を2〜4回、Riptide（マウスのボタン4）を2〜3回使う。
 - **Lesser Healing Wave を C から E に移した。** 急に大きなダメージを受けた味方を回復する呪文なので、WASD のすぐ隣の E がいい。C は小さな手には遠い。
 - **Riptide はマウスのボタン4。** 詠唱がないので、歩きながら使える。親指で押すので、カーソルはパーティーの枠の上に置いたままでいい。
 - **マウスのボタン5は緊急用のマクロ。** 1回押すだけで Nature's Swiftness と Healing Wave を続けて使う。クールダウンが3分なので毎回は使わないが、使う時は一番急ぐ。
 - **Earth Shock を Q に移した。** ほぼ毎回の戦闘で使い、1秒も待てないので、一番押しやすいキーに置いた。回復の詠唱中でも、止めてすぐに使える。
-- **2 は Healthstone（なければ Healing Potion）。** 自分が倒れそうな時の緊急用。あわてている時でも、Shift なしで押せる。
-- **回復が少ない時のダメージは Shift+Q と 3。** Flame Shock（Shift+Q）と Lightning Bolt（3）。Chain Lightning は回復役にはマナが重いので、4 に置いた。
-- **Water Shield は 1 のまま。** 玉は3つなので、1〜2回の戦闘ごとに、戦闘の合間にかけ直そう。Lightning Shield は Water Shield と同時に使えないので、レベル20からはキーから外す。
+- **Totemic Call（1）は、回復する場所に立ってから押す。** 今出しているトーテムを自分の場所に移す（クールダウンは30秒）。ただし、消えたトーテムは戻らない。
+- **Call of the Elements（Shift+1）は約5分ごと。** 長く続くトーテムも5分で消える。数回の戦闘ごとと全滅の後に、戦闘の合間に使おう。
 - **Searing Totem（Shift+R）は毎回置く。** 30〜55秒で消えるので、ボス戦では消えたらもう一度置こう。
-- **Call of the Elements（Shift+X）は約5分ごと。** 長く続くトーテムも5分で消える。数回の戦闘ごとと全滅の後に、戦闘の合間に使おう。その間の戦闘では、Totemic Call（X）で残っているトーテムを自分の場所に移す（クールダウンは30秒）。ただし、消えたトーテムは戻らない。
+- **Water Shield は X。** 玉は3つなので、1〜2回の戦闘ごとに、戦闘の合間にかけ直そう。Lightning Shield は Water Shield と同時に使えないので、レベル20からはキーから外す。
+- **C は Healthstone（なければ Healing Potion）。** 自分が倒れそうな時の緊急用。Z の Mana Potion の隣なので、薬は下の段にまとまる。
 - **Healing Stream Totem はキーなし。** Call of the Elements でまとめて置くので、手で置くことはあまりない。
 - **Ctrl はあまり使わないもの用。** Ghost Wolf（Ctrl+C）は屋外でだけ使えるので、ダンジョンではほとんど使わない。
 - **R とマウスのボタン4はレベル40まで空いている。** Chain Heal と Riptide を覚えたら、そこに置く。後でキーを変えなくていいように、先に場所を決めておく。
-- **5 と C は空けておく。** 好きな物を置いていい。
 - **めったに使わない呪文はキーなし。** Ancestral Spirit・Astral Recall・Water Walking などは、クリック用のバーに置く。
