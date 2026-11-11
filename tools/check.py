@@ -497,6 +497,13 @@ def check_static():
     for slot_, key in (layout.get("old") or {}).items():
         if int(slot_) not in spare_slots or key not in keys:
             problem(f"layout: old slot {slot_} ({key}) must be spare now and a spell")
+    # Own buttons an earlier layout filled: only Ctrl+5's button (Mana Tide Totem in layout 4).
+    old_own = {int(k): v for k, v in (layout.get("oldOwn") or {}).items()}
+    if old_own != {bars["bar5"]["first"] + 4: "mana_tide_totem"}:
+        problem("layout: oldOwn must be exactly Ctrl+5's button with layout 4's Mana Tide Totem")
+    for slot_ in old_own:
+        if str(slot_) not in {str(x) for x in (layout.get("own") or {})}:
+            problem(f"layout: oldOwn slot {slot_} is not an own button")
     if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 5:
         problem("layout: version missing (bump it when slots or keys change)")
 

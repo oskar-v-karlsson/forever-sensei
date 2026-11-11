@@ -379,6 +379,20 @@ function Layout.BuildPlan(onlyKey)
         if spare then table.insert(plan.clears, { slot = slot, where = spare, label = Layout.Label(cur) }) end
       end
     end
+    -- Own buttons that an earlier layout filled (Ctrl+5 = Mana Tide Totem in layout 4): cleared only while they still
+    -- hold exactly that spell and it has its new place. Anything the player put there stays.
+    for slot, key in pairs(layout.oldOwn or {}) do
+      local cur = Layout.Current(slot)
+      if cur and cur.planKey == key and placedElsewhere(key) then
+        local where
+        for _, bar in ipairs(layout.bars) do
+          if slot >= bar.first and slot < bar.first + 12 then
+            where = { bar = bar.id, button = slot - bar.first + 1, slot = slot }
+          end
+        end
+        table.insert(plan.clears, { slot = slot, where = where, label = Layout.Label(cur) })
+      end
+    end
   end
   -- Retired bars (Action Bars 6 and 7, layout 3), full apply only: clear the plan's spells there once they have their
   -- own slot, hide the bars and unbind keys that still point at their buttons (never the player's own keys).

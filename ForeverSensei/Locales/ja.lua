@@ -270,7 +270,7 @@ ns.Locales.ja = {
   ["ui.preview.warn.stance"] = "初期設定ではスタンスバーのキー：{key}。シャーマンのスタンスバーにあるのはGhost Wolfだけで、この配置ではCtrl+Cにある。",
   ["ui.preview.warn.fps"] = "{key}は初期設定ではフレームレートの表示。この配置では空のボタンになるので、好きな物を置いていい。",
   ["ui.preview.warn.mouse"] = "マウスのサイドボタン（マウス4とマウス5）にスキルが割り当てられる。マウスのソフトでは、初期設定のボタン4とボタン5のままにしておこう（「戻る」「進む」やキーにしない）。",
-  ["ui.preview.warn.own"] = "5・Shift+5・Ctrl+5は自分用。ForeverSenseiは変えない。前の配置で置いたスキル（Earth Shock、Earthbind Totem、Mana Tide Totem）が残っていたら、そのまま使うか好きな物に置き換えていい。",
+  ["ui.preview.warn.own"] = "5・Shift+5・Ctrl+5は自分用。ForeverSenseiは変えない。前の配置で置いたEarth ShockやEarthbind Totemが残っていたら、そのまま使うか好きな物に置き換えていい。",
 
   ["ui.layout.intro"] = "ダンジョンでよく押す呪文ほど押しやすいキーにある。同じ役目の呪文は同じキーで、ShiftとCtrlで選ぶ。そのまま押すキー：回復はF・E・Rとマウス4・5、Earth ShockはQ、攻撃は2・3・4、Totemic Callは1、Mana PotionはZ、Water ShieldはX、HealthstoneはC。",
   ["ui.layout.intro2"] = "Shift（アクションバー2）はトーテムと同じキーの仲間の呪文。Ctrlは画面右端のアクションバー5で、Shiftと同じ並び。マウスのサイドボタンはアクションバー3の右半分。5・Shift+5・Ctrl+5と空のボタンは自分用。アクションバー3の左半分と4はクリック用。まだ覚えていないスキルは灰色で、場所は空けてある。",

@@ -277,7 +277,7 @@ L["ui.preview.notes"] = "Note"
 L["ui.preview.warn.stance"] = "By default these keys use the stance bar: {key}. A shaman's only stance-bar spell is Ghost Wolf, and it is on Ctrl+C in this layout."
 L["ui.preview.warn.fps"] = "{key} shows the framerate by default. In this layout it is an empty button that you can fill yourself."
 L["ui.preview.warn.mouse"] = "The mouse side buttons (Mouse 4 and Mouse 5) get skills. In your mouse software, leave them as the default buttons 4 and 5 (not Back/Forward or a key)."
-L["ui.preview.warn.own"] = "5, Shift+5 and Ctrl+5 are yours: ForeverSensei never changes them. If an old layout put a skill there (Earth Shock, Earthbind Totem or Mana Tide Totem), keep it or replace it with anything you like."
+L["ui.preview.warn.own"] = "5, Shift+5 and Ctrl+5 are yours: ForeverSensei never changes them. If an old layout put Earth Shock or Earthbind Totem there, keep it or replace it with anything you like."
 
 L["ui.layout.intro"] = "Your fixed layout puts the spells you press most in a dungeon on the easiest keys. Spells that do the same job share one key with Shift and Ctrl. Without a modifier: heals on F, E, R and the mouse side buttons, Earth Shock on Q, damage on 2, 3 and 4, Totemic Call on 1, a Mana Potion on Z, Water Shield on X and a Healthstone on C."
 L["ui.layout.intro2"] = "Shift (Action Bar 2) holds totems and the rest of each key's family. Ctrl uses Action Bar 5 at the right edge of the screen, in the same order as Shift. The mouse side buttons use the right half of Action Bar 3. 5, Shift+5, Ctrl+5 and the empty buttons are yours. The left half of Action Bar 3 and Action Bar 4 are for clicking. Skills you haven't learned are grey, and their slot is kept free."

@@ -581,7 +581,8 @@ return function(ns, lang)
 
   -- Earlier layouts' leftovers: a full apply clears an old button that still holds a spell that has its new place
   -- (Call of the Elements, layout 2) or now lives only in the spellbook (Sentry Totem, layout 4); the player's own
-  -- buttons 5 (Earth Shock in layout 2) and Ctrl+5 (Mana Tide Totem in layout 4) stay.
+  -- button 5 (Earth Shock in layout 2) stays. Ctrl+5's button held Mana Tide Totem in layout 4: cleared while it
+  -- still holds exactly that, left alone once the player put something else there.
   STUB.level = 60
   for id in pairs(STUB.names) do STUB.known[id] = true end
   local cote, es = ns.Spells.Get("call_of_the_elements"), ns.Spells.Get("earth_shock")
@@ -591,18 +592,37 @@ return function(ns, lang)
   local cleared, touched = {}, false
   for _, c in ipairs(oldPlan.clears) do
     cleared[c.where.slot] = true
-    if c.where.slot == 5 or c.where.slot == 41 then touched = true end
+    if c.where.slot == 5 then touched = true end
   end
   for _, pl in ipairs(oldPlan.place) do if pl.where.slot == 5 or pl.where.slot == 41 then touched = true end end
   for _, m in ipairs(oldPlan.moves) do if m.from == 5 or m.from == 41 then touched = true end end
   if not cleared[72] then fail("old leftover: Call of the Elements on old slot 72 not cleared") end
   if not cleared[36] then fail("old leftover: Sentry Totem (spellbook only now) on old slot 36 not cleared") end
-  if touched then fail("old leftover: the player's own button 5 or Ctrl+5 was planned to change") end
+  if not cleared[41] then fail("old leftover: layout 4's Mana Tide Totem on Ctrl+5's button not cleared") end
+  if touched then fail("old leftover: the player's own button 5 was planned to change, or Ctrl+5 other than cleared") end
+  local mtSlot = L.bySpell.mana_tide_totem.slot
+  try("old leftover apply", ns.Layout.Execute, oldPlan)
+  if STUB.actions[41] then fail("old leftover: Ctrl+5's button still holds Mana Tide Totem after apply") end
+  if not STUB.actions[mtSlot] then fail("old leftover: Mana Tide Totem not on Ctrl+Z after apply") end
+  try("old leftover undo", ns.Layout.Undo)
+  if not (STUB.actions[41] and STUB.actions[41][2] == mt.id) then fail("old leftover undo: Mana Tide Totem not back on Ctrl+5's button") end
+  -- Something else of her own on Ctrl+5 (another spell, or an item) stays.
+  for _, mine in ipairs({ { "spell", es.id }, { "item", 6948 } }) do
+    STUB.actions = { [41] = mine }
+    for _, c in ipairs(ns.Layout.BuildPlan().clears) do
+      if c.slot == 41 then fail("old leftover: the player's own " .. mine[1] .. " on Ctrl+5 was planned to be cleared") end
+    end
+  end
+  STUB.actions = { [72] = { "spell", cote.id }, [41] = { "spell", mt.id } }
+  for _, c in ipairs(ns.Layout.BuildPlan("mana_tide_totem").clears) do
+    if c.slot == 41 then fail("old leftover: placing one spell cleared Ctrl+5's button") end
+  end
   local onePlan = ns.Layout.BuildPlan("call_of_the_elements")
   for _, c in ipairs(onePlan.clears) do
     if c.where.slot == 72 then fail("old leftover: placing one spell cleared an old button") end
   end
   STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
+  try("old leftover items", ns.Items.Refresh) -- the apply above wrote the item macros for the level-60 bags
 
   -- Translation reports: save two, send, format.
   ns.db.reports = {}

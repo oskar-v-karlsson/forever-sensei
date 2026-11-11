@@ -172,8 +172,13 @@ L.macroBodies = {
 -- Earlier layouts put these spells in buttons that are spare now. A full apply clears such a button when it still
 -- holds that spell and the spell has its new place (or now lives in the spellbook), so no duplicates are left
 -- (undoable like everything else). Layout 2 (0.3.0): bar 2. Layout 4 (0.4.1-0.4.2): Action Bar 5 buttons that are
--- spare Ctrl keys now, and Sentry Totem's old button on bar 4. The player's own buttons are left alone, also when
--- an old layout put a spell there (5 and Shift+5 in layout 2, Ctrl+5 = Mana Tide Totem in layout 4).
+-- spare Ctrl keys now, and Sentry Totem's old button on bar 4. The player's own buttons 5 and Shift+5 are left alone,
+-- also when layout 2 put a spell there. L.oldOwn: Ctrl+5's button (Action Bar 5 button 5) held Mana Tide Totem in
+-- layout 4; it is the player's own now, so a full apply clears it only while it still holds exactly that spell.
+L.oldOwn = {
+  [41] = "mana_tide_totem",
+}
+
 L.old = {
   [62] = "cure_disease",
   [64] = "frost_shock",
