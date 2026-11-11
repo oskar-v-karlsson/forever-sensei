@@ -107,7 +107,7 @@ L["ui.preview.sparekey"] = "(empty button)"
 L["ui.preview.macro"] = "macro {name}"
 L["ui.preview.nothing"] = "Everything is already in place."
 L["ui.preview.notes"] = "Note"
-L["ui.preview.warn.fps"] = "{key} shows the framerate by default. In this layout it is an empty button that you can fill yourself."
+L["ui.preview.warn.fps"] = "{key} shows the framerate by default. This layout uses it for one of its buttons."
 L["ui.preview.warn.mouse"] = "The mouse side buttons (Mouse 4 and Mouse 5) get skills. In your mouse software, leave them as the default buttons 4 and 5 (not Back/Forward or a key)."
 
 L["ui.layout.nobook"] = "Only in the spellbook (rarely needed): {names}"

@@ -917,15 +917,16 @@ def check_shaman(pack, sources):
     if spec.get("tabs") != ["role", "healing", "damage", "totems", "manners"]:
         problem(f"shaman: Restoration tabs must be role, healing, damage, totems, manners, are {spec.get('tabs')}")
     # The approved grid (research/keybind-layout.md (a) at ecf40ec; layout 5 keeps the keys, makes Action Bar 5 the
-    # Ctrl mirror of Action Bar 2 and moves the mouse buttons to Action Bar 3 7-12): every key holds exactly this.
+    # Ctrl mirror of Action Bar 2 and moves the mouse buttons to Action Bar 3 7-12; layout 6 (0.6.1) puts the Fire
+    # totem family together: Magma Totem on Shift+4, Fire Nova on Ctrl+R): every key holds exactly this.
     grid = {
         "1": "totemic_call", "2": "flame_shock", "3": "lightning_bolt", "4": "chain_lightning",
         "Q": "earth_shock", "E": "lesser_healing_wave", "R": "chain_heal", "F": "healing_wave",
         "Z": "@mana", "X": "water_shield", "C": "@health",
-        "SHIFT-1": "call_of_the_elements", "SHIFT-3": "purge", "SHIFT-Q": "frost_shock",
+        "SHIFT-1": "call_of_the_elements", "SHIFT-3": "purge", "SHIFT-4": "magma_totem", "SHIFT-Q": "frost_shock",
         "SHIFT-E": "stoneskin_totem", "SHIFT-R": "searing_totem", "SHIFT-F": "tremor_totem",
         "SHIFT-Z": "mana_spring_totem",
-        "CTRL-1": "totemic_recall", "CTRL-Q": "earthbind_totem", "CTRL-E": "stoneclaw_totem",
+        "CTRL-1": "totemic_recall", "CTRL-Q": "earthbind_totem", "CTRL-E": "stoneclaw_totem", "CTRL-R": "fire_nova",
         "CTRL-F": "grounding_totem", "CTRL-Z": "mana_tide_totem", "CTRL-C": "ghost_wolf",
         "BUTTON4": "riptide", "BUTTON5": "natures_swiftness",
         "SHIFT-BUTTON4": "cure_poison", "SHIFT-BUTTON5": "cure_disease",
@@ -1044,10 +1045,17 @@ def check_shaman(pack, sources):
     for slot_ in old_own:
         if str(slot_) not in {str(x) for x in (layout.get("own") or {})}:
             problem(f"layout: oldOwn slot {slot_} is not an own button")
-    # Layout 5 (0.4.3) is still the plan: 0.5.0 moved the data into the pack without changing slots or keys, so
-    # characters get no new "apply all" notice.
-    if layout.get("version") != 5:
-        problem(f"layout: version must stay 5 while slots and keys are unchanged, is {layout.get('version')}")
+    # Spare keys: every keyed button without a skill (the "-" of the grid), and nothing else.
+    want_spare = {"SHIFT-2", "SHIFT-X", "SHIFT-C", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-X"}
+    if spare_keys != want_spare:
+        problem(f"layout: spare keys must be {sorted(want_spare)}, are {sorted(spare_keys)}")
+    # Layout 6 (0.6.1) is the plan: the Fire totem family moved (Erika's request), so characters with layout 5 get
+    # the one-time "apply all" notice, and a full apply clears Fire Nova's and Magma Totem's old bar 4 buttons.
+    if layout.get("version") != 6:
+        problem(f"layout: version must be 6 (Fire totem family together, 0.6.1), is {layout.get('version')}")
+    for slot_, key in ((29, "fire_nova"), (32, "magma_totem")):
+        if (layout.get("old") or {}).get(slot_, (layout.get("old") or {}).get(str(slot_))) != key:
+            problem(f"layout: old must list layout 5's {key} on bar 4 slot {slot_}")
 
     # --- talents ----------------------------------------------------------------------------------------------
     tree_points = check_talents_points(talents)

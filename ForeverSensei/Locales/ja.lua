@@ -99,7 +99,7 @@ ns.Locales.ja = {
   ["ui.preview.macro"] = "マクロ {name}",
   ["ui.preview.nothing"] = "すべて配置済み。",
   ["ui.preview.notes"] = "注意",
-  ["ui.preview.warn.fps"] = "{key}は初期設定ではフレームレートの表示。この配置では空のボタンになるので、好きな物を置いていい。",
+  ["ui.preview.warn.fps"] = "{key}は初期設定ではフレームレートの表示。この配置では、バーのボタンの1つに使う。",
   ["ui.preview.warn.mouse"] = "マウスのサイドボタン（マウス4とマウス5）にスキルが割り当てられる。マウスのソフトでは、初期設定のボタン4とボタン5のままにしておこう（「戻る」「進む」やキーにしない）。",
 
   ["ui.layout.nobook"] = "呪文書から使うスキル（めったに使わない）：{names}",

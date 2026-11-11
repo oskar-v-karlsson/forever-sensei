@@ -633,6 +633,64 @@ return function(ns, lang)
   STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
   try("old leftover items", ns.Items.Refresh) -- the apply above wrote the item macros for the level-60 bags
 
+  -- Update from layout 5 (0.4.3-0.6.0) to 6 (0.6.1): Fire Nova and Magma Totem were clicked buttons on bar 4
+  -- (slots 29 and 32); now Magma is Shift+4 (bar 2 button 4) and Fire Nova Ctrl+R (bar 5 button 8), next to
+  -- Searing on Shift+R. One notice, nothing moves by itself; a full apply moves both and binds the keys, and
+  -- 元に戻す puts them back on bar 4 with the old Ctrl+R binding.
+  STUB.level = 60
+  for id in pairs(STUB.names) do STUB.known[id] = true end
+  local fn, magma = ns.Spells.Get("fire_nova"), ns.Spells.Get("magma_totem")
+  local fnId, magmaId = ns.Spells.CurrentID(fn), ns.Spells.CurrentID(magma)
+  local fnSlot, magmaSlot = L.bySpell.fire_nova.slot, L.bySpell.magma_totem.slot
+  if fnSlot ~= 44 or magmaSlot ~= 64 or L.bySpell.fire_nova.key ~= "CTRL-R" or L.bySpell.magma_totem.key ~= "SHIFT-4" then
+    fail("layout 6: Fire Nova must be Ctrl+R (slot 44) and Magma Totem Shift+4 (slot 64)")
+  end
+  STUB.actions = { [29] = { "spell", fnId }, [32] = { "spell", magmaId } }
+  local savedBinds = {}
+  for k, v in pairs(STUB.bindings) do savedBinds[k] = v end
+  STUB.bindings["CTRL-R"] = "TOGGLEFPS"
+  STUB.bindings["SHIFT-4"] = "MULTIACTIONBAR1BUTTON4"
+  ns.char.layoutVersion = 5
+  relogin()
+  confirm = _G.ForeverSenseiConfirm
+  if not confirm or not confirm:IsShown() or confirm.text:GetText() ~= ns.T("ui.layout.changed") then
+    fail("layout 6: no notice for a player with layout 5")
+  else
+    confirm:Hide()
+  end
+  if not (STUB.actions[29] and STUB.actions[29][2] == fnId and STUB.actions[32] and STUB.actions[32][2] == magmaId)
+      or STUB.actions[fnSlot] or STUB.actions[magmaSlot] then
+    fail("layout 6: the notice moved something by itself")
+  end
+  local firePlan = ns.Layout.BuildPlan()
+  local fireCleared, firePlaced, fpsWarn = {}, {}, false
+  for _, c in ipairs(firePlan.clears) do fireCleared[c.slot] = true end
+  for _, pl in ipairs(firePlan.place) do firePlaced[pl.slot] = pl.desired.entry and pl.desired.entry.key end
+  if not fireCleared[29] or not fireCleared[32] then fail("layout 6: the old bar 4 Fire Nova and Magma buttons are not cleared") end
+  if firePlaced[fnSlot] ~= "fire_nova" or firePlaced[magmaSlot] ~= "magma_totem" then
+    fail("layout 6: Fire Nova and Magma Totem are not placed on Ctrl+R and Shift+4")
+  end
+  for _, line in ipairs(ns.Layout.Warnings(firePlan)) do
+    if line == ns.T("ui.preview.warn.fps", { key = ns.KeyLabel("CTRL-R") }) then fpsWarn = true end
+  end
+  if not fpsWarn then fail("layout 6: the preview does not warn about Ctrl+R's framerate default") end
+  try("layout 6 apply", ns.Layout.Execute, firePlan)
+  if STUB.actions[29] or STUB.actions[32] then fail("layout 6: bar 4 still holds Fire Nova or Magma Totem after apply") end
+  if not (STUB.actions[fnSlot] and STUB.actions[fnSlot][2] == fnId) then fail("layout 6: Fire Nova not on Ctrl+R's button") end
+  if not (STUB.actions[magmaSlot] and STUB.actions[magmaSlot][2] == magmaId) then fail("layout 6: Magma Totem not on Shift+4's button") end
+  if STUB.bindings["CTRL-R"] ~= "MULTIACTIONBAR4BUTTON8" or STUB.bindings["SHIFT-4"] ~= "MULTIACTIONBAR1BUTTON4" then
+    fail("layout 6: Ctrl+R or Shift+4 not bound to its button")
+  end
+  try("layout 6 undo", ns.Layout.Undo)
+  if not (STUB.actions[29] and STUB.actions[29][2] == fnId and STUB.actions[32] and STUB.actions[32][2] == magmaId) then
+    fail("layout 6 undo: Fire Nova and Magma Totem not back on bar 4")
+  end
+  if STUB.actions[fnSlot] or STUB.actions[magmaSlot] then fail("layout 6 undo: Ctrl+R or Shift+4 button not empty again") end
+  if STUB.bindings["CTRL-R"] ~= "TOGGLEFPS" then fail("layout 6 undo: Ctrl+R not back to the framerate display") end
+  STUB.bindings = savedBinds
+  STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
+  try("layout 6 items", ns.Items.Refresh)
+
   -- Translation reports: save two, send, format.
   ns.db.reports = {}
   try("report save 1", ns.Feedback.Save, "spell.chain_heal.when", "unnatural", "2人以上が傷ついている時に使おう。", nil)

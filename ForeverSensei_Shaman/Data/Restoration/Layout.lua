@@ -1,5 +1,5 @@
--- ForeverSensei_Shaman/Data/Restoration/Layout.lua: the fixed slot and key plan (layout version 5, since
--- ForeverSensei 0.4.3; unchanged in 0.5.0, when the Shaman data moved into this class pack).
+-- ForeverSensei_Shaman/Data/Restoration/Layout.lua: the fixed slot and key plan (layout version 6, since
+-- ForeverSensei 0.6.1; layout 5 came with 0.4.3 and moved into this class pack unchanged in 0.5.0).
 -- Spec: research/keybind-layout.md (approved). The level-60 dungeon-healer layout comes first; lower levels use a
 -- subset of it, and a key never moves once its spell is learned (a reserved key stays empty until then).
 -- Rules from the pull walkthroughs in the spec:
@@ -16,15 +16,17 @@
 --     Mouse5 the same: NS + Healing Wave / Cure Disease / Disease Cleansing Totem
 --     E, F   Shift and Ctrl hold the totems against physical damage (Stoneskin, Stoneclaw) and against enemy spells
 --            (Tremor, Grounding); Shift+E Stoneskin, Shift+R Searing and Shift+F Tremor are the player's habit.
+--     R/4    Fire totems (layout 6, 0.6.1, the player's request: they were far apart): Shift+R Searing Totem (every
+--            pull, her habit) / Ctrl+R Fire Nova (it only hits enemies near the active Fire totem, so it goes with
+--            them) / Shift+4 Magma Totem (packs; 4 sits right above R, on the Shift row that holds her totems).
 --     2-4    the damage row, pressed left to right: Flame Shock, Lightning Bolt, Chain Lightning (32).
 -- * X Water Shield (refreshed between pulls; Lightning Shield stands in on X until Water Shield at 20, then moves to
 --   a clickable bar), C Healthstone else Healing Potion (FS_HEALTH, next to the Mana Potion), Shift+3 Purge,
 --   Ctrl+C Ghost Wolf (the player's decision).
 -- * 5, Shift+5 and Ctrl+5 belong to the player: never planned, never bound, never cleared.
--- * Spare keys: Shift+2, Shift+4, Shift+X, Shift+C, Ctrl+2, Ctrl+3, Ctrl+4, Ctrl+R and Ctrl+X. They are bound to
---   their empty buttons anyway, so every key of the Shift and Ctrl bars works the same way and the bars look alike
---   (the player's choice in 0.4.3). Ctrl+2-4 replace stance-bar buttons and Ctrl+R the framerate display; the
---   preview says so.
+-- * Spare keys: Shift+2, Shift+X, Shift+C, Ctrl+2, Ctrl+3, Ctrl+4 and Ctrl+X. They are bound to their empty buttons
+--   anyway, so every key of the Shift and Ctrl bars works the same way and the bars look alike (the player's choice
+--   in 0.4.3). Ctrl+2-4 replace stance-bar buttons and Ctrl+R (Fire Nova) the framerate display; the preview says so.
 -- Bars (Blizzard_ActionBar in the Forever UI code; slot = (page - 1) * 12 + button):
 --   plain = main bar ACTIONBUTTON (1-12); Shift = Action Bar 2 MULTIACTIONBAR1BUTTON (page 6, 61-72);
 --   Ctrl = Action Bar 5 MULTIACTIONBAR4BUTTON (MultiBarLeft, page 4, 37-48, at the right edge of the screen). Bar 5
@@ -79,7 +81,7 @@ L.retired = {
 }
 
 -- Bumped when slots or keys change: players who had the older layout get a one-time notice (Modules/Layout.lua).
-L.version = 5
+L.version = 6
 
 -- Every key the plan binds: the planned buttons' keys and the spare keyed buttons' keys.
 L.allowedKeys = {
@@ -101,13 +103,13 @@ L.plan = {
     "@mana", { "water_shield", standIn = "lightning_shield" }, "@health",
   },
   bar2 = {
-    "call_of_the_elements", "-", "purge", "-", "#",
+    "call_of_the_elements", "-", "purge", "magma_totem", "#",
     "frost_shock", "stoneskin_totem", "searing_totem", "tremor_totem",
     "mana_spring_totem", "-", "-",
   },
   bar5 = {
     "totemic_recall", "-", "-", "-", "#",
-    "earthbind_totem", "stoneclaw_totem", "-", "grounding_totem",
+    "earthbind_totem", "stoneclaw_totem", "fire_nova", "grounding_totem",
     "mana_tide_totem", "-", "ghost_wolf",
   },
   bar3 = {
@@ -116,8 +118,8 @@ L.plan = {
     "riptide", "natures_swiftness", "cure_poison", "cure_disease", "poison_cleansing_totem", "disease_cleansing_totem",
   },
   bar4 = {
-    "ancestral_spirit", "astral_recall", "strength_of_earth_totem", "healing_stream_totem", "fire_nova",
-    "windfury_totem", "grace_of_air_totem", "magma_totem", "call_of_the_ancestors", "call_of_the_spirits",
+    "ancestral_spirit", "astral_recall", "strength_of_earth_totem", "healing_stream_totem", "-",
+    "windfury_totem", "grace_of_air_totem", "-", "call_of_the_ancestors", "call_of_the_spirits",
     "flametongue_totem", "-",
   },
 }
@@ -184,7 +186,10 @@ L.macroVars = { heal = "healing_wave" }
 -- Earlier layouts put these spells in buttons that are spare now. A full apply clears such a button when it still
 -- holds that spell and the spell has its new place (or now lives in the spellbook), so no duplicates are left
 -- (undoable like everything else). Layout 2 (0.3.0): bar 2. Layout 4 (0.4.1-0.4.2): Action Bar 5 buttons that are
--- spare Ctrl keys now, and Sentry Totem's old button on bar 4. The player's own buttons 5 and Shift+5 are left alone,
+-- spare Ctrl keys now, and Sentry Totem's old button on bar 4. Layout 5 (0.4.3-0.6.0): Fire Nova's and Magma Totem's
+-- clicked buttons on bar 4. Only buttons that are spare now are listed: the old Shift+4 (Frost Shock, layout 2) and
+-- Ctrl+R (Nature's Swiftness, layout 4) buttons hold Magma Totem and Fire Nova now, and the plan replaces what is
+-- there (or clears a copy while the new spell is not learned yet). The player's own buttons 5 and Shift+5 are left alone,
 -- also when layout 2 put a spell there. L.oldOwn: Ctrl+5's button (Action Bar 5 button 5) held Mana Tide Totem in
 -- layout 4; it is the player's own now, so a full apply clears it only while it still holds exactly that spell.
 L.oldOwn = {
@@ -193,15 +198,15 @@ L.oldOwn = {
 
 L.old = {
   [62] = "cure_disease",
-  [64] = "frost_shock",
   [71] = "mana_tide_totem",
   [72] = "call_of_the_elements",
   [38] = "earthbind_totem",
   [39] = "stoneclaw_totem",
   [40] = "grounding_totem",
-  [44] = "natures_swiftness",
   [47] = "poison_cleansing_totem",
   [36] = "sentry_totem",
+  [29] = "fire_nova",
+  [32] = "magma_totem",
 }
 
 -- Keys whose default binding the preview explains (expected defaults, research/keybind-layout.md Q4).

@@ -85,11 +85,11 @@ The plan is in [research/keybind-layout.md](research/keybind-layout.md) (pull wa
 | 1 | Totemic Call | Call of the Elements | Totemic Recall |
 | 2 | Flame Shock | – | – |
 | 3 | Lightning Bolt | Purge | – |
-| 4 | Chain Lightning | – | – |
+| 4 | Chain Lightning | Magma Totem | – |
 | 5 | yours | yours | yours |
 | Q | Earth Shock (interrupt) | Frost Shock | Earthbind Totem |
 | E | Lesser Healing Wave | Stoneskin Totem | Stoneclaw Totem |
-| R | Chain Heal | Searing Totem | – |
+| R | Chain Heal | Searing Totem | Fire Nova |
 | F | Healing Wave | Tremor Totem | Grounding Totem |
 | Z | Mana Potion | Mana Spring Totem | Mana Tide Totem |
 | X | Water Shield (Lightning Shield before level 20) | – | – |
@@ -100,13 +100,14 @@ The plan is in [research/keybind-layout.md](research/keybind-layout.md) (pull wa
 - Plain keys are the main bar, Shift keys Action Bar 2 and Ctrl keys Action Bar 5 (at the right edge of the screen). The three rows use the same order: buttons 1-12 are `1`, `2`, `3`, `4`, `5`, `Q`, `E`, `R`, `F`, `Z`, `X`, `C`, plain, with Shift or with Ctrl. The mouse buttons use the right half of Action Bar 3: buttons 7-12 are `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5`. **すべて配置** turns on Action Bars 2-5, because a hidden bar may not react to its keys.
 - Action Bars 6 and 7 are not used. Version 0.4.0 put the Ctrl and mouse spells there, in the middle of the screen. **すべて配置** now clears those spells from them, hides both bars and removes keys that still point at their buttons (not your `Ctrl+5`).
 - A key whose spell you learn later (e.g. Chain Heal and Riptide at 40) stays empty until then. Keys never move.
-- The keys with `–` have no skill. They are still bound to their (empty) button, so every row has all 12 keys: `Shift+2`, `Shift+4`, `Shift+X`, `Shift+C`, `Ctrl+2`, `Ctrl+3`, `Ctrl+4`, `Ctrl+R` and `Ctrl+X`. You can put your own things there; **すべて配置** only binds the key and leaves the button alone.
+- The keys with `–` have no skill. They are still bound to their (empty) button, so every row has all 12 keys: `Shift+2`, `Shift+X`, `Shift+C`, `Ctrl+2`, `Ctrl+3`, `Ctrl+4` and `Ctrl+X`. You can put your own things there; **すべて配置** only binds the key and leaves the button alone.
 - **Mouse side buttons:** leave them as the default Button 4 and Button 5 in your mouse software (no "back/forward" or other remapping), so the game sees `BUTTON4` and `BUTTON5`.
-- Totem flow in a dungeon: `1` Totemic Call at every pull brings your totems along; `Shift+1` Call of the Elements when the 5-minute totems run out (about every few pulls) and after a wipe; `Shift+R` Searing at every pull (it lasts 30-55 s); `Ctrl+1` Totemic Recall when you leave. Before level 22 (no Call of the Elements yet), put down Stoneskin and Searing by hand.
+- Totem flow in a dungeon: `1` Totemic Call at every pull brings your totems along; `Shift+1` Call of the Elements when the 5-minute totems run out (about every few pulls) and after a wipe; `Shift+R` Searing at every pull (it lasts 30-55 s); `Ctrl+1` Totemic Recall when you leave.
+- Fire totems sit together (0.6.1, Erika's request): `Shift+R` Searing Totem, `Shift+4` Magma Totem (20 s, packs) just above it, and `Ctrl+R` Fire Nova. Fire Nova only hits enemies near your active Fire totem, so against a pack place Searing or Magma first, then press `Ctrl+R`. Before level 22 (no Call of the Elements yet), put down Stoneskin and Searing by hand.
 
 The other buttons have no keys. They are for clicking:
 - bar 3, buttons 1-6: Rockbiter, Flametongue and Windfury Weapon, Lightning Shield (after Water Shield), the Arcane Elixir and Healing Potion buttons;
-- bar 4: Ancestral Spirit, Astral Recall, Strength of Earth, Healing Stream Totem, Fire Nova, Windfury, Grace of Air, Magma and Flametongue Totem, the Call of the Ancestors and Call of the Spirits totem sets, and one spare button.
+- bar 4: Ancestral Spirit, Astral Recall, Strength of Earth, Healing Stream Totem, Windfury, Grace of Air and Flametongue Totem, the Call of the Ancestors and Call of the Spirits totem sets, and three spare buttons (5, 8 and 12).
 - Only in the spellbook (no button, rarely needed): Far Sight and Sentry Totem (scouting), Water Breathing and Water Walking (travel), Frostbrand Weapon (a solo imbue that slows runners; a healer uses Rockbiter or Flametongue).
 
 Anything that was on a planned slot moves to the spare buttons first (bar 3, then the free Shift buttons of Action Bar 2).
@@ -184,9 +185,9 @@ These cannot be tested outside the game. Please go through them once, then paste
 14. [ ] The minimap button can be dragged and hidden in settings, and the addon compartment entry works.
 15. [ ] **Login, no old cards:** close a skill card with **あとで**, then place that skill (**配置する** in the skill list, or **すべて配置**). `/reload`: no card opens. A skill left on **あとで** and not placed does not open a card either; a small message with **見る** shows it instead.
 16. [ ] **Layout notice (update from 0.3.0 or older):** with the old layout on the bars, the first login after updating shows the message about the new layout once. **すべて配置** opens the preview, and nothing changes until **適用**. The message does not come back after `/reload`.
-17. [ ] After **すべて配置**: `1` Totemic Call, `Shift+1` Call of the Elements and `Ctrl+1` Totemic Recall work; `Shift+E`, `Shift+R`, `Shift+F` put down Stoneskin, Searing and Tremor. Note the mana cost of Call of the Elements with a full set.
+17. [ ] After **すべて配置**: `1` Totemic Call, `Shift+1` Call of the Elements and `Ctrl+1` Totemic Recall work; `Shift+E`, `Shift+R`, `Shift+F` put down Stoneskin, Searing and Tremor; `Shift+4` puts down Magma Totem, and `Ctrl+R` casts Fire Nova next to the Fire totem (and does nothing useful without one). Note the mana cost of Call of the Elements with a full set.
 18. [ ] **Potions:** `Z` drinks the best mana potion in the bags. Loot or buy a better one: the button changes to it after combat (or right away out of combat). The healing potion and Arcane Elixir buttons on bar 3 work by clicking. With none in the bags, the buttons show a potion icon (no question mark). `/sensei verify` lists `FS_MANA`, `FS_HEALTH`, `FS_HEALPOT` and `FS_ELIXIR` under [Layout] with no `bad` lines.
-19. [ ] **Ctrl and mouse keys:** after **すべて配置**, Action Bar 5 at the right edge has the Ctrl keys in the same order as Action Bar 2 (Ctrl+1 Totemic Recall on button 1, Ctrl+C Ghost Wolf on button 12), and the right half of Action Bar 3 holds the mouse spells (buttons 7-12). Every Ctrl key and `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5` cast their spells. `Ctrl+2`, `Ctrl+3`, `Ctrl+4`, `Ctrl+R` and `Ctrl+X` press their empty Action Bar 5 button (put a skill there to test; the framerate no longer toggles on `Ctrl+R`). The mouse side buttons are set to the default Button 4/5 in the mouse software. `/sensei verify` shows the bindings of `CTRL-2`, `CTRL-R`, `CTRL-X`, `SHIFT-BUTTON4`, `CTRL-BUTTON4` and of `5`, `SHIFT-5`, `CTRL-5`.
+19. [ ] **Ctrl and mouse keys:** after **すべて配置**, Action Bar 5 at the right edge has the Ctrl keys in the same order as Action Bar 2 (Ctrl+1 Totemic Recall on button 1, Ctrl+C Ghost Wolf on button 12), and the right half of Action Bar 3 holds the mouse spells (buttons 7-12). Every Ctrl key and `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5` cast their spells. `Ctrl+2`, `Ctrl+3`, `Ctrl+4` and `Ctrl+X` press their empty Action Bar 5 button (put a skill there to test). `Ctrl+R` casts Fire Nova and no longer toggles the framerate. The mouse side buttons are set to the default Button 4/5 in the mouse software. `/sensei verify` shows the bindings of `CTRL-2`, `CTRL-R`, `CTRL-X`, `SHIFT-BUTTON4`, `CTRL-BUTTON4` and of `5`, `SHIFT-5`, `CTRL-5`.
 20. [ ] **Ctrl+1 over the stance bar:** with Ghost Wolf on the stance bar, `Ctrl+1` casts Totemic Recall (not Ghost Wolf), and `Ctrl+C` casts Ghost Wolf.
 21. [ ] **Macros:** `Q` (FS_ES) during your own cast stops it and interrupts at once. `Mouse 5` (FS_NSHW) casts an instant Healing Wave in one press, and a normal one while Nature's Swiftness is on cooldown. `Shift+3` (FS_PURGE) purges the enemy under the mouse.
 22. [ ] **Healthstone:** `C` uses a Healthstone if you have one, else the best Healing Potion. Check whether the Healthstone and potions share a cooldown.
@@ -212,6 +213,10 @@ These cannot be tested outside the game. Please go through them once, then paste
 39. [ ] **Ranks:** learning a new rank of Holy Strike, Seal of Fury or Holy Shield upgrades its button with a toast. `/sensei verify` has no `bad` lines (it checks every rank ID against the client, including Seal of Fury and Holy Light rank 1).
 40. [ ] **Talents:** from 10, the talent hint follows the Wowhead leveling path: Templar's Bulwark at 32, Swift Judgement at 37, Holy Shield at 42.
 41. [ ] **Trainer:** tell the repo owner whether Blessing of Salvation, Blessing of Sanctuary, Blessing of Light or Hammer of the Righteous are offered at the trainer. They are left out until confirmed.
+
+**Restoration Shaman, Fire totems (0.6.1).** On the Shaman, after updating from 0.6.0:
+
+42. [ ] **Layout message:** the first login shows the layout message about the Fire totems once, and nothing moves by itself. The **すべて配置** preview moves Magma Totem to `Shift+4` and Fire Nova to `Ctrl+R`, clears their old Action Bar 4 buttons (5 and 8), and warns about `Ctrl+R` (framerate display). After **適用**, `Shift+R` Searing, then `Ctrl+R` Fire Nova hits the enemies next to the totem; `Shift+4` Magma (from 26) works the same way. **元に戻す** puts both back on Action Bar 4.
 
 ## Translation reports
 

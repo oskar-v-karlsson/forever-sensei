@@ -68,7 +68,7 @@ Cast, cooldown and cost are rank 1, from `simc`, or from `wh_tt` for spells miss
 | Searing Totem | 10 | instant / – / 25, **30 s** (55 s at the top rank), Fire | every pull (Erika's habit; it only lasts 30-55 s) | Pull | Shift+R |
 | Flametongue Weapon | 10 | instant / – / 30 | before the dungeon | OOC | none |
 | Strength of Earth Totem | 10 | instant / – / 25, 5 min, Earth | instead of Stoneskin for melee groups | Set-up | none (Totem Bar set) |
-| Fire Nova | 12 | instant / 10 s / 65 | rare for a healer: AoE around the Fire totem | DPS | none |
+| Fire Nova | 12 | instant / 10 s / 65 | rare for a healer: AoE around the Fire totem | DPS | none (Ctrl+R from 0.6.1, Fire family) |
 | Purge | 12 | instant / – / 10% base mana | sometimes: enemy buffs | React | Shift+3 |
 | Ancestral Spirit | 12 | 10 s / – / 90% base mana | after a death or wipe | OOC | none |
 | Cure Poison | 16 | instant / – / 9% base mana | often in poison dungeons | React | Shift+Mouse4 |
@@ -87,7 +87,7 @@ Cast, cooldown and cost are rank 1, from `simc`, or from `wh_tt` for spells miss
 | Poison Cleansing Totem | 22 | instant / – / 10% base mana, Water | poison-heavy fights | React | Ctrl+Mouse4 |
 | Frost Resistance Totem | 24 | instant / – / 75, Fire | rare, boss-specific | Set-up | none (Totem Bar) |
 | Mana Tide Totem | 25 (talent) | instant / 5 min / 10, 13 s, Water | long fights, low mana | React | Ctrl+Z |
-| Magma Totem | 26 | instant / – / 230, 20 s, Fire | rare for a healer: big packs | DPS | none |
+| Magma Totem | 26 | instant / – / 230, 20 s, Fire | rare for a healer: big packs | DPS | none (Shift+4 from 0.6.1, Fire family) |
 | Far Sight | 26 | 2 s / – / 80 | never | OOC | none |
 | Mana Spring Totem | 26 | instant / – / 40, 5 min, Water | the default Water totem from 26 | Set-up | Shift+Z |
 | Fire Resistance Totem | 28 | instant / – / 75, Water | rare, boss-specific | Set-up | none (Totem Bar) |
@@ -264,7 +264,7 @@ The client files list every binding name but not its default key (`wm` says the 
 | Shift+1-5 | ACTIONPAGE1-5 (bar paging) | yes |
 | Shift+Q/E/R/F/Z/X/C | none expected | yes |
 | **Ctrl+Q/E/F/Z/C** | none expected | **new** |
-| Ctrl+R | TOGGLEFPS (framerate display), likely | from 0.4.3: empty Action Bar 5 button |
+| Ctrl+R | TOGGLEFPS (framerate display), likely | from 0.4.3: empty Action Bar 5 button; from 0.6.1: Fire Nova |
 | **Mouse4 / Mouse5, also with Shift and Ctrl** | none expected | **new** |
 | **Ctrl+1** | SHAPESHIFTBUTTON1 (stance bar) | **new**: a shaman's only stance-bar spell is expected to be Ghost Wolf, which has Ctrl+C anyway (verify) |
 | Ctrl+2-0 | SHAPESHIFTBUTTON2-10 | from 0.4.3: Ctrl+2-4 get empty Action Bar 5 buttons; Ctrl+5 is Erika's; Ctrl+6-0 not touched |
@@ -505,6 +505,7 @@ Rules used:
 | **Help the player under the cursor: disease** | Mouse5 | NS + Healing Wave *(30)*, MO | Cure Disease *(22)*, MO | Disease Cleansing Totem *(38)* | As above. |
 | **Totems against physical damage** | E | (Lesser Healing Wave) | Stoneskin Totem *(4)* | Stoneclaw Totem *(8)* | Unchanged. Stoneskin is Erika's habit. |
 | **Totems against enemy spells** | F | (Healing Wave) | Tremor Totem *(18)* | Grounding Totem *(30)* | Unchanged. Tremor is Erika's habit. |
+| **Fire totems** (0.6.1) | R, plus Shift+4 | (Chain Heal) | Searing Totem *(10)*: every pull; Shift+4 Magma Totem *(26)*: packs | Fire Nova *(12)*: after Searing or Magma, against a pack | Erika's request: they belong together. Fire Nova only hits enemies near the active Fire totem. R has one free variant (Ctrl), so Magma takes the key right above R on the same Shift row. |
 
 On E and F the plain key is a heal, not part of the totem family. That is kept on purpose: E and F are the best
 keys for heals, and the Shift variants are where Erika asked for her totems. On the mouse buttons the plain heal
@@ -520,7 +521,6 @@ does fit ("help this player").
 | **Shields** | X | Already one key: Lightning Shield until 20, then Water Shield. |
 | **Healthstone** | C | Next to the Mana Potion on Z, but a different concept (health), so not in the mana family. |
 | **Totem presets** | Call of the Ancestors, Call of the Spirits | 1 has only three variants. The two extra presets are clicked next to Call of the Elements. |
-| **Fire totems** | Searing Shift+R | Searing is the only keyed Fire totem; Magma is rare for a healer. Ctrl+R stays an empty button (0.4.3). |
 
 ### Top keys
 
@@ -552,17 +552,35 @@ Action Bar 3 buttons 7-12 (`MULTIACTIONBAR2BUTTON7-12`). The proposal first used
 | 1 | Totemic Call *(22)* | Call of the Elements *(20)* | Totemic Recall *(20)* |
 | 2 | Flame Shock *(10)* | – | – (stance bar default) |
 | 3 | Lightning Bolt *(1)* | Purge, MO harm *(12)* | – (stance bar default) |
-| 4 | Chain Lightning *(32)* | – | – (stance bar default) |
+| 4 | Chain Lightning *(32)* | Magma Totem *(26)* | – (stance bar default) |
 | 5 | Erika's own | Erika's own | Erika's own |
 | Q | Earth Shock, `/stopcasting` + MO harm *(4)* | Frost Shock *(20)* | Earthbind Totem *(6)* |
 | E | Lesser Healing Wave, MO *(20)* | Stoneskin Totem *(4)* | Stoneclaw Totem *(8)* |
-| R | Chain Heal, MO *(40)* | Searing Totem *(10)* | – (keeps its default) |
+| R | Chain Heal, MO *(40)* | Searing Totem *(10)* | Fire Nova *(12)* |
 | F | Healing Wave, MO *(1)* | Tremor Totem *(18)* | Grounding Totem *(30)* |
 | Z | Mana Potion (`FS_MANA`) | Mana Spring Totem *(26)* | Mana Tide Totem *(25)* |
 | X | Water Shield *(20)* (Lightning Shield *(8)* until then) | – | – |
 | C | Healthstone, else Healing Potion (`FS_HEALTH`) | – | Ghost Wolf *(20)* |
 | Mouse4 | Riptide, MO *(40)* | Cure Poison, MO *(16)* | Poison Cleansing Totem *(22)* |
 | Mouse5 | Nature's Swiftness + Healing Wave, MO *(30)* | Cure Disease, MO *(22)* | Disease Cleansing Totem *(38)* |
+
+### Change in layout 6 (ForeverSensei 0.6.1, Erika's request)
+
+Erika: her Fire totem, the Fire totem AoE spell and Magma Totem were not close together in keys or on the bars.
+Searing Totem was on Shift+R, while Fire Nova (bar 4 button 5) and Magma Totem (bar 4 button 8) could only be
+clicked. Fire Nova "instantly inflicts fire damage to enemies within … yd of your active Fire totem" (`simc`
+408341: rank 1 at 12, 10 s cooldown), so it only works with Searing or Magma down: the three are one family.
+Decided by the coordinator while the player was away:
+- Shift+R Searing Totem stays (Erika's habit).
+- **Ctrl+R Fire Nova** (Action Bar 5 button 8, an empty bound button until now): same base key as Searing.
+- **Shift+4 Magma Totem** (Action Bar 2 button 4, an empty bound button until now): 4 sits right above R, on the
+  Shift row that holds her totems. In the reach table Shift+4 is tier 4 for a small hand; Magma is placed for a
+  pack before the damage starts, not as a reaction, so the stretch is acceptable.
+- Action Bar 4 buttons 5 and 8 become spare; Flametongue Totem stays clicked on bar 4. Shift+4 and Ctrl+R leave
+  the spare list.
+
+A full apply from layout 5 clears Fire Nova and Magma Totem from their old bar 4 buttons (`L.old`), and the
+one-time layout notice offers the preview; nothing moves by itself.
 
 ### Reason and source per key
 
@@ -589,6 +607,8 @@ Action Bar 3 buttons 7-12 (`MULTIACTIONBAR2BUTTON7-12`). The proposal first used
 | Shift+E | Stoneskin | Shift+E | Erika's habit; by hand after Tremor (exception) | Erika, `wh_tt` |
 | Ctrl+E | Stoneclaw | (clickable) | physical-protection family; rare | `wh_abil` |
 | Shift+R | Searing | Shift+R | every pull, and 2-4 more times per boss (30-55 s) | Erika, `simc` |
+| Ctrl+R | Fire Nova | (clickable) | Fire family: hits enemies near the active Fire totem (0.6.1, Erika's request) | Erika, `simc` 408341 |
+| Shift+4 | Magma Totem | (clickable) | Fire family: packs, 20 s; right above R (0.6.1, Erika's request) | Erika, `simc` |
 | Shift+F | Tremor | Shift+F | fear, charm and sleep (exception) | Erika, `wh_abil` |
 | Ctrl+F | Grounding | (clickable) | enemy-spell family; rare | `wh_abil` |
 | Shift+Z | Mana Spring | Shift+Z | mana family; pressed again after each Mana Tide | `moba`, `simc` |
@@ -597,7 +617,8 @@ Action Bar 3 buttons 7-12 (`MULTIACTIONBAR2BUTTON7-12`). The proposal first used
 | Ctrl+Mouse4, Ctrl+Mouse5 | Poison, Disease Cleansing Totem | (clickable) | the group version of the cure; usually in the set | `wh_abil` |
 | Ctrl+C | Ghost Wolf | (clickable) | the player's decision; outdoors only | user, `simc` 2645 |
 
-**Spare:** Shift+2, Shift+4, Shift+X, Shift+C, Ctrl+2, Ctrl+3, Ctrl+4, Ctrl+R, Ctrl+X. From 0.4.3 they are bound to
+**Spare:** Shift+2, Shift+X, Shift+C, Ctrl+2, Ctrl+3, Ctrl+4, Ctrl+X (Shift+4 and Ctrl+R hold the Fire family
+from 0.6.1). From 0.4.3 they are bound to
 their empty button, so the plain, Shift and Ctrl rows have all 12 keys (user decision, "Full Ctrl row that mirrors the
 Shift bar"). **5, Shift+5 and Ctrl+5 are Erika's own**: the addon never binds them.
 
@@ -651,7 +672,6 @@ totems stay put.
 | Healing Stream Totem | in the Call of the Elements set from the day it is learned; swap it in with a click between pulls |
 | Strength of Earth Totem | a set-up choice instead of Stoneskin; put it in the Totem Bar set for melee groups |
 | Windfury Totem, Grace of Air Totem | Air totems for melee groups; set up through the Totem Bar |
-| Magma Totem, Fire Nova | AoE damage; rare for a healer |
 | Flametongue Totem | rare |
 | Frost, Fire and Nature Resistance Totem, Windwall Totem | boss-specific; picked in a Totem Bar set |
 | Sentry Totem, Far Sight | scouting; not used in dungeons. **Spellbook only** from 0.4.3 (no button) |
@@ -681,7 +701,8 @@ Not touched:
 - Ctrl+6-0 (the stance bar), Alt with any key.
 
 Replaced from 0.4.3 (full Ctrl row, bound to empty Action Bar 5 buttons): Ctrl+2-4 (stance bar buttons 2-4), Ctrl+R
-(probably the framerate display) and Ctrl+X. The preview warns about the stance and framerate keys.
+(probably the framerate display) and Ctrl+X. The preview warns about the stance and framerate keys. From 0.6.1
+Ctrl+R holds Fire Nova instead of an empty button.
 
 Verify all of these with the `/run` lines in Q4. Apply-layout already backs up and can undo bindings.
 
@@ -710,18 +731,20 @@ Verify all of these with the `/run` lines in Q4. Apply-layout already backs up a
 | Shift+E | Stoneskin | Stoneskin | Stoneskin | Stoneskin | Stoneskin | Stoneskin |
 | Shift+R | Searing | Searing | Searing | Searing | Searing | Searing |
 | Shift+F | – | Tremor | Tremor | Tremor | Tremor | Tremor |
+| Shift+4 | – | – | Magma | Magma | Magma | Magma |
 | Shift+Z | – | – | Mana Spring | Mana Spring | Mana Spring | Mana Spring |
 | Shift+Mouse4 | – | Cure Poison | Cure Poison | Cure Poison | Cure Poison | Cure Poison |
 | Shift+Mouse5 | – | – | Cure Disease | Cure Disease | Cure Disease | Cure Disease |
 | Ctrl+1 | – | Totemic Recall | Totemic Recall | Totemic Recall | Totemic Recall | Totemic Recall |
 | Ctrl+Q | Earthbind | Earthbind | Earthbind | Earthbind | Earthbind | Earthbind |
 | Ctrl+E | Stoneclaw | Stoneclaw | Stoneclaw | Stoneclaw | Stoneclaw | Stoneclaw |
+| Ctrl+R | – | Fire Nova | Fire Nova | Fire Nova | Fire Nova | Fire Nova |
 | Ctrl+F | – | – | – | Grounding | Grounding | Grounding |
 | Ctrl+Z | – | – | Mana Tide | Mana Tide | Mana Tide | Mana Tide |
 | Ctrl+C | – | Ghost Wolf | Ghost Wolf | Ghost Wolf | Ghost Wolf | Ghost Wolf |
 | Ctrl+Mouse4 | – | – | Poison Cleansing | Poison Cleansing | Poison Cleansing | Poison Cleansing |
 | Ctrl+Mouse5 | – | – | – | – | Disease Cleansing | Disease Cleansing |
-| Keys in use | 11 | 19 | 24 | 26 | 30 | 30 |
+| Keys in use | 11 | 20 | 26 | 28 | 32 | 32 |
 
 Notes:
 - Minor Healing Potion has no required level, and Minor Mana Potion needs level 5 (`Data/Items.lua`).
@@ -739,6 +762,7 @@ Notes:
 - Her pull totems on Shift+E (Stoneskin), Shift+R (Searing) and Shift+F (Tremor).
 - Mana Potion on Z.
 - Totemic Call, Totemic Recall and Call of the Elements all keyed, together on 1.
+- Her Fire totems together (0.6.1, her request): Searing Shift+R, Fire Nova Ctrl+R, Magma Shift+4.
 - Rare and out-of-combat spells unkeyed.
 
 **Overridden, with the gameplay reason:**
@@ -779,11 +803,11 @@ Notes:
 | 1 | Totemic Call | Call of the Elements | Totemic Recall |
 | 2 | Flame Shock | – | – |
 | 3 | Lightning Bolt | Purge | – |
-| 4 | Chain Lightning（レベル32から） | – | – |
+| 4 | Chain Lightning（レベル32から） | Magma Totem（レベル26から） | – |
 | 5 | 自由 | 自由 | 自由 |
 | Q | Earth Shock | Frost Shock | Earthbind Totem |
 | E | Lesser Healing Wave | Stoneskin Totem | Stoneclaw Totem |
-| R | Chain Heal（レベル40から） | Searing Totem | – |
+| R | Chain Heal（レベル40から） | Searing Totem | Fire Nova |
 | F | Healing Wave | Tremor Totem | Grounding Totem |
 | Z | Mana Potion | Mana Spring Totem | Mana Tide Totem |
 | X | Water Shield | – | – |
@@ -798,6 +822,7 @@ Notes:
 - **Z＝マナ。** Z は Mana Potion、Shift+Z は Mana Spring Totem、Ctrl+Z は Mana Tide Totem。Mana Tide Totem が消えたら（13秒）、Mana Spring Totem をもう一度置こう。
 - **マウスのボタン＝カーソルの下の味方を助ける。** そのまま押すと回復、Shift で毒や病気を治す、Ctrl でパーティー全体を治すトーテムを置く。ボタン4は毒、ボタン5は病気。
 - **E＝物理ダメージから守るトーテム、F＝敵の呪文に対抗するトーテム。** Shift+E Stoneskin と Shift+F Tremor は今まで通り。
+- **R・4＝火のトーテム（0.6.1、Erika の希望）。** Shift+R は Searing Totem（今まで通り）、Ctrl+R は Fire Nova、Shift+4 は Magma Totem（R のすぐ上）。Fire Nova は今出している火のトーテムの近くの敵にだけ当たるので、敵が固まっている時は Searing か Magma を置いてから Ctrl+R を押そう。
 
 主な理由:
 - **1 と 2 には、戦闘中にほぼ毎回押す呪文を置いた。** Water Shield は戦闘の合間にかけ直すだけなので X に、Healthstone はたまにしか使わないので C に移した。

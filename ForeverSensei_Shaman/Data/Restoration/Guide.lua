@@ -46,6 +46,7 @@ spec.guide = {
     { src = { "simc" } },
     { src = { "simc" } },
     { src = { "moba", "simc" } },
+    { src = { "simc" } },
   } },
   { id = "manners", paragraphs = {
     { src = { "moba" } },
