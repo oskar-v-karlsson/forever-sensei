@@ -161,17 +161,22 @@ end
 
 renderers.layout = function(frame)
   local layout = ns.ClassData.SHAMAN.layout
-  local y = paragraph(frame, 1, 0, "ui.layout.intro") + 12
+  local y = paragraph(frame, 1, 0, "ui.layout.intro") + 8
+  y = y + paragraph(frame, 5, y, "ui.layout.intro2") + 12
   local n = 0
   for bi, bar in ipairs(layout.bars) do
     y = y + label(frame, bi, y, ns.T("ui.bar." .. bar.id), 13, "gold") + 4
     for _, s in ipairs(layout.slots) do
       if s.bar == bar.id then
         n = n + 1
-        local x = (s.button - 1) * 46
-        icon(frame, n, x, y, 38, s.item or Spells.Get(s.spell))
+        -- Bar 7 has long key labels ("Shift+Mouse 4") and only 6 keyed buttons.
+        local step = bar.id == "bar7" and 80 or 46
+        local x = (s.button - 1) * step
+        local e = s.spell and Spells.Get(s.spell)
+        if e and s.standIn and not Spells.IsKnown(e) then e = Spells.Get(s.standIn) end
+        icon(frame, n, x + (step - 46) / 2, y, 38, s.item or e)
         local keyText = pool(frame, "key", n, function() return UI.Text(frame, 10, "gold") end)
-        keyText:SetWidth(46)
+        keyText:SetWidth(step)
         keyText:SetJustifyH("CENTER")
         keyText:ClearAllPoints()
         keyText:SetPoint("TOPLEFT", x - 4, -(y + 40))

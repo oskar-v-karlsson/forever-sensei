@@ -11,7 +11,7 @@ ns.ClassData.SHAMAN.guide = {
     { src = { "moba" } },
     { src = { "moba" } },
   } },
-  { id = "healing", paragraphs = {
+  { id = "healing", verified = "2026-11-11", paragraphs = {
     { src = { "moba", "simc" } },
     { src = { "moba" } },
     { src = { "moba" } },
@@ -29,14 +29,16 @@ ns.ClassData.SHAMAN.guide = {
     { src = { "moba" } },
     { src = { "simc" } },
   } },
-  { id = "totems", paragraphs = {
+  { id = "totems", verified = "2026-11-11", paragraphs = {
     { src = { "moba" } },
     { src = { "simc" } },
-    { src = { "wh_spell" } },
-    { src = { "wh_spell" } },
+    { src = { "wh_spell", "moba", "simc" } },
+    { src = { "wh_spell", "moba" } },
     { src = { "moba", "simc" } },
     { src = { "moba" } },
     { src = { "simc" } },
+    { src = { "simc" } },
+    { src = { "moba", "simc" } },
   } },
   { id = "manners", paragraphs = {
     { src = { "moba" } },
@@ -48,5 +50,5 @@ ns.ClassData.SHAMAN.guide = {
 }
 
 for _, section in ipairs(ns.ClassData.SHAMAN.guide) do
-  section.verified = V
+  section.verified = section.verified or V
 end

@@ -3,7 +3,7 @@
 ## Notes: Japanese class coach for World of Warcraft: Forever (Restoration Shaman).
 ## Notes-jaJP: World of Warcraft: Forever のクラスコーチ（Restoration シャーマン）。
 ## Author: oskar-v-karlsson
-## Version: 0.3.0
+## Version: 0.4.0
 ## SavedVariables: ForeverSenseiDB
 ## OptionalDeps: WoWForeverJapanese
 ## IconTexture: Interface\Icons\Spell_Nature_MagicImmunity

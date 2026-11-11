@@ -71,8 +71,20 @@ return function(ns, lang)
   -- Full layout (mouseover macros): preview, apply, check, undo, check.
   STUB.level = 60
   for id in pairs(STUB.names) do STUB.known[id] = true end
-  STUB.actions = { [1] = { "spell", 403 }, [2] = { "item", 6948 }, [7] = { "spell", 331 }, [13] = { "spell", 324 } }
-  STUB.bindings = { ["Q"] = "STRAFELEFT", ["E"] = "STRAFERIGHT", ["1"] = "ACTIONBUTTON1", ["SHIFT-1"] = "ACTIONPAGE1" }
+  -- Buttons 5, Shift+5 and Ctrl+5 are the player's own (slots 5, 65, 149): the layout never touches them.
+  STUB.actions = { [1] = { "spell", 403 }, [2] = { "item", 6948 }, [7] = { "spell", 331 }, [13] = { "spell", 324 },
+    [5] = { "item", 6948 }, [65] = { "spell", 324 }, [149] = { "spell", 403 } }
+  STUB.bindings = { ["Q"] = "STRAFELEFT", ["E"] = "STRAFERIGHT", ["1"] = "ACTIONBUTTON1", ["SHIFT-1"] = "ACTIONPAGE1",
+    ["CTRL-1"] = "SHAPESHIFTBUTTON1", ["5"] = "ACTIONBUTTON5", ["SHIFT-5"] = "MULTIACTIONBAR1BUTTON5",
+    ["CTRL-5"] = "SHAPESHIFTBUTTON5" }
+  local function ownUntouched(what)
+    local a5, a65, a149 = STUB.actions[5], STUB.actions[65], STUB.actions[149]
+    if not (a5 and a5[2] == 6948 and a65 and a65[2] == 324 and a149 and a149[2] == 403)
+      or STUB.bindings["5"] ~= "ACTIONBUTTON5" or STUB.bindings["SHIFT-5"] ~= "MULTIACTIONBAR1BUTTON5"
+      or STUB.bindings["CTRL-5"] ~= "SHAPESHIFTBUTTON5" then
+      fail(what .. ": the player's own buttons or keys 5, Shift+5, Ctrl+5 were changed")
+    end
+  end
   local function snapshot()
     local a, b = {}, {}
     for k, v in pairs(STUB.actions) do a[k] = v[1] .. ":" .. tostring(v[2]) end
@@ -98,11 +110,16 @@ return function(ns, lang)
         if not m or m.name ~= want or not m.body:find("/use item:", 1, true) then
           fail(mode .. ": slot " .. s.slot .. " should hold item macro " .. want)
         end
-      elseif mode == "mouseover" and L.macros[s.spell] then
+      elseif ns.Layout.UsesMacro(entry) then
         local m = STUB.macros[a[2]]
+        local kind = L.macroKind[s.spell] or "help"
         if a[1] ~= "macro" or not m or m.name ~= L.macros[s.spell] then
           fail(mode .. ": slot " .. s.slot .. " should hold macro " .. L.macros[s.spell])
-        elseif not m.body:find(entry.name, 1, true) or not m.body:find("@mouseover", 1, true) then
+        elseif not m.body:find(entry.name, 1, true) or (m.body:find("@mouseover", 1, true) ~= nil) ~= (mode == "mouseover")
+          or (kind == "interrupt" and not m.body:find("/stopcasting", 1, true))
+          or (kind == "harm" and not m.body:find("harm", 1, true))
+          or (kind == "nshw" and not m.body:find("/cast Nature's Swiftness\n", 1, true))
+          or (kind == "nshw" and not m.body:find("Healing Wave", 1, true)) then
           fail(mode .. ": macro " .. m.name .. " body wrong: " .. m.body)
         end
       elseif a[1] ~= "spell" or STUB.names[a[2]] ~= entry.name then
@@ -124,8 +141,17 @@ return function(ns, lang)
       fail("preview window not shown")
     else
       fits("preview", p)
+      local text = table.concat(ns.Layout.Describe(ns.Layout.BuildPlan()), "\n")
+      for _, want in ipairs({ ns.T("ui.preview.warn.stance", { key = "Ctrl+1" }), ns.T("ui.preview.warn.mouse"),
+        ns.T("ui.preview.warn.own") }) do
+        if not text:find(want, 1, true) then fail("preview: missing the note " .. want) end
+      end
       try("apply", function() p.apply:Click() end)
       checkLayout("mouseover")
+      ownUntouched("apply")
+      if not L.bySpell.lightning_shield or STUB.actions[L.bySpell.lightning_shield.slot] == nil then
+        fail("apply: Lightning Shield not on its own button once Water Shield is known")
+      end
     end
   end
   local planAfter = ns.Layout.BuildPlan()
@@ -136,6 +162,7 @@ return function(ns, lang)
   checkLayout("click")
   try("targeting mouseover", ns.Layout.SetTargeting, "mouseover")
   checkLayout("mouseover")
+  ownUntouched("targeting")
 
   -- Undo the targeting swaps and the full layout: back to the starting bars and keys.
   local undos = 0
@@ -151,7 +178,7 @@ return function(ns, lang)
   if STUB.cursor then fail("cursor not empty after undo") end
   table.insert(notes, "undo steps: " .. undos)
 
-  -- The Hearthstone was on main button 2 (now Lightning Shield): it moved to a spare button of Action Bar 5.
+  -- The Hearthstone was on main button 2 (now Flame Shock): it moved to a spare button of Action Bar 5.
   -- (Checked on the applied layout above through the undo: here only the destination rule.)
   STUB.actions = { [2] = { "item", 6948 } }
   local movePlan = ns.Layout.BuildPlan()
@@ -414,6 +441,62 @@ return function(ns, lang)
   STUB.actions = { [L.byItem.healpot.slot] = { "item", 929 } }
   local itemPlan = ns.Layout.BuildPlan()
   if #itemPlan.moves > 0 then fail("items: a healing potion on its own slot was moved instead of replaced") end
+  local saved = { level = STUB.level, known = STUB.known, actions = STUB.actions, bags = STUB.bags }
+  -- FS_HEALTH: a Healthstone first (best the level allows), else the best Healing Potion.
+  STUB.level = 30
+  STUB.bags = { [929] = 2, [5512] = 1, [5509] = 1 }
+  if not I.Best("health") or I.Best("health").id ~= 5509 then fail("items: FS_HEALTH should prefer the Healthstone (5509)") end
+  STUB.bags = { [929] = 2, [858] = 1 }
+  if not I.Best("health") or I.Best("health").id ~= 929 then fail("items: FS_HEALTH without a Healthstone should use the best Healing Potion") end
+  STUB.bags = {}
+  if not I.MacroBody("health"):find("/use item:", 1, true) then fail("items: FS_HEALTH body without items wrong") end
+
+  -- Before Water Shield (level 20) Lightning Shield stands in on X; once Water Shield is learned it takes X and
+  -- Lightning Shield gets its own clickable button.
+  STUB.level = 15
+  STUB.known = {}
+  for id, lv in pairs(STUB.levels) do if lv <= 15 then STUB.known[id] = true end end
+  local ls, wsE = ns.Spells.Get("lightning_shield"), ns.Spells.Get("water_shield")
+  local xSlot = L.bySpell.water_shield.slot
+  STUB.actions = {}
+  if ns.Spells.LayoutSlot(ls).slot ~= xSlot then fail("stand-in: Lightning Shield's slot should be X before Water Shield") end
+  try("place stand-in", ns.Layout.PlaceOne, ls)
+  local ax = STUB.actions[xSlot]
+  if not ax or STUB.names[ax[2]] ~= "Lightning Shield" or STUB.bindings.X ~= L.bySpell.water_shield.binding then
+    fail("stand-in: Lightning Shield not placed on X")
+  end
+  if not ns.Layout.IsPlaced(ls) then fail("stand-in: Lightning Shield on X not reported as placed") end
+  STUB.known[wsE.id] = true
+  local wsPlan = ns.Layout.BuildPlan()
+  local onX, lsOwn
+  for _, pl in ipairs(wsPlan.place) do
+    if pl.where.slot == xSlot and pl.desired.entry.key == "water_shield" then onX = true end
+    if pl.where.slot == L.bySpell.lightning_shield.slot and pl.desired.entry.key == "lightning_shield" then lsOwn = true end
+  end
+  if not onX or not lsOwn then fail("stand-in: after Water Shield, X should get Water Shield and Lightning Shield its own button") end
+  if ns.Spells.LayoutSlot(ls).slot ~= L.bySpell.lightning_shield.slot then fail("stand-in: Lightning Shield's slot after Water Shield") end
+
+  -- Layout 2 leftovers: a full apply clears an old button that still holds a spell that has its new place;
+  -- the player's own button 5 (Earth Shock in layout 2) stays.
+  STUB.level = 60
+  for id in pairs(STUB.names) do STUB.known[id] = true end
+  local tr, es = ns.Spells.Get("totemic_recall"), ns.Spells.Get("earth_shock")
+  STUB.actions = { [59] = { "spell", tr.id }, [5] = { "spell", es.id } }
+  local oldPlan = ns.Layout.BuildPlan()
+  local cleared59, touched5 = false, false
+  for _, c in ipairs(oldPlan.clears) do
+    if c.where.slot == 59 then cleared59 = true end
+    if c.where.slot == 5 then touched5 = true end
+  end
+  for _, pl in ipairs(oldPlan.place) do if pl.where.slot == 5 then touched5 = true end end
+  for _, m in ipairs(oldPlan.moves) do if m.from == 5 then touched5 = true end end
+  if not cleared59 then fail("layout 2 leftover: Totemic Recall on old slot 59 not cleared") end
+  if touched5 then fail("layout 2 leftover: the player's own button 5 was planned to change") end
+  local onePlan = ns.Layout.BuildPlan("totemic_recall")
+  for _, c in ipairs(onePlan.clears) do
+    if c.where.slot == 59 then fail("layout 2 leftover: placing one spell cleared an old button") end
+  end
+  STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
 
   -- Translation reports: save two, send, format.
   ns.db.reports = {}

@@ -65,6 +65,21 @@ Checked on **2026-11-10** on Wowhead Forever item pages and tooltips. Listed bes
 | | Lesser Arcane Elixir (+15, 30 minutes, new in Forever) | [250342](https://www.wowhead.com/forever/item=250342) | 25 |
 | | Minor Arcane Elixir (+5, 30 minutes, new in Forever) | [247754](https://www.wowhead.com/forever/item=247754) | none |
 
+Healthstones for `FS_HEALTH` (key C: a Healthstone first, else the best Healing Potion above) were checked on **2026-11-11** on Wowhead Forever item tooltips (`https://nether.wowhead.com/forever/tooltip/item/<id>`). All are Conjured, Unique, with a 2-minute cooldown. The two higher IDs of each size are the Improved Healthstone talent versions.
+
+| Kind (macro) | Item | ID | Heals | Level |
+|---|---|---|---|---|
+| Health (`FS_HEALTH`, key C) | Major Healthstone | [9421](https://www.wowhead.com/forever/item=9421), [19013](https://www.wowhead.com/forever/item=19013) | 1440 | 48 |
+| | Major Healthstone | [19012](https://www.wowhead.com/forever/item=19012) | 1320 | 48 |
+| | Greater Healthstone | [5510](https://www.wowhead.com/forever/item=5510), [19011](https://www.wowhead.com/forever/item=19011) | 960 | 36 |
+| | Greater Healthstone | [19010](https://www.wowhead.com/forever/item=19010) | 880 | 36 |
+| | Healthstone | [5509](https://www.wowhead.com/forever/item=5509), [19009](https://www.wowhead.com/forever/item=19009) | 600 | 24 |
+| | Healthstone | [19008](https://www.wowhead.com/forever/item=19008) | 550 | 24 |
+| | Lesser Healthstone | [5511](https://www.wowhead.com/forever/item=5511), [19007](https://www.wowhead.com/forever/item=19007) | 300 | 12 |
+| | Lesser Healthstone | [19006](https://www.wowhead.com/forever/item=19006) | 275 | 12 |
+| | Minor Healthstone | [5512](https://www.wowhead.com/forever/item=5512), [19005](https://www.wowhead.com/forever/item=19005) | 120 | none |
+| | Minor Healthstone | [19004](https://www.wowhead.com/forever/item=19004) | 110 | none |
+
 Left out on purpose: Discolored Healing Potions (they heal, then return 75% as poison or disease damage), the PvP Combat potions (18839, 18841, need a PvP rank), the Restored potions (282011, 282013) and draughts.
 
 ## Where sources disagree
@@ -82,7 +97,7 @@ Forever runs the modern 12.x UI ("Camelot", `## Interface: 16001`, `WOW_PROJECT_
 
 - [warcraft.wiki.gg](https://warcraft.wiki.gg/): the API reference, including how secret values work in combat in 12.x.
 - [realworldbuilder/wowwrapped docs/addon-api.md](https://github.com/realworldbuilder/wowwrapped/blob/main/docs/addon-api.md): notes on the Forever addon API.
-- [reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode), `Forever`: the function and event lists, `Bindings.xml`, the MultiBar layout, the talent tree code, and the macro icon picker.
+- [reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode), `Forever`: the function and event lists, `Bindings.xml` (including `MULTIACTIONBAR5BUTTON` for Action Bar 6 and `MULTIACTIONBAR6BUTTON` for Action Bar 7), the MultiBar layout and pages, the `BUTTON4`/`BUTTON5` key names (`Blizzard_FrameXML/BindingUtil`), the talent tree code, and the macro icon picker. The macro limit, `MAX_CHARACTER_MACROS = 30` (and `MAX_ACCOUNT_MACROS = 120`), is in `Blizzard_APIDocumentationGenerated/MacroConstantsDocumentation.lua`; the addon uses 13 character macros. Details and verification dates for the layout v3 keys are in [research/keybind-layout.md](research/keybind-layout.md).
 - [zyaga/wow-forever-japanese](https://github.com/zyaga/wow-forever-japanese) (WFJ, GPLv2): the Japanese style guide and glossary (name policy, katakana terms), the bundled IPA font, the font-refusal fix (`docs/lessons/2026-09-14-bundled-font-refused-on-fresh-launch.md`), and the AddOns install path.
 
 ## Not verifiable offline: test in the game
@@ -91,8 +106,8 @@ These depend on the live Forever client. They are handled defensively in the cod
 
 1. The legacy action and macro globals exist: `PickupSpell`, `PickupMacro`, `PlaceAction`, `GetActionInfo`, `GetActionText`, `CreateMacro`, `EditMacro`, `GetMacroIndexByName`.
 2. The binding functions exist: `SetBinding`, `SaveBindings`, `GetBindingAction`, `GetCurrentBindingSet`. `SetBinding(key)` with no action unbinds the key.
-3. Extra action bars turn on through `Settings.SetValue("PROXY_SHOW_ACTIONBAR_2..5")`.
-4. Totem Bar behaviour: the resistance totems and Windwall are left there.
+3. Extra action bars turn on through `Settings.SetValue("PROXY_SHOW_ACTIONBAR_2..7")`, and the Ctrl keys (Action Bar 6) and mouse buttons (Action Bar 7) fire once their bars are shown. `CTRL-1` on Action Bar 6 takes over from the stance bar's first button.
+4. Totem Bar behaviour: the resistance totems and Windwall are left there. The addon does not set the Totem Bar's totem sets (`SetMultiCastSpell` could not be verified offline), so the player sets them by hand.
 5. **Verified in game (v0.1.0, 2026-11):** learning a new rank does **not** upgrade the bar button, so the addon does it (Layout.ApplyNewRanks). Still to check: `/cast <Name>` in a macro uses the highest rank. `/sensei verify` prints what each macro casts. If a macro casts a lower rank, the addon writes `Name(Rank N)` into it instead.
 6. Talent reading through `C_Traits` (Forever's single class tree), opening the talent frame through `PlayerSpellsUtil`, and `IsSpellKnown` for talents with one rank.
 7. `C_Spell.GetSpellLevelLearned` returns the trainer levels.
@@ -102,3 +117,4 @@ These depend on the live Forever client. They are handled defensively in the cod
 11. The 7 Wowhead-only spell IDs above.
 12. Combat: cards hide, and bar or key changes wait until combat ends.
 13. Potion macros (0.3.0): `/use item:<id>` in a character macro, `#showtooltip` picking up the item's icon, and the fixed icon (set by its file name, e.g. `INV_Potion_72`) when the bags have none. `C_Item.GetItemCount` and the required level from `C_Item.GetItemInfo`. `/sensei verify` prints each macro's body and the best item in the bags.
+14. Layout v3 macros (0.4.0): `/stopcasting` in `FS_ES` lets Earth Shock interrupt at once; `FS_NSHW` casts Nature's Swiftness and Healing Wave in one press; `FS_HEALTH` uses a Healthstone else a Healing Potion. Whether Healthstones and potions share a cooldown, and the mana cost of Call of the Elements with a full set.

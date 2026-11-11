@@ -119,6 +119,15 @@ function Verify.Run()
       add(string.format("  %s %s = %s", bar.id, bar.setting, ok and tostring(v) or ("error " .. tostring(v))))
     end
   end
+  -- The player's own keys (never bound by the addon) and the defaults the layout may replace (spec Q4).
+  for _, key in ipairs(layout.ownKeys) do
+    local ok, action = ns.Call("GetBindingAction", key)
+    add(string.format("  own key %s = %s", key, ok and tostring(action) or "?"))
+  end
+  for _, key in ipairs({ "CTRL-2", "CTRL-R", "CTRL-X", "SHIFT-BUTTON4", "CTRL-BUTTON4" }) do
+    local ok, action = ns.Call("GetBindingAction", key)
+    add(string.format("  key %s = %s", key, ok and tostring(action) or "?"))
+  end
   -- In-game question: does "/cast Name" in a macro cast the highest rank? GetMacroSpell tells which id it casts.
   for key, name in pairs(layout.macros) do
     local ok, idx = ns.Call("GetMacroIndexByName", name)
@@ -129,7 +138,11 @@ function Verify.Run()
       local okM, casts = ns.Call("GetMacroSpell", idx)
       line = line .. string.format("  casts %s  highest known %s  named rank %s", okM and tostring(casts) or "?",
         tostring(bestId), tostring(ns.char.macroRank[key] or "-"))
-      if okM and casts and bestId and casts ~= bestId then
+      local okI, _, _, curBody = ns.Call("GetMacroInfo", idx)
+      if okI and curBody ~= ns.Layout.MacroBody(e) then
+        bad(line .. "  (macro body is not up to date)")
+        line = nil
+      elseif okM and casts and bestId and casts ~= bestId and (layout.macroKind[key] or "help") ~= "nshw" then
         bad(line .. "  (macro does not cast the highest rank)")
         line = nil
       end

@@ -343,8 +343,11 @@ def check_static():
             problem(f"layout: unknown spell {s['spell']}")
         if s.get("item") and s["item"] not in items["kinds"]:
             problem(f"layout: unknown item kind {s['item']}")
-        if s.get("item") and s.get("key") not in (None, "Z"):
-            problem(f"layout: item @{s['item']} on key {s.get('key')} (only the mana potion has a key, Z)")
+        if s.get("item") and s.get("key") not in (None, "Z", "C"):
+            problem(f"layout: item @{s['item']} on key {s.get('key')} (only FS_MANA on Z and FS_HEALTH on C have keys)")
+        for opt in ("standIn", "after"):
+            if s.get(opt) and s[opt] not in keys:
+                problem(f"layout: slot {s['slot']} {opt} {s[opt]} is not a spell")
     for slot_ in layout["spare"]:
         if slot_["slot"] in seen_slot:
             problem(f"layout: spare slot {slot_['slot']} is also planned")
@@ -357,11 +360,6 @@ def check_static():
     for kind in items["kinds"]:
         if "@" + kind not in seen_spell:
             problem(f"layout: item kind {kind} has no slot")
-    if not allowed <= set(
-        ["1", "2", "3", "4", "5", "Q", "E", "R", "F", "Z", "X", "C"]
-        + ["SHIFT-" + k for k in "12345QERFZXC"]
-    ):
-        problem("layout: allowedKeys has keys beyond 1-5 Q E R F Z X C (+Shift)")
     for k in keys:
         placed = k in seen_spell
         unslotted = k in layout["noSlot"]
@@ -372,28 +370,95 @@ def check_static():
             problem(f"layout: macro for unplaced spell {k}")
         if len(m) > 16:
             problem(f"layout: macro name {m} too long")
-    # Healer first (player feedback, layout version 2): heals on the keys next to WASD, every keyed totem on Shift,
-    # the pull totems on the easiest Shift keys.
-    by_key = {s["key"]: what(s) for s in slots if s.get("key")}
-    role = {x["key"]: x["role"] for x in spells}
-    for k in ("F", "C", "R", "E", "X"):
-        if role.get(by_key.get(k)) != "heal":
-            problem(f"layout: key {k} must hold a heal, has {by_key.get(k)}")
-    fixed = {
-        "1": "water_shield", "2": "lightning_shield", "Z": "@mana",
+    # The approved grid (layout version 3, research/keybind-layout.md (a) at ecf40ec): every key holds exactly this.
+    grid = {
+        "1": "totemic_call", "2": "flame_shock", "3": "lightning_bolt", "4": "chain_lightning",
+        "Q": "earth_shock", "E": "lesser_healing_wave", "R": "chain_heal", "F": "healing_wave",
+        "Z": "@mana", "X": "water_shield", "C": "@health",
+        "SHIFT-1": "call_of_the_elements", "SHIFT-3": "purge", "SHIFT-Q": "frost_shock",
         "SHIFT-E": "stoneskin_totem", "SHIFT-R": "searing_totem", "SHIFT-F": "tremor_totem",
-        "SHIFT-C": "call_of_the_elements",
+        "SHIFT-Z": "mana_spring_totem",
+        "CTRL-1": "totemic_recall", "CTRL-Q": "earthbind_totem", "CTRL-E": "stoneclaw_totem",
+        "CTRL-F": "grounding_totem", "CTRL-Z": "mana_tide_totem", "CTRL-C": "ghost_wolf",
+        "BUTTON4": "riptide", "BUTTON5": "natures_swiftness",
+        "SHIFT-BUTTON4": "cure_poison", "SHIFT-BUTTON5": "cure_disease",
+        "CTRL-BUTTON4": "poison_cleansing_totem", "CTRL-BUTTON5": "disease_cleansing_totem",
     }
-    for k, want in fixed.items():
-        if by_key.get(k) != want:
-            problem(f"layout: key {k} must be {want}, has {by_key.get(k)}")
-    names_by_key = {x["key"]: x["name"] for x in spells}
+    by_key = {s["key"]: what(s) for s in slots if s.get("key")}
+    for k in sorted(set(grid) | set(by_key)):
+        if by_key.get(k) != grid.get(k):
+            problem(f"layout: key {k} must be {grid.get(k)}, has {by_key.get(k)}")
+    if allowed != set(grid):
+        problem(f"layout: allowedKeys must be exactly the grid's keys (diff {sorted(allowed ^ set(grid))})")
+    # Lightning Shield stands in on X until Water Shield is learned, then moves to its own clickable button.
+    x = next((s for s in slots if s.get("key") == "X"), {})
+    ls = next((s for s in slots if s.get("spell") == "lightning_shield"), {})
+    if x.get("standIn") != "lightning_shield" or ls.get("after") != "water_shield" or ls.get("key"):
+        problem("layout: X must be Water Shield with Lightning Shield standing in until it is learned")
+    # 5, Shift+5 and Ctrl+5 are the player's own: never bound, never planned, never spare.
+    if layout.get("ownKeys") != ["5", "SHIFT-5", "CTRL-5"]:
+        problem("layout: ownKeys must be 5, SHIFT-5 and CTRL-5")
+    if set(layout.get("ownKeys") or []) & allowed:
+        problem("layout: an own key is in allowedKeys")
+    bars = {b["id"]: b for b in layout["bars"]}
+    spare_slots = {x["slot"] for x in layout["spare"]}
+    for bid in ("main", "bar2", "bar6"):
+        own = bars[bid]["first"] + 4
+        if own in seen_slot or own in spare_slots:
+            problem(f"layout: own button {own} ({bid} 5) is planned or spare")
+        if bars[bid]["keys"][4] not in layout["ownKeys"]:
+            problem(f"layout: {bid} button 5 key must be an own key")
+    want_bars = {
+        "bar6": (145, "MULTIACTIONBAR5BUTTON%d", "PROXY_SHOW_ACTIONBAR_6"),
+        "bar7": (157, "MULTIACTIONBAR6BUTTON%d", "PROXY_SHOW_ACTIONBAR_7"),
+    }
+    for bid, (first, binding, setting) in want_bars.items():
+        b = bars.get(bid, {})
+        if (b.get("first"), b.get("binding"), b.get("setting")) != (first, binding, setting):
+            problem(f"layout: {bid} must be first {first}, {binding}, {setting}")
     for s in slots:
-        n = names_by_key.get(s.get("spell"), "")
-        totem = n.endswith(" Totem") or s.get("spell") == "call_of_the_elements"
-        if totem and s.get("key") and not s["key"].startswith("SHIFT-"):
-            problem(f"layout: totem {s['spell']} on key {s['key']} (keyed totems go on Shift)")
-    if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 2:
+        b = bars[s["bar"]]
+        want = (b.get("keys") or [None] * 12)[s["button"] - 1] if s["button"] <= len(b.get("keys") or []) else None
+        if s.get("key") and s["key"] != want:
+            problem(f"layout: slot {s['slot']} key {s['key']} is not its bar's key {want}")
+    # Macros: the kinds exist, mouseover heals and cures, interrupt with /stopcasting, NS + Healing Wave.
+    bodies = layout["macroBodies"]
+    want_macros = {"healing_wave", "lesser_healing_wave", "chain_heal", "riptide", "cure_poison", "cure_disease",
+                   "earth_shock", "purge", "natures_swiftness"}
+    if set(layout["macros"]) != want_macros:
+        problem(f"layout: macros must be {sorted(want_macros)}")
+    for k, kind in layout["macroKind"].items():
+        if k not in layout["macros"] or kind not in bodies:
+            problem(f"layout: macroKind {k} = {kind} has no macro or body")
+    for k in layout["macroAlways"]:
+        if k not in layout["macros"]:
+            problem(f"layout: macroAlways {k} is not a macro")
+    for kind, body in bodies.items():
+        if "{spell}" not in body or not body.startswith("#showtooltip"):
+            problem(f"layout: macro body {kind} must start with #showtooltip and use {{spell}}")
+        base = kind.removesuffix("_click")
+        if base != kind and base not in bodies:
+            problem(f"layout: macro body {kind} has no {base}")
+        if base == "nshw" and "{heal}" not in body:
+            problem(f"layout: macro body {kind} must cast {{heal}}")
+        if base == "interrupt" and "/stopcasting" not in body:
+            problem(f"layout: macro body {kind} must /stopcasting")
+        if kind in ("help", "nshw") and "@mouseover,help" not in body:
+            problem(f"layout: macro body {kind} must use the friendly mouseover")
+        if kind in ("harm", "interrupt") and "@mouseover,harm" not in body:
+            problem(f"layout: macro body {kind} must use the enemy mouseover")
+    kinds_used = {layout["macroKind"].get(k, "help") for k in layout["macros"]}
+    if {"interrupt", "harm", "nshw", "help"} - kinds_used:
+        problem("layout: earth_shock interrupt, purge harm and the NS + Healing Wave macro are required")
+    # Character macros: Forever allows 30 (MAX_CHARACTER_MACROS); leave most of them to the player.
+    n_macros = len(layout["macros"]) + len(items["kinds"])
+    if n_macros > 15:
+        problem(f"layout: {n_macros} addon macros (keep it at 15 or fewer of the 30 character macros)")
+    # Layout 2 leftovers are cleared only from buttons that are spare now.
+    for slot_, key in (layout.get("old") or {}).items():
+        if int(slot_) not in spare_slots or key not in keys:
+            problem(f"layout: old slot {slot_} ({key}) must be spare now and a spell")
+    if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 3:
         problem("layout: version missing (bump it when slots or keys change)")
 
     # --- items ------------------------------------------------------------------------------------------------

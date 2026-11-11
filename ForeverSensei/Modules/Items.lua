@@ -1,5 +1,7 @@
--- Modules/Items.lua: the potion and elixir macros of the layout (FS_MANA, FS_HEALPOT, FS_ELIXIR).
--- Each macro uses the best item of its kind in the bags that the player's level allows (Data/Items.lua, best first).
+-- Modules/Items.lua: the potion, elixir and Healthstone macros of the layout (FS_MANA, FS_HEALPOT, FS_ELIXIR,
+-- FS_HEALTH).
+-- Each macro uses the best item of its kind in the bags that the player's level allows (Data/Items.lua, best first),
+-- else the best item of its fallback kind (FS_HEALTH: a Healthstone, else a Healing Potion).
 -- Macros can only be edited out of combat: bag changes in combat (drinking a potion) are handled silently when combat
 -- ends. With none in the bags the macro keeps a fixed icon, so the button stays easy to find.
 local _, ns = ...
@@ -56,12 +58,14 @@ function Items.KindOfMacro(name)
   end
 end
 
--- The best usable item of a kind in the bags. → item ({ id, name, level }) or nil
+-- The best usable item of a kind in the bags, else of its fallback kind. → item ({ id, name, level }) or nil
 function Items.Best(kind)
   local level = playerLevel()
-  for _, item in ipairs(data(kind).list) do
+  local d = data(kind)
+  for _, item in ipairs(d.list) do
     if count(item.id) > 0 and minLevel(item) <= level then return item end
   end
+  if d.fallback then return Items.Best(d.fallback) end
 end
 
 -- The best item of a kind the player could use now, in the bags or not (for the macro when the bags have none).

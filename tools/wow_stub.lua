@@ -19,7 +19,7 @@ STUB = {
   bags = {},       -- item id → count
   itemLevels = {}, -- item id → required level the client reports (C_Item.GetItemInfo)
   settings = { PROXY_SHOW_ACTIONBAR_2 = false, PROXY_SHOW_ACTIONBAR_3 = false, PROXY_SHOW_ACTIONBAR_4 = false,
-    PROXY_SHOW_ACTIONBAR_5 = false },
+    PROXY_SHOW_ACTIONBAR_5 = false, PROXY_SHOW_ACTIONBAR_6 = false, PROXY_SHOW_ACTIONBAR_7 = false },
   meta = {},
 }
 

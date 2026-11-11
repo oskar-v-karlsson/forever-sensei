@@ -93,14 +93,19 @@ function Spells.Texture(entry)
   return nil
 end
 
+-- The planned slot of a spell. A spell that only gets its own slot "after" another one is learned stands in on
+-- that spell's slot until then (Lightning Shield on X before Water Shield).
 function Spells.LayoutSlot(entry)
-  return ns.ClassData.SHAMAN.layout.bySpell[entry.key]
+  local layout = ns.ClassData.SHAMAN.layout
+  local slot = layout.bySpell[entry.key]
+  if slot and slot.after and not Spells.IsKnown(Spells.Get(slot.after)) then return layout.bySpell[slot.after] end
+  return slot
 end
 
 -- "メインバー・キー 1" / "アクションバー 3（クリック）" / Totem Bar / passive
 function Spells.WhereText(entry)
   local layout = ns.ClassData.SHAMAN.layout
-  local slot = layout.bySpell[entry.key]
+  local slot = Spells.LayoutSlot(entry)
   if slot then
     local bar = ns.T("ui.bar." .. slot.bar)
     if slot.key then

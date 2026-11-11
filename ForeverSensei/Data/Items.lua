@@ -1,4 +1,5 @@
--- Data/Items.lua: potions and elixirs the layout's item macros use (FS_MANA, FS_HEALPOT, FS_ELIXIR).
+-- Data/Items.lua: potions, elixirs and Healthstones the layout's item macros use (FS_MANA, FS_HEALPOT, FS_ELIXIR,
+-- FS_HEALTH).
 -- Every item was checked on Wowhead Forever (https://www.wowhead.com/forever/item=<id>, tooltip data from
 -- nether.wowhead.com/forever/tooltip/item/<id>) on the verified date. List order is best first; the macro uses the
 -- first one in the bags that the player's level allows. level = required level from the Forever tooltip (nil: none).
@@ -6,12 +7,13 @@
 -- Combat potions (need a PvP rank), Restored potions (restore a percentage) and Draughts.
 local _, ns = ...
 
-local V = "2026-11-10"
+local V = "2026-11-11"
 
 ns.ItemData = {
   verified = V,
   src = "wh_item",
   -- label: the item name the texts use for the kind; icon: shown when the bags have none (Forever tooltip icon).
+  -- fallback: the kind to use when the bags have none of this kind.
   kinds = {
     mana = {
       macro = "FS_MANA",
@@ -45,6 +47,32 @@ ns.ItemData = {
         { id = 118,    name = "Minor Healing Potion" },            -- no required level on the tooltip
         { id = 287966, name = "Minor Healing Potion" },            -- Bind to Account
         { id = 268881, name = "Perishable Minor Healing Potion" },
+      },
+    },
+    -- Healthstones are conjured by warlocks: Unique, "Instantly restores N life", 2 Min Cooldown on every Forever
+    -- tooltip. Forever has three items per size; two heal the full amount and one a little less (e.g. Minor 5512 and
+    -- 19005 heal 120, 19004 heals 110). Without a Healthstone the macro uses the best Healing Potion.
+    health = {
+      macro = "FS_HEALTH",
+      label = "Healthstone",
+      icon = "INV_Stone_04",
+      fallback = "healpot",
+      list = {
+        { id = 9421,  name = "Major Healthstone",   level = 48 }, -- 1440
+        { id = 19013, name = "Major Healthstone",   level = 48 }, -- 1440
+        { id = 19012, name = "Major Healthstone",   level = 48 }, -- 1320
+        { id = 5510,  name = "Greater Healthstone", level = 36 }, -- 960
+        { id = 19011, name = "Greater Healthstone", level = 36 }, -- 960
+        { id = 19010, name = "Greater Healthstone", level = 36 }, -- 880
+        { id = 5509,  name = "Healthstone",         level = 24 }, -- 600
+        { id = 19009, name = "Healthstone",         level = 24 }, -- 600
+        { id = 19008, name = "Healthstone",         level = 24 }, -- 550
+        { id = 5511,  name = "Lesser Healthstone",  level = 12 }, -- 300
+        { id = 19007, name = "Lesser Healthstone",  level = 12 }, -- 300
+        { id = 19006, name = "Lesser Healthstone",  level = 12 }, -- 275
+        { id = 5512,  name = "Minor Healthstone" },               -- 120, no required level
+        { id = 19005, name = "Minor Healthstone" },               -- 120
+        { id = 19004, name = "Minor Healthstone" },               -- 110
       },
     },
     elixir = {

@@ -92,7 +92,9 @@ function Layout.Label(cur)
 end
 
 function Layout.UsesMacro(entry)
-  return ns.settings.targeting == "mouseover" and L().macros[entry.key] ~= nil
+  local layout = L()
+  if not layout.macros[entry.key] then return false end
+  return layout.macroAlways[entry.key] == true or ns.settings.targeting == "mouseover"
 end
 
 -- The action this spell should be in its slot. → { kind = "spell"|"macro", entry, id, macro, name } or nil when not known
@@ -111,9 +113,14 @@ function Layout.DesiredItem(kind)
 end
 
 -- The desired action of a planned slot. → desired or nil
+-- standIn: the spell this slot holds until its own spell is learned (Lightning Shield on X before Water Shield).
+-- after: the slot is only used once that spell is known (Lightning Shield's clickable slot after Water Shield).
 function Layout.DesiredFor(s)
   if s.item then return Layout.DesiredItem(s.item) end
-  return Layout.Desired(Spells.Get(s.spell))
+  if s.after and not Spells.IsKnown(Spells.Get(s.after)) then return nil end
+  local d = Layout.Desired(Spells.Get(s.spell))
+  if not d and s.standIn then d = Layout.Desired(Spells.Get(s.standIn)) end
+  return d
 end
 
 -- slot (optional): an older rank the player kept there on purpose (undid its upgrade) counts as a match.
@@ -140,8 +147,12 @@ function Layout.MacroSpellName(entry)
 end
 
 function Layout.MacroBody(entry)
-  local name = Layout.MacroSpellName(entry)
-  return (L().macroBody:gsub("{spell}", function() return name end))
+  local layout = L()
+  local kind = layout.macroKind[entry.key] or "help"
+  if ns.settings.targeting ~= "mouseover" and layout.macroBodies[kind .. "_click"] then kind = kind .. "_click" end
+  local vars = { spell = Layout.MacroSpellName(entry) }
+  if kind:match("^nshw") then vars.heal = Layout.MacroSpellName(Spells.Get("healing_wave")) end
+  return (layout.macroBodies[kind]:gsub("{(%w+)}", function(k) return vars[k] end))
 end
 
 -- Create or update the character macro for a spell. → macro index or nil
@@ -160,6 +171,25 @@ function Layout.EnsureMacro(entry)
   if ok3 and created and created > 0 then return created end
   ns.Debug("CreateMacro " .. name .. ": " .. tostring(created))
   return nil
+end
+
+-- Bring the existing spell macros up to date (rank, targeting mode). Never creates macros (only the layout does).
+-- Call only out of combat. → number of macros changed
+function Layout.RefreshMacros()
+  local n = 0
+  for key, name in pairs(L().macros) do
+    local ok, idx = call(API.macroIndex, name)
+    if ok and type(idx) == "number" and idx > 0 then
+      local entry = Spells.Get(key)
+      local body = Layout.MacroBody(entry)
+      local okI, _, _, cur = call(API.macroInfo, idx)
+      if not okI or cur ~= body then
+        call(API.editMacro, idx, name, "INV_MISC_QUESTIONMARK", body)
+        n = n + 1
+      end
+    end
+  end
+  return n
 end
 
 local function put(slot)
@@ -247,9 +277,15 @@ local function slotWhere(s)
 end
 Layout.SlotWhere = slotWhere
 
--- A planned spell slot whose spell the player does not know yet (item slots are always in use).
+-- A planned spell slot that has nothing to hold yet (its spell is not learned; item slots are always in use).
 local function reservedUnknown(s)
-  return s.spell ~= nil and not Spells.IsKnown(Spells.Get(s.spell))
+  return s.spell ~= nil and not Layout.DesiredFor(s)
+end
+
+-- Is this plan key a known spell with its own planned slot? Only those are cleared as duplicates.
+local function placedElsewhere(planKey)
+  local e = planKey and Spells.Get(planKey)
+  return e ~= nil and Spells.LayoutSlot(e) ~= nil and Layout.Desired(e) ~= nil
 end
 
 -- Work out every change. onlyKey limits it to one spell (the card's 配置する button).
@@ -259,10 +295,9 @@ function Layout.BuildPlan(onlyKey)
   local plan = { place = {}, moves = {}, clears = {}, lost = {}, binds = {}, bars = {} }
   local targets = {}
   for _, s in ipairs(layout.slots) do
-    if not onlyKey or s.spell == onlyKey then
-      local d = Layout.DesiredFor(s)
-      if d then targets[s.slot] = d end
-    end
+    local d = Layout.DesiredFor(s)
+    -- A spell learned "after" another (Lightning Shield after Water Shield) moves with it, so it is not lost.
+    if d and (not onlyKey or (d.entry and d.entry.key == onlyKey) or s.after == onlyKey) then targets[s.slot] = d end
   end
 
   -- Displaced actions go to empty free slots: the spare buttons of Action Bar 5 first, then slots reserved for spells
@@ -312,10 +347,24 @@ function Layout.BuildPlan(onlyKey)
   for _, s in ipairs(layout.slots) do
     if not targets[s.slot] and reservedUnknown(s) then
       local cur = Layout.Current(s.slot)
-      if cur and cur.planKey and (not onlyKey or cur.planKey == onlyKey) and Layout.Desired(Spells.Get(cur.planKey)) then
+      if cur and cur.planKey and (not onlyKey or cur.planKey == onlyKey) and placedElsewhere(cur.planKey) then
         table.insert(plan.clears, { slot = s.slot, where = s, label = Layout.Label(cur) })
       end
     end
+  end
+  -- Buttons that layout 2 used and that are spare now: clear them if they still hold that layout's spell.
+  if not onlyKey then
+    for slot, key in pairs(layout.old) do
+      local cur = not layout.own[slot] and Layout.Current(slot)
+      if cur and cur.planKey == key and placedElsewhere(key) then
+        local spare
+        for _, sp in ipairs(layout.spare) do
+          if sp.slot == slot then spare = sp end
+        end
+        if spare then table.insert(plan.clears, { slot = slot, where = spare, label = Layout.Label(cur) }) end
+      end
+    end
+    table.sort(plan.clears, function(a, b) return a.slot < b.slot end)
   end
 
   for barId in pairs(barsNeeded) do
@@ -448,6 +497,27 @@ function Layout.Undo(record)
   end)
 end
 
+-- Notes on default bindings a plan replaces: the stance bar on Ctrl+1, the framerate display on Ctrl+R, the mouse
+-- side buttons. → list of text lines (no duplicates)
+function Layout.Warnings(plan)
+  local out, seen = {}, {}
+  local function add(id, vars)
+    if seen[id] then return end
+    seen[id] = true
+    table.insert(out, ns.T(id, vars))
+  end
+  for _, b in ipairs(plan.binds) do
+    local id = L().defaultWarn[b.key]
+    if not id and b.old then
+      if b.old:match("^SHAPESHIFTBUTTON") then id = "ui.preview.warn.stance" end
+      if b.old == "TOGGLEFPS" then id = "ui.preview.warn.fps" end
+    end
+    if id then add(id, { key = L().KeyLabel(b.key) }) end
+    if b.key:match("BUTTON%d$") then add("ui.preview.warn.mouse") end
+  end
+  return out
+end
+
 -- Text lines describing a plan, for the preview window.
 function Layout.Describe(plan)
   local lines = {}
@@ -486,6 +556,9 @@ function Layout.Describe(plan)
     head("ui.preview.bars")
     for _, bar in ipairs(plan.bars) do table.insert(lines, ns.T("ui.bar." .. bar.id)) end
   end
+  head("ui.preview.notes")
+  for _, w in ipairs(Layout.Warnings(plan)) do table.insert(lines, w) end
+  table.insert(lines, ns.T("ui.preview.warn.own"))
   return lines
 end
 
@@ -580,6 +653,7 @@ function Layout.PlaceOne(entry)
       table.insert(warn, ns.T("ui.place.keybusy", { key = L().KeyLabel(b.key), action = bindingName(b.old) }))
     end
   end
+  for _, w in ipairs(Layout.Warnings(plan)) do table.insert(warn, w) end
   if #warn == 0 then
     go()
   else
@@ -667,6 +741,7 @@ function Layout.ApplyNewRanks(learned)
     for _, e in ipairs(Spells.List()) do
       if Spells.IsKnown(e) then Layout.CheckMacroRank(e) end
     end
+    Layout.RefreshMacros()
     local lines = {}
     if learned and #learned > 0 then
       local names = {}
@@ -703,6 +778,7 @@ function Layout.SetTargeting(mode)
         end
       end
     end
+    Layout.RefreshMacros()
     ns.UI.Toast(ns.T(mode == "mouseover" and "ui.targeting.mouseover.done" or "ui.targeting.click.done", { n = n }), 10)
     if fallback then ns.UI.Toast(ns.T("ui.layout.macrofail"), 12) end
     if ns.Guide and ns.Guide.Refresh then ns.Guide.Refresh() end
