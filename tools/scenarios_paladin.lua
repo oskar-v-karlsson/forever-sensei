@@ -45,11 +45,11 @@ return function(ns, lang)
     try("guide " .. tab, ns.Guide.Open, tab)
     if ns.Guide.Current() ~= tab then fail("guide: tab " .. tab .. " did not open") end
   end
-  -- The key page names Ctrl+1-4 as the auras on the stance bar, and the auras in the stance bar line.
+  -- The key page draws the auras on Action Bar 3 (Ctrl+1-5) and tells the player to move Action Bar 6 in Edit Mode.
   try("guide layout", ns.Guide.Open, "layout")
   local shown = table.concat(STUB.shown, "\n")
-  if not shown:find(ns.T("ui.layout.stancekeys"), 1, true) then fail("guide layout: no Ctrl+1-4 stance bar note") end
-  if not shown:find("Devotion Aura", 1, true) then fail("guide layout: the stance bar line does not name the auras") end
+  if not shown:find(ns.T("ui.layout.editmode"), 1, true) then fail("guide layout: no Edit Mode note for Action Bar 6") end
+  if not shown:find("Devotion Aura", 1, true) then fail("guide layout: the key page does not name the auras") end
   for lv = 10, 60, 5 do
     STUB.level, STUB.unspent = lv, 1
     try("talent hint " .. lv, ns.Talents.ShowHint, true)
@@ -95,18 +95,19 @@ return function(ns, lang)
     return a and a[1] == "macro" and STUB.macros[a[2]] or nil
   end
   local stance = { ["CTRL-1"] = "SHAPESHIFTBUTTON1", ["CTRL-2"] = "SHAPESHIFTBUTTON2", ["CTRL-3"] = "SHAPESHIFTBUTTON3",
-    ["CTRL-4"] = "SHAPESHIFTBUTTON4" }
-  local function untouched(what)
-    for k, v in pairs(stance) do
-      if STUB.bindings[k] ~= v then fail(what .. ": " .. k .. " left the stance bar (" .. tostring(STUB.bindings[k]) .. ")") end
+    ["CTRL-4"] = "SHAPESHIFTBUTTON4", ["CTRL-5"] = "SHAPESHIFTBUTTON5" }
+  -- Layout 2: the auras are on Action Bar 3 (Ctrl+1-5), not on the stance bar; Action Bar 5 is no longer filled.
+  -- (An aura not learned yet keeps its key's default until it is placed.) own: Action Bar 5 slots he filled himself.
+  local function auraKeys(what, own)
+    for _, s in ipairs(L.slots) do
+      if s.bar == "bar3" and s.button <= 5 and ns.Layout.DesiredFor(s) then
+        if STUB.bindings[s.key] ~= "MULTIACTIONBAR2BUTTON" .. s.button then
+          fail(what .. ": " .. s.key .. " bound to " .. tostring(STUB.bindings[s.key]) .. ", expected Action Bar 3 button " .. s.button)
+        end
+      end
     end
-    for i = 37, 40 do
-      if STUB.actions[i] then fail(what .. ": Action Bar 5 button " .. (i - 36) .. " (Ctrl+1-4) was filled") end
-    end
-    local a5, a65 = STUB.actions[5], STUB.actions[65]
-    if not (a5 and a5[2] == 6948 and a65 and a65[2] == 465) or STUB.bindings["5"] ~= "ACTIONBUTTON5"
-      or STUB.bindings["SHIFT-5"] ~= "MULTIACTIONBAR1BUTTON5" or STUB.bindings["CTRL-5"] ~= "SHAPESHIFTBUTTON5" then
-      fail(what .. ": his own buttons or keys 5, Shift+5, Ctrl+5 were changed")
+    for i = 37, 48 do
+      if STUB.actions[i] and not (own and own[i]) then fail(what .. ": Action Bar 5 button " .. (i - 36) .. " was filled") end
     end
   end
   local function checkLayout(mode)
@@ -134,9 +135,7 @@ return function(ns, lang)
     for _, bar in ipairs(L.bars) do
       if bar.setting and STUB.settings[bar.setting] ~= true then fail(mode .. ": " .. bar.id .. " not shown") end
     end
-    if STUB.settings.PROXY_SHOW_ACTIONBAR_6 or STUB.settings.PROXY_SHOW_ACTIONBAR_7 then
-      fail(mode .. ": Action Bar 6 or 7 shown")
-    end
+    if STUB.settings.PROXY_SHOW_ACTIONBAR_7 then fail(mode .. ": Action Bar 7 shown") end
   end
   local function bodyOf(key)
     local m = macroAt(L.bySpell[key].slot)
@@ -161,14 +160,23 @@ return function(ns, lang)
       local text = table.concat(ns.Layout.Describe(ns.Layout.BuildPlan()), "\n")
       if not text:find(ns.T("ui.preview.warn.fps", { key = "Ctrl+R" }), 1, true) then fail("preview: no Ctrl+R warning") end
       if not text:find(ns.T("ui.preview.warn.mouse"), 1, true) then fail("preview: no mouse button warning") end
-      if text:find(ns.T("ui.preview.warn.stance", { key = "Ctrl+1" }):sub(1, 12), 1, true) then
-        fail("preview: warns about the stance bar keys, which the paladin layout keeps")
+      if not text:find(ns.T("ui.preview.warn.stance", { key = "Ctrl+1, Ctrl+2, Ctrl+3, Ctrl+4, Ctrl+5" }), 1, true) then
+        fail("preview: no note that Ctrl+1-5 leave the stance bar for the auras on Action Bar 3")
+      end
+      if not text:find(ns.T("ui.preview.warn.editmode", { bar = ns.T("ui.bar.bar6") }), 1, true) then
+        fail("preview: no Edit Mode note for Action Bar 6")
       end
       try("apply", function() p.apply:Click() end)
     end
   end
   checkLayout("mouseover")
-  untouched("apply")
+  auraKeys("apply")
+  if STUB.settings.PROXY_SHOW_ACTIONBAR_6 ~= true then fail("apply: Action Bar 6 (mouse buttons) not shown") end
+  for key, want in pairs({ ["5"] = "ACTIONBUTTON5", ["SHIFT-5"] = "MULTIACTIONBAR1BUTTON5", ["SHIFT-1"] = "MULTIACTIONBAR1BUTTON1",
+    ["CTRL-Z"] = "MULTIACTIONBAR2BUTTON10", ["BUTTON4"] = "MULTIACTIONBAR5BUTTON1", ["BUTTON5"] = "MULTIACTIONBAR5BUTTON4",
+    ["CTRL-BUTTON5"] = "MULTIACTIONBAR5BUTTON6", ["CTRL-Q"] = "MULTIACTIONBAR2BUTTON6" }) do
+    if STUB.bindings[key] ~= want then fail("apply: " .. key .. " should be bound to " .. want) end
+  end
   if not ns.Layout.IsEmptyPlan(ns.Layout.BuildPlan()) then fail("plan not empty after apply") end
   if STUB.cursor then fail("cursor not empty after apply") end
   -- The macros: help with the self fallback, Protection and Sacrifice without, Hammer of Justice stops the cast, the
@@ -191,7 +199,7 @@ return function(ns, lang)
   if not op or op.name ~= "FS_OPEN" or op.body ~= "#showtooltip Swift Judgement\n/startattack\n/cast Judgement\n/cast Swift Judgement\n/cast Holy Strike" then
     fail("opener macro: " .. tostring(op and op.body))
   end
-  if STUB.bindings["CTRL-Q"] ~= "MULTIACTIONBAR4BUTTON6" then fail("opener: Ctrl+Q not bound to Action Bar 5 button 6") end
+  if L.byCombo.opener.key ~= "R" or STUB.bindings["R"] ~= "ACTIONBUTTON8" then fail("opener: R not bound to Action Bar 1 button 8") end
   local nMacros = 0
   for _ in pairs(STUB.macros) do nMacros = nMacros + 1 end
   if nMacros > 15 then fail("macros: " .. nMacros .. " made, over 15") end
@@ -206,11 +214,19 @@ return function(ns, lang)
   end
   try("targeting mouseover", ns.Layout.SetTargeting, "mouseover")
   checkLayout("mouseover")
-  untouched("targeting")
+  auraKeys("targeting")
 
-  -- Clean: only the addon's buttons; his own 5 and a spare button keep what he put there; Undo restores.
-  local spare = L.spare[1].slot
+  -- Clean: only the addon's buttons; a spare button and Action Bar 5 button 1 (no layout filled it) keep what he put
+  -- there; Undo restores.
+  local spare
+  for _, sp in ipairs(L.spare) do
+    if not spare and not STUB.actions[sp.slot] then spare = sp.slot end
+  end
   STUB.actions[spare] = { "spell", 465 }
+  -- (The Hearthstone from button 5 sits on a spare button since the apply: kept too.)
+  local isSpare = {}
+  for _, sp in ipairs(L.spare) do isSpare[sp.slot] = true end
+  STUB.actions[37] = { "item", 6948 }
   local clA = snapshot()
   try("clean", ns.Layout.Clean)
   local cf = _G.ForeverSenseiConfirm
@@ -219,13 +235,13 @@ return function(ns, lang)
     try("clean confirm", function() cf.yes:Click() end)
   end
   for slot in pairs(clA) do
-    local keep = slot == 5 or slot == 65 or slot == spare
+    local keep = slot == 37 or isSpare[slot] or false
     if (STUB.actions[slot] ~= nil) ~= keep then fail("clean: slot " .. slot .. (keep and " was emptied" or " still set")) end
   end
   try("clean undo", ns.Layout.Undo)
   local ok, why = same(clA, (snapshot()))
   if not ok then fail("clean undo: " .. why) end
-  STUB.actions[spare] = nil
+  STUB.actions[spare], STUB.actions[37] = nil, nil
 
   -- Undo everything: back to the starting bars and keys.
   local undos = 0
@@ -239,7 +255,88 @@ return function(ns, lang)
   ok, why = same(beforeB, afterB)
   if not ok then fail("undo did not restore key bindings: " .. why) end
 
-  -- Level 30: no Swift Judgement (talent at 37) → Ctrl+Q empty but bound; no Cleanse (42) → Purify stands in on
+  -- Update from layout 1 (0.6.0-0.6.1) to 2 (0.7.0, family blocks): the auras leave the stance bar for Action Bar 3
+  -- (Ctrl+1-5), the Ctrl row leaves Action Bar 5, the mouse buttons move from Action Bar 3 7-12 to Action Bar 6, and
+  -- key 5 is planned. One notice, nothing moves by itself; a full apply moves it all, shows Action Bar 6, clears
+  -- layout 1's spells on Action Bar 5 (the bar stays shown) and 元に戻す puts back the spells, keys and bar settings.
+  do
+    local function cur(key) return ns.Spells.CurrentID(ns.Spells.Get(key)) end
+    local function settingsSnap()
+      local t = {}
+      for k, v in pairs(STUB.settings) do t[k] = tostring(v) end
+      return t
+    end
+    STUB.actions = { [9] = { "spell", cur("seal_of_fury") }, [69] = { "spell", cur("seal_of_righteousness") },
+      [44] = { "spell", cur("turn_undead") }, [45] = { "spell", cur("seal_of_the_crusader") },
+      [47] = { "spell", cur("redemption") }, [48] = { "spell", cur("divine_protection") },
+      [55] = { "spell", cur("blessing_of_protection") }, [56] = { "spell", cur("cleanse") },
+      [57] = { "spell", cur("lay_on_hands") }, [5] = { "item", 6948 }, [38] = { "item", 6948 } }
+    STUB.bindings = { ["CTRL-R"] = "MULTIACTIONBAR4BUTTON8", ["BUTTON4"] = "MULTIACTIONBAR2BUTTON7",
+      ["BUTTON5"] = "MULTIACTIONBAR2BUTTON8", ["5"] = "ACTIONBUTTON5" }
+    for k, v in pairs(stance) do STUB.bindings[k] = v end
+    STUB.settings.PROXY_SHOW_ACTIONBAR_3, STUB.settings.PROXY_SHOW_ACTIONBAR_5 = true, true
+    STUB.settings.PROXY_SHOW_ACTIONBAR_6 = false
+    local v1A, v1B = snapshot()
+    local v1S = settingsSnap()
+    ns.char.layoutVersion = 1
+    for _ = 1, 60 do ns.NewSkill.Next() end
+    if _G.ForeverSenseiCard then _G.ForeverSenseiCard:Hide() end
+    if _G.ForeverSenseiToast then _G.ForeverSenseiToast:Hide() end
+    ns.ready = false
+    STUB.fire("PLAYER_LOGIN")
+    STUB.runTimers()
+    for _ = 1, 60 do ns.NewSkill.Next() end
+    if _G.ForeverSenseiCard then _G.ForeverSenseiCard:Hide() end
+    local confirm = _G.ForeverSenseiConfirm
+    if not confirm or not confirm:IsShown() or confirm.text:GetText() ~= ns.T("ui.layout.changed") then
+      fail("layout 2: no notice for a player with layout 1")
+    else
+      fits("layout 2 notice", confirm)
+      confirm:Hide()
+    end
+    if ns.char.layoutVersion ~= L.version then fail("layout 2: version not saved after the notice") end
+    local nA, nB = snapshot()
+    if not same(v1A, nA) or not same(v1B, nB) then fail("layout 2: the notice moved something by itself") end
+    local plan = ns.Layout.BuildPlan()
+    local cleared, bars = {}, {}
+    for _, c in ipairs(plan.clears) do cleared[c.slot] = true end
+    for _, bar in ipairs(plan.bars) do bars[bar.id] = true end
+    for _, slot in ipairs({ 44, 45, 47, 48, 55, 56, 57 }) do
+      if not cleared[slot] then fail("layout 2: layout 1's spell on slot " .. slot .. " not cleared") end
+    end
+    if cleared[38] then fail("layout 2: his own item on Action Bar 5 is planned to be cleared") end
+    if not bars.bar6 then fail("layout 2: the preview does not show Action Bar 6") end
+    for _, h in ipairs(plan.hide) do if h.id == "bar5" then fail("layout 2: Action Bar 5 is planned to be hidden") end end
+    local text = table.concat(ns.Layout.Describe(plan), "\n")
+    if not text:find(ns.T("ui.preview.warn.stance", { key = "Ctrl+1, Ctrl+2, Ctrl+3, Ctrl+4, Ctrl+5" }), 1, true) then
+      fail("layout 2: the preview does not explain that Ctrl+1-5 leave the stance bar")
+    end
+    try("layout 2 apply", ns.Layout.Execute, plan)
+    checkLayout("layout 2")
+    auraKeys("layout 2", { [38] = true })
+    if not (STUB.actions[38] and STUB.actions[38][2] == 6948) then fail("layout 2: his item on Action Bar 5 was cleared") end
+    if STUB.settings.PROXY_SHOW_ACTIONBAR_5 ~= true or STUB.settings.PROXY_SHOW_ACTIONBAR_6 ~= true then
+      fail("layout 2: Action Bar 5 should stay shown and Action Bar 6 be shown")
+    end
+    local hearth
+    for _, sp in ipairs(L.spare) do
+      if STUB.actions[sp.slot] and STUB.actions[sp.slot][2] == 6948 then hearth = sp.slot end
+    end
+    if not hearth then fail("layout 2: the Hearthstone from button 5 did not move to a spare button") end
+    if STUB.bindings["BUTTON4"] ~= "MULTIACTIONBAR5BUTTON1" or STUB.bindings["CTRL-R"] ~= "MULTIACTIONBAR2BUTTON8" then
+      fail("layout 2: Mouse4 or Ctrl+R not moved to the new buttons")
+    end
+    try("layout 2 undo", ns.Layout.Undo)
+    local uA, uB = snapshot()
+    local ok2, why2 = same(v1A, uA)
+    if not ok2 then fail("layout 2 undo: action slots differ: " .. why2) end
+    ok2, why2 = same(v1B, uB)
+    if not ok2 then fail("layout 2 undo: key bindings differ: " .. why2) end
+    ok2, why2 = same(v1S, settingsSnap())
+    if not ok2 then fail("layout 2 undo: bar settings differ: " .. why2) end
+  end
+
+  -- Level 30: no Swift Judgement (talent at 37) → E empty but bound; no Cleanse (42) → Purify stands in on
   -- Mouse5 with its macro; no Holy Shield (talent at 42) → 3 stays empty.
   STUB.level = 30
   STUB.known = {}
@@ -253,10 +350,10 @@ return function(ns, lang)
     end
   end
   forgetTalents()
-  STUB.actions, STUB.macros = { [5] = { "item", 6948 }, [65] = { "spell", 465 } }, {}
+  STUB.actions, STUB.macros = {}, {}
   try("apply 30", ns.Layout.Execute, ns.Layout.BuildPlan())
   checkLayout("level 30")
-  untouched("level 30")
+  auraKeys("level 30")
   if STUB.actions[L.byCombo.opener.slot] then fail("level 30: the opener was placed without Swift Judgement") end
   local m5 = macroAt(L.bySpell.cleanse.slot)
   if not m5 or m5.name ~= "FS_PURIFY" or not m5.body:find("Purify", 1, true) then fail("level 30: Purify not standing in on Mouse5") end
@@ -287,10 +384,12 @@ return function(ns, lang)
   end
   local where = ns.Spells.WhereText(cons) or ""
   if not where:find(ns.KeyLabel("2"), 1, true) then fail("card: Consecration's place does not name key 2: " .. where) end
-  -- An aura: its card points at the stance bar.
+  -- An aura: its card points at Action Bar 3 and Ctrl+1.
   local ret = ns.Spells.Get("retribution_aura")
-  local rw = ns.Spells.WhereText(ret)
-  if rw ~= ns.T("ui.where.stancebar") then fail("card: an aura's place should be the stance bar: " .. tostring(rw)) end
+  local rw = ns.Spells.WhereText(ret) or ""
+  if not rw:find(ns.KeyLabel("CTRL-1"), 1, true) or not rw:find(ns.T("ui.bar.bar3"), 1, true) then
+    fail("card: an aura's place should be Action Bar 3, Ctrl+1: " .. rw)
+  end
 
   -- New rank: Holy Strike rank 1 on 1 becomes rank 2 after combat.
   ns.settings.targeting = "click"

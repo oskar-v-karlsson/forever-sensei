@@ -1,23 +1,29 @@
--- ForeverSensei_Paladin/Data/Protection/Layout.lua: the fixed bar and key plan for a Protection Paladin (dungeon tank).
--- The spec is research/keybind-layout-paladin.md (approved grid, commit 824c74c). Planned for level 60; keys never
--- move while levelling, and a spell learned later keeps its slot empty until it is learned.
+-- ForeverSensei_Paladin/Data/Protection/Layout.lua: the fixed bar and key plan for a Protection Paladin (dungeon tank),
+-- layout version 2 (since ForeverSensei 0.7.0: "family blocks"). Spec: research/keybind-layout-v4.md P1-P8 (approved,
+-- commit 27b6754), which builds on research/keybind-layout-paladin.md (pull walkthroughs, reach tiers for normal
+-- hands). Planned for level 60; keys never move while levelling, and a spell learned later keeps its slot empty until
+-- it is learned.
 --
 -- Hands: normal-sized, WASD. Allowed keys: 1-5, Q, E, R, F, Z, X, C and the mouse side buttons, each plain, with
--- Shift or with Ctrl. 5, Shift+5 and Ctrl+5 are the player's own (never bound or filled).
--- - Top keys hold what is pressed in combat in most pulls: 1 Holy Strike, 2 Consecration, 3 Holy Shield, Q Judgement.
--- - Families share one base key with plain, Shift and Ctrl (frequency and urgency pick the variant):
---   Q Judgement / Swift Judgement / the opener macro; E Hammer of Justice / Hammer of Wrath; R Exorcism / Holy Wrath /
---   Turn Undead (against undead); F Seal of Fury / Seal of Righteousness / Seal of the Crusader; Z health / mana
---   potion; X Righteous Fury / Blessing of Kings / Redemption (between pulls); C Templar's Bulwark / Divine Shield /
---   Divine Protection (Forbearance); 4 Flash of Light / Holy Light; Mouse4 Blessing of Protection / Lay on Hands /
---   Blessing of Sacrifice (save a party member); Mouse5 Cleanse (Purify until 42) / Blessing of Freedom / Voice of
---   Truth (free a party member).
--- - Auras use the stance bar. Ctrl+1-4 stay on their game default (stance bar buttons 1-4), so Action Bar 5 buttons
---   1-4 are neither bound nor filled. Frost and Fire Resistance Aura (stance buttons 5 and 6) are clicked.
--- - Bars: plain = Action Bar 1, Shift = Action Bar 2, Ctrl = Action Bar 5 (the right edge, Q-C in the same order as
---   Shift), mouse = Action Bar 3 buttons 7-12. Action Bar 3 buttons 1-6 and Action Bar 4 are clicked. Action Bars 6
---   and 7 are never used.
--- - Spares (bound, empty): Shift+1, Shift+2, Shift+3, Ctrl+E and Ctrl+Z.
+-- Shift or with Ctrl. No key is the player's own any more: 5, Shift+5 and Ctrl+5 are planned like the others.
+-- Rules (Oskar's decisions for v4):
+-- * Each modifier row splits into three blocks of neighbouring keys: 1-5, Q/E/R/F and Z/X/C. A family fills one
+--   block, so it sits together on the keyboard and, because button n is key n on bars 1-3, on screen.
+-- * Plain row = the core rotation: 1 Holy Strike, 2 Consecration, 3 Holy Shield, 4 Flash of Light, 5 Holy Light;
+--   Q Judgement, E Swift Judgement, R the opener macro, F Hammer of Justice; Z health, X mana, C Righteous Fury.
+-- * Shift 1-5 seals (Fury, Righteousness, Crusader, Wisdom, Light; Justice is clicked on Action Bar 6); Shift Q/E/R/F
+--   conditional attacks (Exorcism, Hammer of Wrath, Holy Wrath, Turn Undead); Shift Z/X/C Forbearance (Templar's
+--   Bulwark, Divine Shield, Divine Protection).
+-- * Ctrl 1-5 auras on Action Bar 3 (Retribution, Devotion, Concentration, Shadow and Frost Resistance; Fire
+--   Resistance is clicked on Action Bar 6). The stance bar still shows every aura as the game draws it; the addon
+--   doesn't touch it. Ctrl Q/E/R/F spare (bound, empty); Ctrl Z/X/C blessings (Kings, Might, Wisdom).
+-- * Mouse columns: Mouse4 saves a party member (Blessing of Protection / Lay on Hands / Blessing of Sacrifice),
+--   Mouse5 frees one (Cleanse, Purify until 42 / Blessing of Freedom / Voice of Truth).
+-- Bars: plain = Action Bar 1, Shift = Action Bar 2, Ctrl = Action Bar 3 (all at the bottom). Action Bar 6 holds the
+-- mouse keys (buttons 1-6, column by column) and the clicked spells used in combat; it starts in the middle of the
+-- screen and the guide tells the player to drag it down in Edit Mode. Action Bar 4 holds out-of-combat clicks
+-- (Redemption, Greater Blessings). Action Bar 5 (the Ctrl bar of layout 1) left the plan: it stays as the player has
+-- it, and a full apply only clears what layout 1 put there (L.old).
 local _, P = ...
 P.specs = P.specs or {}
 P.specs.PROTECTION = P.specs.PROTECTION or {}
@@ -34,75 +40,82 @@ end
 L.bars = {
   { id = "main", first = 1,   binding = "ACTIONBUTTON%d",          setting = nil,                      keys = KEYS },
   { id = "bar2", first = 61,  binding = "MULTIACTIONBAR1BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_2", keys = withMod("SHIFT-") },
-  -- Ctrl+1-4: false = not bound by the addon, the key keeps its game default (the auras on the stance bar).
-  { id = "bar5", first = 37,  binding = "MULTIACTIONBAR4BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_5",
-    keys = { false, false, false, false, "CTRL-5", "CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F", "CTRL-Z", "CTRL-X", "CTRL-C" } },
-  { id = "bar3", first = 49,  binding = "MULTIACTIONBAR2BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_3",
-    keys = { false, false, false, false, false, false,
-      "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5" } },
+  { id = "bar3", first = 49,  binding = "MULTIACTIONBAR2BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_3", keys = withMod("CTRL-") },
+  -- editMode: the bar starts in the middle of the screen; the guide and the preview tell the player to move it.
+  { id = "bar6", first = 145, binding = "MULTIACTIONBAR5BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_6", editMode = true,
+    keys = { "BUTTON4", "SHIFT-BUTTON4", "CTRL-BUTTON4", "BUTTON5", "SHIFT-BUTTON5", "CTRL-BUTTON5",
+      false, false, false, false, false, false } },
   { id = "bar4", first = 25,  binding = "MULTIACTIONBAR3BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_4" },
 }
 
+-- Bars the plan no longer uses. Action Bar 5 (the Ctrl bar of layout 1) stays as the player has it (keepShown); the
+-- clean-up button empties only the buttons layout 1 filled there (assigned).
+L.retired = {
+  { id = "bar5", first = 37,  binding = "MULTIACTIONBAR4BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_5", keepShown = true,
+    assigned = { 6, 8, 9, 11, 12 } },
+}
+
 -- Bump when slots or keys change (characters then get the one-time "apply all" notice).
-L.version = 1
+L.version = 2
 
 L.allowedKeys = {
-  "1", "2", "3", "4", "Q", "E", "R", "F", "Z", "X", "C",
-  "SHIFT-1", "SHIFT-2", "SHIFT-3", "SHIFT-4", "SHIFT-Q", "SHIFT-E", "SHIFT-R", "SHIFT-F", "SHIFT-Z", "SHIFT-X",
-  "SHIFT-C",
-  "CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F", "CTRL-Z", "CTRL-X", "CTRL-C",
+  "1", "2", "3", "4", "5", "Q", "E", "R", "F", "Z", "X", "C",
+  "SHIFT-1", "SHIFT-2", "SHIFT-3", "SHIFT-4", "SHIFT-5", "SHIFT-Q", "SHIFT-E", "SHIFT-R", "SHIFT-F", "SHIFT-Z",
+  "SHIFT-X", "SHIFT-C",
+  "CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-5", "CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F", "CTRL-Z", "CTRL-X", "CTRL-C",
   "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5",
 }
 
-L.ownKeys = { "5", "SHIFT-5", "CTRL-5" }
-
--- Keys the addon never binds: they keep their game default (stance bar buttons 1-4 = the auras).
-L.keepDefault = { "CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4" }
--- Shown under the bars on the guide's key page.
-L.keyNotes = { "ui.layout.stancekeys" }
-
 L.plan = {
   main = {
-    "holy_strike", "consecration", "holy_shield", "flash_of_light", "#",
-    "judgement", "hammer_of_justice", "exorcism", "seal_of_fury",
-    "@health", "righteous_fury", "templars_bulwark",
+    "holy_strike", "consecration", "holy_shield", "flash_of_light", "holy_light",
+    "judgement", "swift_judgement", "!opener", "hammer_of_justice",
+    "@health", "@mana", "righteous_fury",
   },
   bar2 = {
-    "-", "-", "-", "holy_light", "#",
-    "swift_judgement", "hammer_of_wrath", "holy_wrath", "seal_of_righteousness",
-    "@mana", "blessing_of_kings", "divine_shield",
-  },
-  bar5 = {
-    "x", "x", "x", "x", "#",
-    "!opener", "-", "turn_undead", "seal_of_the_crusader",
-    "-", "redemption", "divine_protection",
+    "seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader", "seal_of_wisdom", "seal_of_light",
+    "exorcism", "hammer_of_wrath", "holy_wrath", "turn_undead",
+    "templars_bulwark", "divine_shield", "divine_protection",
   },
   bar3 = {
-    "seal_of_wisdom", "seal_of_light", "seal_of_justice", "blessing_of_might", "blessing_of_wisdom", "-",
-    "blessing_of_protection", { "cleanse", standIn = "purify" }, "lay_on_hands", "blessing_of_freedom",
-    "blessing_of_sacrifice", "voice_of_truth",
+    "retribution_aura", "devotion_aura", "concentration_aura", "shadow_resistance_aura", "frost_resistance_aura",
+    "-", "-", "-", "-",
+    "blessing_of_kings", "blessing_of_might", "blessing_of_wisdom",
+  },
+  bar6 = {
+    "blessing_of_protection", "lay_on_hands", "blessing_of_sacrifice",
+    { "cleanse", standIn = "purify" }, "blessing_of_freedom", "voice_of_truth",
+    "seal_of_justice", "fire_resistance_aura", "divine_intervention", "-", "-", "-",
   },
   bar4 = {
-    "greater_blessing_of_kings", "greater_blessing_of_might", "greater_blessing_of_wisdom", "divine_intervention",
+    "redemption", "greater_blessing_of_kings", "greater_blessing_of_might", "greater_blessing_of_wisdom",
     "-", "-", "-", "-", "-", "-", "-", "-",
   },
 }
 
--- Spells without a bar slot: the auras are on the stance bar; Purify (replaced by Cleanse on Mouse5 at 42) and the
--- mounts are used from the spellbook.
+-- Families (research/keybind-layout-v4.md P1/P2): each keyed family fills one block of one row, or one mouse column
+-- (block "BUTTON4"/"BUTTON5": plain, Shift, Ctrl); spill-overs are clicked on Action Bar 6. tools/check.py checks the
+-- plan against this list.
+L.families = {
+  { id = "judgement", block = "QERF", row = "", members = { "judgement", "swift_judgement", "!opener" } },
+  { id = "seals", block = "1-5", row = "SHIFT-", spill = { "seal_of_justice" },
+    members = { "seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader", "seal_of_wisdom", "seal_of_light" } },
+  { id = "conditional", block = "QERF", row = "SHIFT-", members = { "exorcism", "hammer_of_wrath", "holy_wrath", "turn_undead" } },
+  { id = "forbearance", block = "ZXC", row = "SHIFT-", members = { "templars_bulwark", "divine_shield", "divine_protection" } },
+  { id = "auras", block = "1-5", row = "CTRL-", spill = { "fire_resistance_aura" },
+    members = { "retribution_aura", "devotion_aura", "concentration_aura", "shadow_resistance_aura", "frost_resistance_aura" } },
+  { id = "blessings", block = "ZXC", row = "CTRL-", members = { "blessing_of_kings", "blessing_of_might", "blessing_of_wisdom" } },
+  { id = "save", block = "BUTTON4", members = { "blessing_of_protection", "lay_on_hands", "blessing_of_sacrifice" } },
+  { id = "free", block = "BUTTON5", members = { "cleanse", "blessing_of_freedom", "voice_of_truth" } },
+}
+
+-- Spells without a bar slot: Purify (replaced by Cleanse on Mouse5 at 42) and the mounts are used from the spellbook.
 L.noSlot = {
-  devotion_aura = "stancebar",
-  retribution_aura = "stancebar",
-  concentration_aura = "stancebar",
-  shadow_resistance_aura = "stancebar",
-  frost_resistance_aura = "stancebar",
-  fire_resistance_aura = "stancebar",
   purify = "spellbook",
   summon_warhorse = "spellbook",
   summon_charger = "spellbook",
 }
 L.noSlotLines = {
-  { kind = "stancebar", text = "ui.layout.nostance" },
   { kind = "spellbook", text = "ui.layout.nobook" },
 }
 
@@ -148,9 +161,21 @@ L.combos = {
   },
 }
 
--- The preview warns when a key loses one of these game defaults.
+-- What layout 1 put on buttons that are now off the plan or spare (Action Bar 5, Action Bar 3 buttons 7-9). A full
+-- apply clears such a button only while it still holds exactly that spell and the spell has a new home.
+L.old = {
+  [42] = "!opener", [44] = "turn_undead", [45] = "seal_of_the_crusader", [47] = "redemption", [48] = "divine_protection",
+  [55] = "blessing_of_protection", [56] = { "cleanse", "purify" }, [57] = "lay_on_hands",
+}
+
+-- The preview warns when a key loses one of these game defaults (Ctrl+1-5: stance bar buttons; Ctrl+R: framerate).
 L.defaultWarn = {
+  ["CTRL-1"] = "ui.preview.warn.stance",
+  ["CTRL-2"] = "ui.preview.warn.stance",
+  ["CTRL-3"] = "ui.preview.warn.stance",
+  ["CTRL-4"] = "ui.preview.warn.stance",
+  ["CTRL-5"] = "ui.preview.warn.stance",
   ["CTRL-R"] = "ui.preview.warn.fps",
 }
 
-L.spareOrder = { "bar4", "bar3", "bar2", "bar5" }
+L.spareOrder = { "bar4", "bar6", "bar3" }

@@ -1,5 +1,9 @@
 # Keybind layout research: Protection Paladin, dungeon tank (proposal)
 
+> **Superseded (0.7.0):** the current Protection layout (layout 2, "family blocks", auras on Action Bar 3) is in
+> [keybind-layout-v4.md](keybind-layout-v4.md). This document keeps the pull walkthroughs, reach tiers and sources
+> that v4 builds on; its grid, own-key rule and stance-bar aura plan are history.
+
 Status: **proposal for approval**. Nothing here is built yet. Once Oskar approves the grid in section (a), a separate
 task builds the `ForeverSensei_Paladin` pack (target: ForeverSensei 0.6.0). It follows the method of the shaman
 layout (`research/keybind-layout.md`, layout v3 onwards).

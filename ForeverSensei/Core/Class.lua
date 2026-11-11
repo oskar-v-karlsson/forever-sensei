@@ -19,7 +19,7 @@ ns.Sources = {
 
 -- ui texts the core shows in its windows but whose wording belongs to a class or spec. Every pack defines them.
 ns.PackTexts = {
-  "ui.where.totembar", "ui.preview.warn.own", "ui.layout.intro", "ui.layout.intro2", "ui.layout.items",
+  "ui.where.totembar", "ui.layout.intro", "ui.layout.intro2", "ui.layout.items",
   "ui.layout.changed", "ui.layout.clean", "ui.targeting.mouseover.help", "ui.targeting.click.help",
   "ui.trainer.title", "ui.trainer.intro", "ui.talents.intro", "ui.preview.warn.stance",
 }
@@ -42,12 +42,14 @@ function ns.KeyLabel(key)
 end
 
 -- A spec layout from its plan: L.plan[bar id] = 12 entries (a spell key; "@kind" an item macro; "-" a spare button;
--- "#" the player's own button; "x" a button the addon never uses (not spare, never filled or bound); "!id" a multi-spell macro from L.combos; { "key", standIn = .., after = .. } a spell
--- with options). Builds L.slots, L.bySpell, L.byItem, L.byCombo, L.own (slot → true) and L.spare (unplanned buttons,
--- in L.spareOrder bar order: first choice for things moved out of a planned slot; key/binding for keyed bars).
--- A bar's keys entry false leaves that button unbound and the key on its game default (the paladin's Ctrl+1-4).
+-- "x" a button the addon never uses (not spare, never filled or bound); "!id" a multi-spell macro from L.combos;
+-- { "key", standIn = .., after = .. } a spell with options). Builds L.slots, L.bySpell, L.byItem, L.byCombo and
+-- L.spare (unplanned buttons, in L.spareOrder bar order: first choice for things moved out of a planned slot;
+-- key/binding for keyed bars). A bar's keys entry false leaves that button unbound.
+-- L.retired: bars the plan no longer uses ({ id, first, binding, setting, assigned = { buttons }, keepShown }).
+-- L.old[slot] = a plan key (or a list of them) an earlier layout put in a button the plan no longer fills.
 function ns.BuildLayout(L)
-  L.slots, L.bySpell, L.byItem, L.byCombo, L.own, L.spare = {}, {}, {}, {}, {}, {}
+  L.slots, L.bySpell, L.byItem, L.byCombo, L.spare = {}, {}, {}, {}, {}
   L.noSlot = L.noSlot or {}
   L.macros = L.macros or {}
   L.macroKind = L.macroKind or {}
@@ -55,9 +57,7 @@ function ns.BuildLayout(L)
   L.macroVars = L.macroVars or {}
   L.combos = L.combos or {}
   L.old = L.old or {}
-  L.oldOwn = L.oldOwn or {}
   L.retired = L.retired or {}
-  L.ownKeys = L.ownKeys or {}
   L.KeyLabel = ns.KeyLabel
   local spareByBar = {}
   for _, bar in ipairs(L.bars) do
@@ -68,9 +68,7 @@ function ns.BuildLayout(L)
       local slotNo = bar.first + i - 1
       local key = bar.keys and bar.keys[i] or nil
       local binding = key and string.format(bar.binding, i) or nil
-      if what == "#" then
-        L.own[slotNo] = true
-      elseif what == "x" then -- nothing: the addon leaves this button alone
+      if what == "x" then -- nothing: the addon leaves this button alone
       elseif what == "-" then
         table.insert(spareByBar[bar.id], { bar = bar.id, button = i, slot = slotNo, key = key, binding = binding })
       else

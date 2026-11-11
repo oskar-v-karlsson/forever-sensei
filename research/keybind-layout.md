@@ -1,5 +1,9 @@
 # Keybind layout research: Restoration Shaman, dungeon healer (proposal)
 
+> **Superseded (0.7.0):** the current Restoration layout (layout 7, "family blocks") is in
+> [keybind-layout-v4.md](keybind-layout-v4.md). This document keeps the pull walkthroughs, reach tiers and sources
+> that v4 builds on; its grids, own-key rule and Action Bar 5 plan are history.
+
 Status: **proposal for approval**. Nothing here is implemented yet. The current layout (version 2,
 ForeverSensei 0.3.0) is in `ForeverSensei/Data/Shaman/Layout.lua`. Once the player and Erika approve the
 tables in section (a), a separate task implements them.

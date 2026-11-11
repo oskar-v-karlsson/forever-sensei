@@ -78,21 +78,13 @@ return function(ns, lang)
   -- Full layout (mouseover macros): preview, apply, check, undo, check.
   STUB.level = 60
   for id in pairs(STUB.names) do STUB.known[id] = true end
-  -- Buttons 5 and Shift+5 (slots 5, 65) and the keys 5, Shift+5, Ctrl+5 are the player's own; so is layout 3's Ctrl+5
-  -- button on the retired Action Bar 6 (slot 149): a full apply never touches them.
+  -- No key is the player's own since layout 7: buttons 5 and Shift+5 (slots 5, 65) and Action Bar 6's button 5
+  -- (slot 149) are planned like the rest, and what was there moves to a spare button or is replaced.
   STUB.actions = { [1] = { "spell", 403 }, [2] = { "item", 6948 }, [7] = { "spell", 331 }, [13] = { "spell", 324 },
     [5] = { "item", 6948 }, [65] = { "spell", 324 }, [149] = { "spell", 403 } }
   STUB.bindings = { ["Q"] = "STRAFELEFT", ["E"] = "STRAFERIGHT", ["1"] = "ACTIONBUTTON1", ["SHIFT-1"] = "ACTIONPAGE1",
     ["CTRL-1"] = "SHAPESHIFTBUTTON1", ["5"] = "ACTIONBUTTON5", ["SHIFT-5"] = "MULTIACTIONBAR1BUTTON5",
     ["CTRL-5"] = "SHAPESHIFTBUTTON5" }
-  local function ownUntouched(what)
-    local a5, a65, a149 = STUB.actions[5], STUB.actions[65], STUB.actions[149]
-    if not (a5 and a5[2] == 6948 and a65 and a65[2] == 324 and a149 and a149[2] == 403)
-      or STUB.bindings["5"] ~= "ACTIONBUTTON5" or STUB.bindings["SHIFT-5"] ~= "MULTIACTIONBAR1BUTTON5"
-      or STUB.bindings["CTRL-5"] ~= "SHAPESHIFTBUTTON5" then
-      fail(what .. ": the player's own buttons or keys 5, Shift+5, Ctrl+5 were changed")
-    end
-  end
   local function snapshot()
     local a, b = {}, {}
     for k, v in pairs(STUB.actions) do a[k] = v[1] .. ":" .. tostring(v[2]) end
@@ -141,7 +133,7 @@ return function(ns, lang)
       if bar.setting and STUB.settings[bar.setting] ~= true then fail(mode .. ": " .. bar.id .. " not shown") end
     end
     for _, bar in ipairs(L.retired) do
-      if STUB.settings[bar.setting] then fail(mode .. ": retired " .. bar.id .. " is shown") end
+      if not bar.keepShown and STUB.settings[bar.setting] then fail(mode .. ": retired " .. bar.id .. " is shown") end
     end
   end
 
@@ -153,25 +145,27 @@ return function(ns, lang)
     else
       fits("preview", p)
       local text = table.concat(ns.Layout.Describe(ns.Layout.BuildPlan()), "\n")
-      for _, want in ipairs({ ns.T("ui.preview.warn.stance", { key = "Ctrl+1, Ctrl+2, Ctrl+3, Ctrl+4" }),
-        ns.T("ui.preview.warn.fps", { key = "Ctrl+R" }), ns.T("ui.preview.warn.mouse"), ns.T("ui.preview.warn.own") }) do
+      for _, want in ipairs({ ns.T("ui.preview.warn.stance", { key = "Ctrl+1, Ctrl+2, Ctrl+3, Ctrl+4, Ctrl+5" }),
+        ns.T("ui.preview.warn.fps", { key = "Ctrl+R" }), ns.T("ui.preview.warn.mouse"),
+        ns.T("ui.preview.warn.editmode", { bar = ns.T("ui.bar.bar6") }) }) do
         if not text:find(want, 1, true) then fail("preview: missing the note " .. want) end
       end
       try("apply", function() p.apply:Click() end)
       checkLayout("mouseover")
-      ownUntouched("apply")
-      -- Every key of a keyed bar is bound, also spare ones (empty buttons): Ctrl mirrors Shift on Action Bar 5, and the
-      -- mouse buttons fire Action Bar 3 7-12.
+      -- Every key of a keyed bar is bound, also spare ones (empty buttons): Ctrl is Action Bar 3, and the mouse
+      -- buttons fire Action Bar 6 1-6.
       for _, sp in ipairs(L.spare) do
         if sp.key and STUB.bindings[sp.key] ~= sp.binding then fail("apply: spare key " .. sp.key .. " not bound to " .. sp.binding) end
       end
-      for key, want in pairs({ ["CTRL-R"] = "MULTIACTIONBAR4BUTTON8", ["CTRL-2"] = "MULTIACTIONBAR4BUTTON2",
-        ["CTRL-C"] = "MULTIACTIONBAR4BUTTON12", ["BUTTON4"] = "MULTIACTIONBAR2BUTTON7", ["CTRL-BUTTON5"] = "MULTIACTIONBAR2BUTTON12" }) do
+      for key, want in pairs({ ["CTRL-R"] = "MULTIACTIONBAR2BUTTON8", ["CTRL-4"] = "MULTIACTIONBAR2BUTTON4",
+        ["CTRL-C"] = "MULTIACTIONBAR2BUTTON12", ["5"] = "ACTIONBUTTON5", ["SHIFT-5"] = "MULTIACTIONBAR1BUTTON5",
+        ["BUTTON4"] = "MULTIACTIONBAR5BUTTON1", ["CTRL-BUTTON5"] = "MULTIACTIONBAR5BUTTON6" }) do
         if STUB.bindings[key] ~= want then fail("apply: " .. key .. " should be bound to " .. want) end
       end
       if not L.bySpell.lightning_shield or STUB.actions[L.bySpell.lightning_shield.slot] == nil then
         fail("apply: Lightning Shield not on its own button once Water Shield is known")
       end
+      if STUB.settings.PROXY_SHOW_ACTIONBAR_6 ~= true then fail("apply: Action Bar 6 (mouse buttons) not shown") end
     end
   end
   local planAfter = ns.Layout.BuildPlan()
@@ -182,7 +176,6 @@ return function(ns, lang)
   checkLayout("click")
   try("targeting mouseover", ns.Layout.SetTargeting, "mouseover")
   checkLayout("mouseover")
-  ownUntouched("targeting")
 
   -- Undo the targeting swaps and the full layout: back to the starting bars and keys.
   local undos = 0
@@ -211,11 +204,12 @@ return function(ns, lang)
   if not needsBar then fail("layout: the spare button's bar not shown although something moves there") end
 
   -- 0.4.0 (layout 3) players: Action Bars 6 and 7 are shown and hold the Ctrl and mouse spells, and their keys point
-  -- there. A full apply clears those buttons, hides both bars and unbinds stale keys, but keeps the player's own
-  -- Ctrl+5 key and layout 3's Ctrl+5 button (slot 149) and anything that isn't the plan's. Undo restores it all.
+  -- there. Action Bar 6 is planned again (the mouse buttons); Action Bar 7 is retired: a full apply clears the plan's
+  -- spells on its buttons and hides it, but keeps anything that isn't the plan's. The old Ctrl and mouse keys are
+  -- bound to their new buttons. Undo restores it all.
   local function idOf(key) return ns.Spells.CurrentID(ns.Spells.Get(key)) end
   STUB.actions = { [145] = { "spell", idOf("totemic_recall") }, [157] = { "spell", idOf("riptide") },
-    [149] = { "spell", 403 }, [150] = { "item", 6948 } }
+    [158] = { "item", 6948 }, [163] = { "spell", 403 } }
   STUB.bindings = { ["CTRL-1"] = "MULTIACTIONBAR5BUTTON1", ["BUTTON4"] = "MULTIACTIONBAR6BUTTON1",
     ["CTRL-2"] = "MULTIACTIONBAR5BUTTON2", ["CTRL-5"] = "MULTIACTIONBAR5BUTTON5" }
   STUB.settings.PROXY_SHOW_ACTIONBAR_6, STUB.settings.PROXY_SHOW_ACTIONBAR_7 = true, true
@@ -228,17 +222,21 @@ return function(ns, lang)
   local migS = settingsSnap()
   local migPlan = ns.Layout.BuildPlan()
   local migText = table.concat(ns.Layout.Describe(migPlan), "\n")
-  if #migPlan.hide ~= 2 or not migText:find(ns.T("ui.preview.hide"), 1, true) then
-    fail("migration: the preview does not list Action Bars 6 and 7 as hidden")
+  if #migPlan.hide ~= 1 or migPlan.hide[1].id ~= "bar7" or not migText:find(ns.T("ui.preview.hide"), 1, true) then
+    fail("migration: the preview does not list Action Bar 7 (only) as hidden")
   end
   try("migration apply", ns.Layout.Execute, migPlan)
   checkLayout("mouseover") -- (migration)
-  if STUB.actions[145] or STUB.actions[157] then fail("migration: layout 3 spells left on Action Bars 6/7") end
-  if not (STUB.actions[149] and STUB.actions[149][2] == 403 and STUB.actions[150]) then
-    fail("migration: the player's Ctrl+5 button or a non-plan button on Action Bar 6 was cleared")
+  if STUB.actions[157] then fail("migration: layout 3's Riptide left on Action Bar 7") end
+  if not (STUB.actions[158] and STUB.actions[158][2] == 6948 and STUB.actions[163] and STUB.actions[163][2] == 403) then
+    fail("migration: a button on Action Bar 7 that isn't the plan's was cleared")
   end
-  if STUB.bindings["CTRL-2"] ~= "MULTIACTIONBAR4BUTTON2" or STUB.bindings["CTRL-5"] ~= "MULTIACTIONBAR5BUTTON5" then
-    fail("migration: stale Action Bar 6/7 keys not moved to Action Bar 5, or the own Ctrl+5 key changed")
+  if STUB.settings.PROXY_SHOW_ACTIONBAR_6 ~= true or STUB.settings.PROXY_SHOW_ACTIONBAR_7 then
+    fail("migration: Action Bar 6 should stay shown and Action Bar 7 be hidden")
+  end
+  for key, want in pairs({ ["CTRL-1"] = "MULTIACTIONBAR2BUTTON1", ["CTRL-2"] = "MULTIACTIONBAR2BUTTON2",
+    ["CTRL-5"] = "MULTIACTIONBAR2BUTTON5", ["BUTTON4"] = "MULTIACTIONBAR5BUTTON1" }) do
+    if STUB.bindings[key] ~= want then fail("migration: " .. key .. " not moved to " .. want) end
   end
   if not ns.Layout.IsEmptyPlan(ns.Layout.BuildPlan()) then fail("migration: plan not empty after apply") end
   try("migration undo", ns.Layout.Undo)
@@ -251,12 +249,16 @@ return function(ns, lang)
   if not ok then fail("migration undo: bar settings differ: " .. why) end
 
   -- Clean bars: asks first, empties only the buttons the addon configures (planned slots, including ones kept free for
-  -- spells not learned yet, and layout 3's buttons on Action Bars 6/7), keeps spare and own buttons and everything
-  -- else, and Undo puts everything back.
+  -- spells not learned yet, layout 6's buttons on Action Bar 5 and layout 3's on Action Bar 7), keeps spare buttons,
+  -- the other buttons of the retired bars and everything else, and Undo puts everything back.
   local spare = L.spare[1].slot
   local unlearned = L.bySpell.chain_heal.slot
+  local bar6Spare
+  for _, sp in ipairs(L.spare) do if sp.bar == "bar6" then bar6Spare = bar6Spare or sp.slot end end
   for _, sl in ipairs(L.slots) do
-    if sl.slot == spare or sl.slot == 146 then fail("clean: test slot " .. sl.slot .. " is planned") end
+    if sl.slot == spare or sl.slot == bar6Spare or sl.slot == 39 or sl.slot == 163 then
+      fail("clean: test slot " .. sl.slot .. " is planned")
+    end
   end
   local knownBefore = STUB.known
   STUB.known = {}
@@ -265,9 +267,12 @@ return function(ns, lang)
   if ns.Spells.IsKnown(ns.Spells.Get("chain_heal")) then
     fail("clean: Chain Heal should be unlearned here, to test a slot kept free for it")
   end
-  STUB.actions = { [1] = { "spell", 403 }, [5] = { "item", 6948 }, [65] = { "spell", 324 }, [30] = { "item", 6948 },
-    [45] = { "spell", 331 }, [149] = { "spell", 403 }, [160] = { "spell", 324 }, [100] = { "spell", 403 },
-    [spare] = { "spell", 324 }, [146] = { "spell", 403 }, [unlearned] = { "spell", 403 } }
+  -- Planned: 1 (Flame Shock), 30 (Action Bar 4 button 6), 45 (Action Bar 5 button 9, layout 6), 160 (Action Bar 7
+  -- button 4, layout 3) and Chain Heal's button. Kept: 100, the first spare, a spare on Action Bar 6, Action Bar 5
+  -- button 3 and Action Bar 7 button 7 (no layout filled them last).
+  STUB.actions = { [1] = { "spell", 403 }, [30] = { "item", 6948 }, [45] = { "spell", 331 }, [160] = { "spell", 324 },
+    [100] = { "spell", 403 }, [spare] = { "spell", 324 }, [bar6Spare] = { "spell", 403 }, [39] = { "item", 6948 },
+    [163] = { "spell", 403 }, [unlearned] = { "spell", 403 } }
   local clA = snapshot()
   try("clean", ns.Layout.Clean)
   local cf = _G.ForeverSenseiConfirm
@@ -277,7 +282,7 @@ return function(ns, lang)
     fits("clean confirm", cf)
     try("clean confirm", function() cf.yes:Click() end)
   end
-  local keepSlots = { [5] = true, [65] = true, [100] = true, [149] = true, [146] = true, [spare] = true }
+  local keepSlots = { [100] = true, [spare] = true, [bar6Spare] = true, [39] = true, [163] = true }
   for slot in pairs(clA) do
     local keep = keepSlots[slot] or false
     if (STUB.actions[slot] ~= nil) ~= keep then fail("clean: slot " .. slot .. (keep and " was emptied" or " still set")) end
@@ -285,11 +290,11 @@ return function(ns, lang)
   try("clean undo", ns.Layout.Undo)
   ok, why = same(clA, (snapshot()))
   if not ok then fail("clean undo: action slots differ: " .. why) end
-  STUB.actions = { [5] = { "item", 6948 }, [65] = { "spell", 324 } }
+  STUB.actions = { [100] = { "spell", 403 }, [39] = { "item", 6948 }, [spare] = { "spell", 324 } }
   STUB.known = knownBefore
   if cf then cf:Hide() end
   try("clean nothing", ns.Layout.Clean)
-  if cf and cf:IsShown() then fail("clean: asked although only the own buttons hold something") end
+  if cf and cf:IsShown() then fail("clean: asked although only buttons the addon doesn't configure hold something") end
   -- Something Undo can't restore (a mount) is named in the question.
   STUB.actions = { [L.bySpell.earthbind_totem.slot] = { "summonmount", 7 } }
   try("clean mount", ns.Layout.Clean)
@@ -457,7 +462,7 @@ return function(ns, lang)
   ns.char.ranks.stoneskin_totem = ns.Spells.CurrentID(stoneskin)
   STUB.actions = { [ss.slot] = { "spell", ns.Spells.CurrentID(stoneskin) } }
   STUB.bindings[ss.key] = ss.binding
-  STUB.settings.PROXY_SHOW_ACTIONBAR_2 = true
+  STUB.settings.PROXY_SHOW_ACTIONBAR_2, STUB.settings.PROXY_SHOW_ACTIONBAR_3 = true, true
   ns.char.postponed = { stoneskin_totem = true }
   ns.char.layoutVersion = L.version
   if ns.Layout.IsPlaced(stoneskin) ~= true then fail("login: Stoneskin Totem setup is not placed") end
@@ -589,107 +594,132 @@ return function(ns, lang)
   if ns.Spells.LayoutSlot(ls).slot ~= L.bySpell.lightning_shield.slot then fail("stand-in: Lightning Shield's slot after Water Shield") end
 
   -- Earlier layouts' leftovers: a full apply clears an old button that still holds a spell that has its new place
-  -- (Call of the Elements, layout 2) or now lives only in the spellbook (Sentry Totem, layout 4); the player's own
-  -- button 5 (Earth Shock in layout 2) stays. Ctrl+5's button held Mana Tide Totem in layout 4: cleared while it
-  -- still holds exactly that, left alone once the player put something else there.
+  -- (Fire Nova on layout 6's Ctrl+R button, Action Bar 5) or now lives only in the spellbook (Sentry Totem, layout 4
+  -- on Action Bar 4 button 12). Action Bar 5 button 5 held Mana Tide Totem in layout 4: cleared while it still holds
+  -- exactly that, left alone once the player put something else there. Action Bar 5 stays shown.
   STUB.level = 60
   for id in pairs(STUB.names) do STUB.known[id] = true end
-  local cote, es = ns.Spells.Get("call_of_the_elements"), ns.Spells.Get("earth_shock")
+  local fn, es = ns.Spells.Get("fire_nova"), ns.Spells.Get("earth_shock")
   local st, mt = ns.Spells.Get("sentry_totem"), ns.Spells.Get("mana_tide_totem")
-  STUB.actions = { [72] = { "spell", cote.id }, [36] = { "spell", st.id }, [5] = { "spell", es.id }, [41] = { "spell", mt.id } }
+  STUB.actions = { [44] = { "spell", ns.Spells.CurrentID(fn) }, [36] = { "spell", st.id }, [41] = { "spell", mt.id },
+    [40] = { "item", 6948 } }
+  STUB.settings.PROXY_SHOW_ACTIONBAR_5 = true
   local oldPlan = ns.Layout.BuildPlan()
   local cleared, touched = {}, false
   for _, c in ipairs(oldPlan.clears) do
     cleared[c.where.slot] = true
-    if c.where.slot == 5 then touched = true end
+    if c.where.slot == 40 then touched = true end
   end
-  for _, pl in ipairs(oldPlan.place) do if pl.where.slot == 5 or pl.where.slot == 41 then touched = true end end
-  for _, m in ipairs(oldPlan.moves) do if m.from == 5 or m.from == 41 then touched = true end end
-  if not cleared[72] then fail("old leftover: Call of the Elements on old slot 72 not cleared") end
+  for _, m in ipairs(oldPlan.moves) do if m.from == 40 then touched = true end end
+  for _, h in ipairs(oldPlan.hide) do if h.id == "bar5" then touched = true end end
+  if not cleared[44] then fail("old leftover: layout 6's Fire Nova on Action Bar 5 button 8 not cleared") end
   if not cleared[36] then fail("old leftover: Sentry Totem (spellbook only now) on old slot 36 not cleared") end
-  if not cleared[41] then fail("old leftover: layout 4's Mana Tide Totem on Ctrl+5's button not cleared") end
-  if touched then fail("old leftover: the player's own button 5 was planned to change, or Ctrl+5 other than cleared") end
+  if not cleared[41] then fail("old leftover: layout 4's Mana Tide Totem on Action Bar 5 button 5 not cleared") end
+  if touched then fail("old leftover: the player's own item on Action Bar 5, or the bar itself, was planned to change") end
   local mtSlot = L.bySpell.mana_tide_totem.slot
   try("old leftover apply", ns.Layout.Execute, oldPlan)
-  if STUB.actions[41] then fail("old leftover: Ctrl+5's button still holds Mana Tide Totem after apply") end
-  if not STUB.actions[mtSlot] then fail("old leftover: Mana Tide Totem not on Ctrl+Z after apply") end
+  if STUB.actions[41] or STUB.actions[44] then fail("old leftover: Action Bar 5 still holds an old spell after apply") end
+  if not (STUB.actions[40] and STUB.actions[40][2] == 6948) then fail("old leftover: the player's item on Action Bar 5 was cleared") end
+  if STUB.settings.PROXY_SHOW_ACTIONBAR_5 ~= true then fail("old leftover: Action Bar 5 was hidden") end
+  if not STUB.actions[mtSlot] then fail("old leftover: Mana Tide Totem not on Shift+X after apply") end
   try("old leftover undo", ns.Layout.Undo)
-  if not (STUB.actions[41] and STUB.actions[41][2] == mt.id) then fail("old leftover undo: Mana Tide Totem not back on Ctrl+5's button") end
-  -- Something else of her own on Ctrl+5 (another spell, or an item) stays.
+  if not (STUB.actions[41] and STUB.actions[41][2] == mt.id) then fail("old leftover undo: Mana Tide Totem not back on Action Bar 5 button 5") end
+  -- Something else of her own there (another spell, or an item) stays.
   for _, mine in ipairs({ { "spell", es.id }, { "item", 6948 } }) do
-    STUB.actions = { [41] = mine }
+    STUB.actions = { [41] = mine, [44] = mine }
     for _, c in ipairs(ns.Layout.BuildPlan().clears) do
-      if c.slot == 41 then fail("old leftover: the player's own " .. mine[1] .. " on Ctrl+5 was planned to be cleared") end
+      if c.slot == 41 or c.slot == 44 then fail("old leftover: the player's own " .. mine[1] .. " on Action Bar 5 was planned to be cleared") end
     end
   end
-  STUB.actions = { [72] = { "spell", cote.id }, [41] = { "spell", mt.id } }
+  STUB.actions = { [44] = { "spell", ns.Spells.CurrentID(fn) }, [41] = { "spell", mt.id } }
   for _, c in ipairs(ns.Layout.BuildPlan("mana_tide_totem").clears) do
-    if c.slot == 41 then fail("old leftover: placing one spell cleared Ctrl+5's button") end
+    if c.slot == 41 then fail("old leftover: placing one spell cleared Action Bar 5 button 5") end
   end
-  local onePlan = ns.Layout.BuildPlan("call_of_the_elements")
-  for _, c in ipairs(onePlan.clears) do
-    if c.where.slot == 72 then fail("old leftover: placing one spell cleared an old button") end
+  for _, c in ipairs(ns.Layout.BuildPlan("fire_nova").clears) do
+    if c.slot == 44 then fail("old leftover: placing one spell cleared an old button") end
   end
   STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
   try("old leftover items", ns.Items.Refresh) -- the apply above wrote the item macros for the level-60 bags
 
-  -- Update from layout 5 (0.4.3-0.6.0) to 6 (0.6.1): Fire Nova and Magma Totem were clicked buttons on bar 4
-  -- (slots 29 and 32); now Magma is Shift+4 (bar 2 button 4) and Fire Nova Ctrl+R (bar 5 button 8), next to
-  -- Searing on Shift+R. One notice, nothing moves by itself; a full apply moves both and binds the keys, and
-  -- 元に戻す puts them back on bar 4 with the old Ctrl+R binding.
+  -- Update from layout 6 (0.6.1) to 7 (0.7.0, family blocks): Ctrl moves from Action Bar 5 to Action Bar 3, the mouse
+  -- buttons from Action Bar 3 7-12 to Action Bar 6 1-6, and key 5 is planned. One notice, nothing moves by itself; a
+  -- full apply moves the spells and keys, shows Action Bar 6, clears layout 6's spells on Action Bar 5 but leaves the
+  -- bar shown, and 元に戻す puts back the spells, the keys and the bar settings.
   STUB.level = 60
   for id in pairs(STUB.names) do STUB.known[id] = true end
-  local fn, magma = ns.Spells.Get("fire_nova"), ns.Spells.Get("magma_totem")
-  local fnId, magmaId = ns.Spells.CurrentID(fn), ns.Spells.CurrentID(magma)
-  local fnSlot, magmaSlot = L.bySpell.fire_nova.slot, L.bySpell.magma_totem.slot
-  if fnSlot ~= 44 or magmaSlot ~= 64 or L.bySpell.fire_nova.key ~= "CTRL-R" or L.bySpell.magma_totem.key ~= "SHIFT-4" then
-    fail("layout 6: Fire Nova must be Ctrl+R (slot 44) and Magma Totem Shift+4 (slot 64)")
-  end
-  STUB.actions = { [29] = { "spell", fnId }, [32] = { "spell", magmaId } }
+  local function cur(key) return ns.Spells.CurrentID(ns.Spells.Get(key)) end
+  -- Layout 6: Totemic Call on 1, Purge on Shift+3, Totemic Recall Ctrl+1 (37), Fire Nova Ctrl+R (44), Mana Tide
+  -- Ctrl+Z (46), Ghost Wolf Ctrl+C (48), Riptide on Mouse4 (Action Bar 3 button 7, 55), the elixir on Action Bar 3
+  -- button 5 (53). The player's own Hearthstone on button 5 and on Action Bar 5 button 2.
+  STUB.actions = { [1] = { "spell", cur("totemic_call") }, [63] = { "spell", cur("purge") },
+    [37] = { "spell", cur("totemic_recall") }, [44] = { "spell", cur("fire_nova") },
+    [46] = { "spell", cur("mana_tide_totem") }, [48] = { "spell", cur("ghost_wolf") },
+    [55] = { "spell", cur("riptide") }, [5] = { "item", 6948 }, [38] = { "item", 6948 } }
   local savedBinds = {}
   for k, v in pairs(STUB.bindings) do savedBinds[k] = v end
-  STUB.bindings["CTRL-R"] = "TOGGLEFPS"
-  STUB.bindings["SHIFT-4"] = "MULTIACTIONBAR1BUTTON4"
-  ns.char.layoutVersion = 5
+  STUB.bindings = { ["CTRL-1"] = "MULTIACTIONBAR4BUTTON1", ["CTRL-R"] = "MULTIACTIONBAR4BUTTON8",
+    ["BUTTON4"] = "MULTIACTIONBAR2BUTTON7", ["CTRL-BUTTON5"] = "MULTIACTIONBAR2BUTTON12", ["5"] = "ACTIONBUTTON5" }
+  STUB.settings.PROXY_SHOW_ACTIONBAR_3, STUB.settings.PROXY_SHOW_ACTIONBAR_5 = true, true
+  STUB.settings.PROXY_SHOW_ACTIONBAR_6 = false
+  local v6A, v6B = snapshot()
+  local v6S = settingsSnap()
+  ns.char.layoutVersion = 6
   relogin()
   confirm = _G.ForeverSenseiConfirm
   if not confirm or not confirm:IsShown() or confirm.text:GetText() ~= ns.T("ui.layout.changed") then
-    fail("layout 6: no notice for a player with layout 5")
+    fail("layout 7: no notice for a player with layout 6")
   else
     confirm:Hide()
   end
-  if not (STUB.actions[29] and STUB.actions[29][2] == fnId and STUB.actions[32] and STUB.actions[32][2] == magmaId)
-      or STUB.actions[fnSlot] or STUB.actions[magmaSlot] then
-    fail("layout 6: the notice moved something by itself")
+  local nA, nB = snapshot()
+  if not same(v6A, nA) or not same(v6B, nB) then fail("layout 7: the notice moved something by itself") end
+  local v7Plan = ns.Layout.BuildPlan()
+  local v7Cleared, v7Bars = {}, {}
+  for _, c in ipairs(v7Plan.clears) do v7Cleared[c.slot] = true end
+  for _, bar in ipairs(v7Plan.bars) do v7Bars[bar.id] = true end
+  for _, slot in ipairs({ 37, 44, 46, 48 }) do
+    if not v7Cleared[slot] then fail("layout 7: layout 6's spell on Action Bar 5 slot " .. slot .. " not cleared") end
   end
-  local firePlan = ns.Layout.BuildPlan()
-  local fireCleared, firePlaced, fpsWarn = {}, {}, false
-  for _, c in ipairs(firePlan.clears) do fireCleared[c.slot] = true end
-  for _, pl in ipairs(firePlan.place) do firePlaced[pl.slot] = pl.desired.entry and pl.desired.entry.key end
-  if not fireCleared[29] or not fireCleared[32] then fail("layout 6: the old bar 4 Fire Nova and Magma buttons are not cleared") end
-  if firePlaced[fnSlot] ~= "fire_nova" or firePlaced[magmaSlot] ~= "magma_totem" then
-    fail("layout 6: Fire Nova and Magma Totem are not placed on Ctrl+R and Shift+4")
+  if v7Cleared[38] then fail("layout 7: the player's own item on Action Bar 5 is planned to be cleared") end
+  if not v7Bars.bar6 then fail("layout 7: the preview does not show Action Bar 6") end
+  for _, h in ipairs(v7Plan.hide) do if h.id == "bar5" then fail("layout 7: Action Bar 5 is planned to be hidden") end end
+  local v7Text = table.concat(ns.Layout.Describe(v7Plan), "\n")
+  if not v7Text:find(ns.T("ui.preview.warn.editmode", { bar = ns.T("ui.bar.bar6") }), 1, true) then
+    fail("layout 7: the preview does not tell the player to move Action Bar 6 in Edit Mode")
   end
-  for _, line in ipairs(ns.Layout.Warnings(firePlan)) do
-    if line == ns.T("ui.preview.warn.fps", { key = ns.KeyLabel("CTRL-R") }) then fpsWarn = true end
+  try("layout 7 apply", ns.Layout.Execute, v7Plan)
+  checkLayout(ns.settings.targeting) -- (layout 7)
+  for _, slot in ipairs({ 37, 44, 46, 48 }) do
+    if STUB.actions[slot] then fail("layout 7: Action Bar 5 slot " .. slot .. " still holds layout 6's spell") end
   end
-  if not fpsWarn then fail("layout 6: the preview does not warn about Ctrl+R's framerate default") end
-  try("layout 6 apply", ns.Layout.Execute, firePlan)
-  if STUB.actions[29] or STUB.actions[32] then fail("layout 6: bar 4 still holds Fire Nova or Magma Totem after apply") end
-  if not (STUB.actions[fnSlot] and STUB.actions[fnSlot][2] == fnId) then fail("layout 6: Fire Nova not on Ctrl+R's button") end
-  if not (STUB.actions[magmaSlot] and STUB.actions[magmaSlot][2] == magmaId) then fail("layout 6: Magma Totem not on Shift+4's button") end
-  if STUB.bindings["CTRL-R"] ~= "MULTIACTIONBAR4BUTTON8" or STUB.bindings["SHIFT-4"] ~= "MULTIACTIONBAR1BUTTON4" then
-    fail("layout 6: Ctrl+R or Shift+4 not bound to its button")
+  if not (STUB.actions[38] and STUB.actions[38][2] == 6948) then fail("layout 7: the player's item on Action Bar 5 was cleared") end
+  if STUB.settings.PROXY_SHOW_ACTIONBAR_5 ~= true or STUB.settings.PROXY_SHOW_ACTIONBAR_6 ~= true then
+    fail("layout 7: Action Bar 5 should stay shown and Action Bar 6 be shown")
   end
-  try("layout 6 undo", ns.Layout.Undo)
-  if not (STUB.actions[29] and STUB.actions[29][2] == fnId and STUB.actions[32] and STUB.actions[32][2] == magmaId) then
-    fail("layout 6 undo: Fire Nova and Magma Totem not back on bar 4")
+  local hearth
+  for _, sp in ipairs(L.spare) do
+    if STUB.actions[sp.slot] and STUB.actions[sp.slot][2] == 6948 then hearth = sp.slot end
   end
-  if STUB.actions[fnSlot] or STUB.actions[magmaSlot] then fail("layout 6 undo: Ctrl+R or Shift+4 button not empty again") end
-  if STUB.bindings["CTRL-R"] ~= "TOGGLEFPS" then fail("layout 6 undo: Ctrl+R not back to the framerate display") end
+  if not hearth then fail("layout 7: the Hearthstone from button 5 did not move to a spare button") end
+  for key, want in pairs({ ["CTRL-1"] = "MULTIACTIONBAR2BUTTON1", ["CTRL-R"] = "MULTIACTIONBAR2BUTTON8",
+    ["SHIFT-F"] = "MULTIACTIONBAR1BUTTON9", ["BUTTON4"] = "MULTIACTIONBAR5BUTTON1",
+    ["CTRL-BUTTON5"] = "MULTIACTIONBAR5BUTTON6", ["5"] = "ACTIONBUTTON5" }) do
+    if STUB.bindings[key] ~= want then fail("layout 7: " .. key .. " not bound to " .. want) end
+  end
+  if L.bySpell.fire_nova.key ~= "SHIFT-F" or L.bySpell.riptide.key ~= "BUTTON4" or L.bySpell.ghost_wolf.key ~= "CTRL-1" then
+    fail("layout 7: Fire Nova Shift+F, Riptide Mouse4 and Ghost Wolf Ctrl+1 expected")
+  end
+  try("layout 7 undo", ns.Layout.Undo)
+  local uA, uB = snapshot()
+  ok, why = same(v6A, uA)
+  if not ok then fail("layout 7 undo: action slots differ: " .. why) end
+  ok, why = same(v6B, uB)
+  if not ok then fail("layout 7 undo: key bindings differ: " .. why) end
+  ok, why = same(v6S, settingsSnap())
+  if not ok then fail("layout 7 undo: bar settings differ: " .. why) end
   STUB.bindings = savedBinds
   STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
-  try("layout 6 items", ns.Items.Refresh)
+  try("layout 7 items", ns.Items.Refresh)
 
   -- Translation reports: save two, send, format.
   ns.db.reports = {}

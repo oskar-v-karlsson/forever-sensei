@@ -3,7 +3,7 @@
 ## Notes: Protection Paladin pack for ForeverSensei: skills, key layout, talents and guide.
 ## Notes-jaJP: ForeverSensei用のProtection パラディンのパック（スキル・キー配置・タレント・ガイド）。
 ## Author: oskar-v-karlsson
-## Version: 0.6.1
+## Version: 0.7.0
 ## Dependencies: ForeverSensei
 ## LoadOnDemand: 1
 ## X-ForeverSensei-API: 1

@@ -110,6 +110,8 @@ L["ui.preview.notes"] = "Note"
 L["ui.preview.warn.fps"] = "{key} shows the framerate by default. This layout uses it for one of its buttons."
 L["ui.preview.warn.mouse"] = "The mouse side buttons (Mouse 4 and Mouse 5) get skills. In your mouse software, leave them as the default buttons 4 and 5 (not Back/Forward or a key)."
 
+L["ui.layout.editmode"] = "Action Bar 6 starts in the middle of the screen. Press Esc, open Edit Mode and drag it next to your bottom bars. The game remembers where you put it."
+L["ui.preview.warn.editmode"] = "{bar} starts in the middle of the screen: press Esc, open Edit Mode and drag it next to your bottom bars."
 L["ui.layout.nobook"] = "Only in the spellbook (rarely needed): {names}"
 L["ui.layout.targeting"] = "How your heals choose a target:"
 L["ui.clean.confirm"] = "Remove the {n} buttons that this layout uses? Your own buttons and all other buttons stay. Your bars are saved, so Undo puts them back."

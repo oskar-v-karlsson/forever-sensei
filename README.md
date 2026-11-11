@@ -11,7 +11,7 @@ A class pack loads only on characters of its class. Turn off packs you don't pla
 
 - **Language (日本語 / English):** the first time the addon runs, a small window asks for the language with two buttons, **日本語** and **English**. Nothing else shows until you choose. The choice is saved for the whole account and kept through updates. Change it any time in the settings tab or with `/sensei ja` / `/sensei en`; open windows switch at once, no `/reload` needed. Players who used a version before 0.5.1 are not asked and keep their language.
 - **New skill cards (新しいスキル):** when you learn a skill, a card explains in the chosen language what it does, when to use it, where it goes on your bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
-- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot and key, planned for a level-60 dungeon healer (Shaman) or tank (Paladin), so a key never moves as you level. The Shaman examples below; the Paladin grid is in [Key layout: Protection Paladin](#key-layout-protection-paladin). Only keys near WASD are used: `1-4`, `Q E R F`, `Z X C`, the same keys with Shift or Ctrl, and the two mouse side buttons. The heals have keys without a modifier (`F`, `E`, `R`, Mouse 4, Mouse 5), and spells for the same job share one key with Shift and Ctrl (e.g. `1` / `Shift+1` / `Ctrl+1` move your totems). `5`, `Shift+5` and `Ctrl+5` are yours: the addon never touches them. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them. **バーを空にする** first empties only the buttons the layout uses, so the full layout starts clean; your other buttons stay.
+- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot and key, planned for a level-60 dungeon healer (Shaman) or tank (Paladin), so a key never moves as you level. The Shaman examples below; the Paladin grid is in [Key layout: Protection Paladin](#key-layout-protection-paladin). Only keys near WASD are used: `1-5`, `Q E R F`, `Z X C`, the same keys with Shift or Ctrl, and the two mouse side buttons. The heals have keys without a modifier (`E`, `R`, `F`, Mouse 4, Mouse 5), and spells of one family sit together in one block of keys and buttons (e.g. the Fire totems on `Shift+Q/E/R/F`, the Paladin seals on `Shift+1-5`). Plain, Shift and Ctrl are Action Bars 1, 2 and 3 at the bottom of the screen; the mouse buttons are Action Bar 6. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them. **バーを空にする** first empties only the buttons the layout uses, so the full layout starts clean; your other buttons stay.
 - **New ranks:** the game does not put a new rank on the bars, so the addon upgrades bar buttons to the highest rank automatically (after combat if you are fighting), with a toast and **元に戻す** to keep the old rank. It can be turned off in the settings. Healing macros are checked to cast the highest rank too.
 - **Healing targeting:** mouseover healing macros, or plain spells for click-target healing. One setting switches between them.
 - **Talent advisor (タレント):** when you have an unspent point, it shows the next talent with a short reason, plus the full order: the Mobalytics build for the Restoration Shaman, the Wowhead leveling path (0/32/19) for the Protection Paladin.
@@ -50,10 +50,11 @@ To update, delete the old `ForeverSensei`, `ForeverSensei_Paladin` and `ForeverS
 2. Type `/sensei`, or click the minimap button, or use the addon compartment (the AddOns button at the minimap). The guide opens.
 3. Open **キー配置** (layout), choose how to pick a healing target (**マウスオーバーで回復** or **ターゲットを回復**), then press **すべて配置** to see the preview.
 4. The preview lists every slot and key that changes. Press **適用** to apply. `/sensei undo` or the **元に戻す** button restores the old bars and keys.
-   To start from empty bars, press **バーを空にする** first (`/sensei clean`). It asks first and empties only the buttons the addon configures: every planned slot (spells, item macros, and slots kept free for spells you haven't learned yet) and the buttons 0.4.0 used on Action Bars 6 and 7. Spare buttons, `5`, `Shift+5` and every other button stay. It saves the bars first, so **元に戻す** puts them back.
+   To start from empty bars, press **バーを空にする** first (`/sensei clean`). It asks first and empties only the buttons the addon configures: every planned slot (spells, item macros, and slots kept free for spells you haven't learned yet), the buttons 0.4.1-0.6.1 used on Action Bar 5 and the buttons 0.4.0 used on Action Bar 7. Spare buttons and every other button stay. It saves the bars first, so **元に戻す** puts them back.
 
-   Note: the full layout binds `Q`/`E` (strafe by default), `Shift+1-4` (bar paging by default), `Ctrl+R` (framerate display) and the mouse side buttons, and for the Shaman also `Ctrl+1-4` (stance-bar buttons, e.g. Ghost Wolf). The Paladin layout leaves `Ctrl+1-4` on the stance bar, where the auras are. The preview warns about this.
-5. Play. New skills show a card out of combat. Cards wait until combat ends, and bar or key changes started in combat are applied when it ends.
+   Note: the full layout binds every key of the three rows, including `Q`/`E` (strafe by default), `Shift+1-4` (bar paging by default), `Ctrl+1-5` (stance-bar buttons: Ghost Wolf, the Paladin auras), `Ctrl+R` (framerate display) and the mouse side buttons. The preview warns about this.
+5. **Move Action Bar 6.** The layout uses Action Bar 6 for the mouse buttons and the spells you click in combat. The game puts it in the middle of the screen: press `Esc`, open **Edit Mode** and drag it next to your bottom bars. The game remembers where you put it.
+6. Play. New skills show a card out of combat. Cards wait until combat ends, and bar or key changes started in combat are applied when it ends.
 
 The game's 12.x API hides health, cooldowns and auras from addons in combat, so ForeverSensei only coaches outside combat. It has no rotation helper.
 
@@ -78,43 +79,44 @@ The game's 12.x API hides health, cooldowns and auras from addons in combat, so 
 
 ### Key layout: Restoration Shaman
 
-The plan is in [research/keybind-layout.md](research/keybind-layout.md) (pull walkthroughs, key families, sources). Each row is one base key; Shift and Ctrl press the same key with a modifier.
+The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (layout 7, "family blocks", 0.7.0), which builds on [research/keybind-layout.md](research/keybind-layout.md) (pull walkthroughs, reach for small hands, sources). *(n)* is the level the spell becomes available; MO = mouseover macro.
 
-| Key | Plain | Shift | Ctrl |
+| Key | Plain (Action Bar 1) | Shift (Action Bar 2) | Ctrl (Action Bar 3) |
 |---|---|---|---|
-| 1 | Totemic Call | Call of the Elements | Totemic Recall |
-| 2 | Flame Shock | – | – |
-| 3 | Lightning Bolt | Purge | – |
-| 4 | Chain Lightning | Magma Totem | – |
-| 5 | yours | yours | yours |
-| Q | Earth Shock (interrupt) | Frost Shock | Earthbind Totem |
-| E | Lesser Healing Wave | Stoneskin Totem | Stoneclaw Totem |
-| R | Chain Heal | Searing Totem | Fire Nova |
-| F | Healing Wave | Tremor Totem | Grounding Totem |
-| Z | Mana Potion | Mana Spring Totem | Mana Tide Totem |
-| X | Water Shield (Lightning Shield before level 20) | – | – |
-| C | Healthstone, else Healing Potion | – | Ghost Wolf |
-| Mouse 4 | Riptide | Cure Poison | Poison Cleansing Totem |
-| Mouse 5 | Nature's Swiftness + Healing Wave | Cure Disease | Disease Cleansing Totem |
+| 1 | Flame Shock *(10)* | Totemic Call *(22)* | Ghost Wolf *(20)* |
+| 2 | Lightning Bolt *(1)* | Call of the Elements *(20)* | Water Walking *(28)* |
+| 3 | Chain Lightning *(32)* | Call of the Ancestors *(30)* | Water Breathing *(22)* |
+| 4 | Purge, MO enemy *(12)* | Call of the Spirits *(40)* | – |
+| 5 | Frost Shock *(20)* | Totemic Recall *(20)* | – |
+| Q | Earth Shock (interrupt) *(4)* | Flametongue Totem *(28)* | Earthbind Totem *(6)* |
+| E | Lesser Healing Wave, MO *(20)* | Magma Totem *(26)* | Stoneclaw Totem *(8)* |
+| R | Chain Heal, MO *(40)* | Searing Totem *(10)* | Stoneskin Totem *(4)* |
+| F | Healing Wave, MO *(1)* | Fire Nova *(12)* | Tremor Totem *(18)* |
+| Z | Mana Potion | Mana Spring Totem *(26)* | Grounding Totem *(30)* |
+| X | Water Shield *(20)*; Lightning Shield *(8)* until then | Mana Tide Totem *(25)* | Windfury Totem *(32)* |
+| C | Healthstone, else Healing Potion | Healing Stream Totem *(20)* | Grace of Air Totem *(42)* |
+| Mouse 4 | Riptide, MO *(40)* | Cure Poison, MO *(16)* | Poison Cleansing Totem *(22)* |
+| Mouse 5 | Nature's Swiftness + Healing Wave *(30)* | Cure Disease, MO *(22)* | Disease Cleansing Totem *(38)* |
 
-- Plain keys are the main bar, Shift keys Action Bar 2 and Ctrl keys Action Bar 5 (at the right edge of the screen). The three rows use the same order: buttons 1-12 are `1`, `2`, `3`, `4`, `5`, `Q`, `E`, `R`, `F`, `Z`, `X`, `C`, plain, with Shift or with Ctrl. The mouse buttons use the right half of Action Bar 3: buttons 7-12 are `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5`. **すべて配置** turns on Action Bars 2-5, because a hidden bar may not react to its keys.
-- Action Bars 6 and 7 are not used. Version 0.4.0 put the Ctrl and mouse spells there, in the middle of the screen. **すべて配置** now clears those spells from them, hides both bars and removes keys that still point at their buttons (not your `Ctrl+5`).
-- A key whose spell you learn later (e.g. Chain Heal and Riptide at 40) stays empty until then. Keys never move.
-- The keys with `–` have no skill. They are still bound to their (empty) button, so every row has all 12 keys: `Shift+2`, `Shift+X`, `Shift+C`, `Ctrl+2`, `Ctrl+3`, `Ctrl+4` and `Ctrl+X`. You can put your own things there; **すべて配置** only binds the key and leaves the button alone.
+- **Blocks:** each row splits into `1-5`, `Q E R F` and `Z X C`, and one family fills one block. Plain: damage on `1-5`, the interrupt and heals on `Q-F`, potions and the shield on `Z-C`. Shift: the totem calls on `1-5`, Fire totems on `Q-F`, Water totems on `Z-C`. Ctrl: travel on `1-3`, Earth totems on `Q-F`, Air totems on `Z-C`. The mouse buttons are three pairs: heals, cures, cleansing totems.
+- **Bars:** plain keys are Action Bar 1, Shift Action Bar 2 and Ctrl Action Bar 3, all at the bottom of the screen. Button n of a bar is key n of its row (`1`, `2`, `3`, `4`, `5`, `Q`, `E`, `R`, `F`, `Z`, `X`, `C`), so a family also sits together on screen. Action Bar 6 buttons 1-6 are `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5`. **すべて配置** turns on Action Bars 2, 3, 4 and 6, because a hidden bar may not react to its keys. Move Action Bar 6 down in Edit Mode (see First steps).
+- **Fire totems** (Erika's request in 0.6.1, kept together): Flametongue, Magma, Searing and Fire Nova on `Shift+Q/E/R/F`. Fire Nova only hits enemies near your active Fire totem, so against a pack place Searing or Magma first, then press `Shift+F`.
+- Totem flow in a dungeon: `Shift+1` Totemic Call at every pull brings your totems along; `Shift+2` Call of the Elements when the 5-minute totems run out (about every few pulls) and after a wipe; `Shift+R` Searing at every pull (it lasts 30-55 s); `Shift+5` Totemic Recall when you leave. Before level 22 (no Totemic Call yet), put down Stoneskin (`Ctrl+R`) and Searing by hand.
+- A key whose spell you learn later (e.g. Chain Heal and Riptide at 40) stays empty until then. Keys never move while levelling.
+- `Ctrl+4` and `Ctrl+5` have no skill. They are still bound to their (empty) button, so every row has all 12 keys. You can put your own things there; **すべて配置** only binds the key and leaves the button alone. No key is reserved any more: `5`, `Shift+5` and `Ctrl+5` are planned like the others, and anything you had there moves to a spare button.
 - **Mouse side buttons:** leave them as the default Button 4 and Button 5 in your mouse software (no "back/forward" or other remapping), so the game sees `BUTTON4` and `BUTTON5`.
-- Totem flow in a dungeon: `1` Totemic Call at every pull brings your totems along; `Shift+1` Call of the Elements when the 5-minute totems run out (about every few pulls) and after a wipe; `Shift+R` Searing at every pull (it lasts 30-55 s); `Ctrl+1` Totemic Recall when you leave.
-- Fire totems sit together (0.6.1, Erika's request): `Shift+R` Searing Totem, `Shift+4` Magma Totem (20 s, packs) just above it, and `Ctrl+R` Fire Nova. Fire Nova only hits enemies near your active Fire totem, so against a pack place Searing or Magma first, then press `Ctrl+R`. Before level 22 (no Call of the Elements yet), put down Stoneskin and Searing by hand.
 
 The other buttons have no keys. They are for clicking:
-- bar 3, buttons 1-6: Rockbiter, Flametongue and Windfury Weapon, Lightning Shield (after Water Shield), the Arcane Elixir and Healing Potion buttons;
-- bar 4: Ancestral Spirit, Astral Recall, Strength of Earth, Healing Stream Totem, Windfury, Grace of Air and Flametongue Totem, the Call of the Ancestors and Call of the Spirits totem sets, and three spare buttons (5, 8 and 12).
-- Only in the spellbook (no button, rarely needed): Far Sight and Sentry Totem (scouting), Water Breathing and Water Walking (travel), Frostbrand Weapon (a solo imbue that slows runners; a healer uses Rockbiter or Flametongue).
+- Action Bar 6, buttons 7-8 (used in combat): Strength of Earth Totem (the Earth block is full) and the Healing Potion button (`FS_HEALPOT`). Buttons 9-12 are spare.
+- Action Bar 4 (right edge, out of combat only): Ancestral Spirit, Astral Recall, Rockbiter, Flametongue, Frostbrand and Windfury Weapon, Lightning Shield (after Water Shield), the Arcane Elixir button (`FS_ELIXIR`). Buttons 9-12 are spare.
+- Only in the spellbook (no button, rarely needed): Far Sight and Sentry Totem (scouting).
+- Action Bar 5 is no longer used. **すべて配置** clears the spells 0.4.1-0.6.1 put there (only while a button still holds exactly that spell) and leaves the bar and anything else on it as you have it. Action Bar 7 (0.4.0) stays hidden.
 
-Anything that was on a planned slot moves to the spare buttons first (bar 3, then the free Shift buttons of Action Bar 2).
+Anything that was on a planned slot moves to the spare buttons first (Action Bar 4, then Action Bar 6, then Action Bar 3).
 
 The item buttons are character macros the addon keeps up to date: `FS_MANA` (Mana Potion), `FS_HEALTH` (Healthstone, else Healing Potion), `FS_HEALPOT` (Healing Potion) and `FS_ELIXIR` (Arcane Elixir, e.g. Minor Arcane Elixir). Each uses the best one of its kind in your bags that your level allows. They are only changed out of combat (after looting, or when combat ends). With none in the bags, the button keeps a fixed icon. The items are listed in `ForeverSensei/Data/Items.lua`.
 
-Players who applied an older layout get a one-time message after updating, with a **すべて配置** button that opens the usual preview. Nothing moves by itself.
+Players who applied an older layout get a one-time message after updating, with a **すべて配置** button that opens the usual preview. Nothing moves by itself, and **元に戻す** restores the old bars, keys and bar visibility.
 
 The resistance totems and Windwall Totem are used from the Totem Bar or spellbook. Reincarnation is passive. The source of truth is `ForeverSensei_Shaman/Data/Restoration/Layout.lua`.
 
@@ -134,34 +136,34 @@ It heals the friend under the mouse, otherwise the friendly target, otherwise yo
 
 ### Key layout: Protection Paladin
 
-The plan is in [research/keybind-layout-paladin.md](research/keybind-layout-paladin.md) (pull walkthroughs at levels 20, 40 and 60, the reach ranking for normal hands, key families, sources). It uses the same allowed keys and bars as the Shaman layout. *(n)* is the level the spell becomes available; MO = mouseover macro.
+The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (layout 2, "family blocks", 0.7.0), which builds on [research/keybind-layout-paladin.md](research/keybind-layout-paladin.md) (pull walkthroughs at levels 20, 40 and 60, reach for normal hands, sources). It uses the same allowed keys and bars as the Shaman layout. *(n)* is the level the spell becomes available; MO = mouseover macro.
 
-| Key | Plain | Shift | Ctrl |
+| Key | Plain (Action Bar 1) | Shift (Action Bar 2) | Ctrl (Action Bar 3) |
 |---|---|---|---|
-| 1 | Holy Strike *(6)* | – | Devotion Aura (stance bar, game key) |
-| 2 | Consecration *(20)* | – | Retribution Aura (stance bar, game key) |
-| 3 | Holy Shield *(42, talent)* | – | Concentration Aura (stance bar, game key) |
-| 4 | Flash of Light, MO + self *(20)* | Holy Light, MO + self *(1)* | Shadow Resistance Aura (stance bar, game key) |
-| 5 | yours | yours | yours |
-| Q | Judgement *(4)* | Swift Judgement *(37, talent)* | Opener: Judgement + Swift Judgement + Holy Strike *(37)* |
-| E | Hammer of Justice, MO enemy *(8)* | Hammer of Wrath *(44)* | – |
-| R | Exorcism *(20)* | Holy Wrath *(50)* | Turn Undead *(24)* |
-| F | Seal of Fury *(10)* | Seal of Righteousness *(1)* | Seal of the Crusader *(6)* |
-| Z | Healthstone, else Healing Potion | Mana Potion | – |
-| X | Righteous Fury *(10)* | Blessing of Kings *(20)* | Redemption *(12)* |
-| C | Templar's Bulwark *(32, talent)* | Divine Shield *(34)* | Divine Protection *(6)* |
+| 1 | Holy Strike *(6)* | Seal of Fury *(10)* | Retribution Aura *(16)* |
+| 2 | Consecration *(20)* | Seal of Righteousness *(1)* | Devotion Aura *(1)* |
+| 3 | Holy Shield *(42, talent)* | Seal of the Crusader *(6)* | Concentration Aura *(22)* |
+| 4 | Flash of Light, MO + self *(20)* | Seal of Wisdom *(38)* | Shadow Resistance Aura *(28)* |
+| 5 | Holy Light, MO + self *(1)* | Seal of Light *(30)* | Frost Resistance Aura *(32)* |
+| Q | Judgement *(4)* | Exorcism *(20)* | – |
+| E | Swift Judgement *(37, talent)* | Hammer of Wrath *(44)* | – |
+| R | Opener: Judgement + Swift Judgement + Holy Strike *(37)* | Holy Wrath *(50)* | – |
+| F | Hammer of Justice, MO enemy *(8)* | Turn Undead *(24)* | – |
+| Z | Healthstone, else Healing Potion | Templar's Bulwark *(32, talent)* | Blessing of Kings *(20)* |
+| X | Mana Potion | Divine Shield *(34)* | Blessing of Might *(4)* |
+| C | Righteous Fury *(10)* | Divine Protection *(6)* | Blessing of Wisdom *(14)* |
 | Mouse 4 | Blessing of Protection, MO *(10)* | Lay on Hands, MO + self *(10)* | Blessing of Sacrifice, MO *(46)* |
 | Mouse 5 | Cleanse, MO + self *(42)*; Purify *(8)* until then | Blessing of Freedom, MO + self *(18)* | Voice of Truth *(20)* |
 
-- **Families:** one job per base key. `Q` Judgement, `E` hammers, `R` against undead, `F` seals, `X` buffs and between pulls, `C` Forbearance cooldowns (Bulwark, Divine Shield and Divine Protection share Forbearance), `Mouse 4/5` help on other players. `1`-`3` are the core loop: Holy Strike, Consecration, Holy Shield.
-- **Auras:** all six auras are on the stance bar (the game puts them there). `Ctrl+1-4` keep their game binding to the first four stance-bar buttons: Devotion, Retribution, Concentration and Shadow Resistance Aura. Frost and Fire Resistance Aura are clicked on the stance bar. The addon never binds `Ctrl+1-4` for the Paladin and does not use Action Bar 5 buttons 1-4.
-- Plain keys are the main bar, Shift keys Action Bar 2, `Ctrl+Q` to `Ctrl+C` Action Bar 5 buttons 6-12, and the mouse buttons the right half of Action Bar 3 (buttons 7-12), as for the Shaman.
-- **Taunt:** the Paladin has no taunt button. Judgement (`Q`) while Seal of Fury is active taunts for 3 seconds. There is no interrupt either: `E` Hammer of Justice stuns (the macro stops your own cast first and stuns the enemy under the mouse, else your target).
+- **Blocks:** plain `1-3` the core loop (Holy Strike, Consecration, Holy Shield), `4-5` the heals, `Q-R` the Judgement family, `F` Hammer of Justice, `Z-C` potions and Righteous Fury. Shift: seals on `1-5`, the conditional attacks (undead, low health) on `Q-F`, the Forbearance cooldowns on `Z-C` (Bulwark, Divine Shield and Divine Protection share Forbearance). Ctrl: auras on `1-5`, blessings on `Z-C`; `Ctrl+Q/E/R/F` are spare. The mouse buttons are two columns: Mouse 4 saves a player, Mouse 5 frees or cleanses one.
+- **Bars:** as for the Shaman. Plain keys are Action Bar 1, Shift Action Bar 2, Ctrl Action Bar 3, the mouse keys Action Bar 6 buttons 1-6 (`Mouse 4`, `Shift+Mouse 4`, `Ctrl+Mouse 4`, `Mouse 5`, `Shift+Mouse 5`, `Ctrl+Mouse 5`). Move Action Bar 6 down in Edit Mode.
+- **Auras:** the auras are on Action Bar 3 buttons 1-5 with `Ctrl+1-5`, next to the seals on `Shift+1-5`. `Ctrl+1-5` no longer press the stance bar (the preview says so); the stance bar still shows your auras. Fire Resistance Aura is clicked on Action Bar 6 (button 8). If an aura button on Action Bar 3 does not light up while the aura is on (checklist), the fallback is the stance bar's own `Ctrl+1-5`.
+- **Taunt:** the Paladin has no taunt button. Judgement (`Q`) while Seal of Fury is active taunts for 3 seconds. There is no interrupt either: `F` Hammer of Justice stuns (the macro stops your own cast first and stuns the enemy under the mouse, else your target).
 - **Help macros:** with **マウスオーバーで回復**, Flash of Light, Holy Light, Lay on Hands, Cleanse, Purify and Blessing of Freedom go to the friend under the mouse, else a friendly target, else you. Blessing of Protection and Blessing of Sacrifice never fall back to you (Protection would stop your attacks; Sacrifice can't be cast on yourself). With **ターゲットを回復**, plain spells.
-- **Opener** (`Ctrl+Q`, macro `FS_OPEN`, from level 37): `/startattack`, Judgement, Swift Judgement and Holy Strike in one press. Judgement and Swift Judgement are off the global cooldown. Its button stays empty until Swift Judgement is learned.
+- **Opener** (`R`, macro `FS_OPEN`, from level 37): `/startattack`, Judgement, Swift Judgement and Holy Strike in one press. Judgement and Swift Judgement are off the global cooldown. Its button stays empty until Swift Judgement is learned.
 - **Purify → Cleanse:** Purify stands in on `Mouse 5` until Cleanse at 42. Then Cleanse takes the button and Purify stays in the spellbook.
-- Spare keys, bound to empty buttons for your own use: `Shift+1`, `Shift+2`, `Shift+3`, `Ctrl+E`, `Ctrl+Z`.
-- Clicked, no key: bar 3 buttons 1-5 hold Seal of Wisdom, Seal of Light, Seal of Justice, Blessing of Might and Blessing of Wisdom; bar 4 holds Greater Blessing of Kings, Might and Wisdom and Divine Intervention. Summon Warhorse and Summon Charger stay in the spellbook (mount journal).
+- Spare keys, bound to empty buttons for your own use: `Ctrl+Q`, `Ctrl+E`, `Ctrl+R`, `Ctrl+F`. No key is reserved any more: `5`, `Shift+5` and `Ctrl+5` are planned, and anything you had there moves to a spare button.
+- Clicked, no key: Action Bar 6 buttons 7-9 (in combat) hold Seal of Justice, Fire Resistance Aura and Divine Intervention; Action Bar 4 (out of combat) holds Redemption and Greater Blessing of Kings, Might and Wisdom. Summon Warhorse and Summon Charger stay in the spellbook (mount journal). Action Bar 5 is no longer used; **すべて配置** clears what 0.6.x put there and leaves the bar as you have it.
 - Character macros: `FS_FOL`, `FS_HL`, `FS_LOH`, `FS_CLEANSE` (`FS_PURIFY` before 42), `FS_BOF`, `FS_BOP`, `FS_BOS` (mouseover mode only), `FS_HOJ` and `FS_OPEN` (always), `FS_HEALTH` and `FS_MANA`: at most 12 of 30.
 - The source of truth is `ForeverSensei_Paladin/Data/Protection/Layout.lua`.
 
@@ -173,7 +175,7 @@ These cannot be tested outside the game. Please go through them once, then paste
 2. [ ] **Font, fresh launch:** fully quit the game and start it again (not `/reload`). Japanese shows in the guide and cards, with no boxes or `?`. Test once with WFJ enabled and once without.
 3. [ ] Learning a skill at the trainer (or a level-up skill) shows a card out of combat. Hovering the icon shows the game tooltip.
 4. [ ] **配置する** on a card puts the skill in its slot and binds the key, and asks first if the slot is used.
-5. [ ] **すべて配置:** the preview is shown, **適用** changes the bars and keys, Action Bars 2-5 become visible (6 and 7 stay hidden), and `/reload` keeps everything. `5`, `Shift+5` and `Ctrl+5` and their buttons are unchanged.
+5. [ ] **すべて配置:** the preview is shown, **適用** changes the bars and keys, Action Bars 2, 3, 4 and 6 become visible (Action Bar 5 stays as it was, 7 stays hidden), and `/reload` keeps everything.
 6. [ ] **元に戻す** / `/sensei undo` restores the old bars and keys.
 7. [ ] Mouseover mode: hovering a party frame and pressing `F` (or Mouse 4 for Riptide) heals that player. With no mouseover, it heals the target. With no friendly target, it heals you.
 8. [ ] Switching to **ターゲットを回復** replaces the macros with plain spells in the same slots, and back again.
@@ -185,17 +187,17 @@ These cannot be tested outside the game. Please go through them once, then paste
 14. [ ] The minimap button can be dragged and hidden in settings, and the addon compartment entry works.
 15. [ ] **Login, no old cards:** close a skill card with **あとで**, then place that skill (**配置する** in the skill list, or **すべて配置**). `/reload`: no card opens. A skill left on **あとで** and not placed does not open a card either; a small message with **見る** shows it instead.
 16. [ ] **Layout notice (update from 0.3.0 or older):** with the old layout on the bars, the first login after updating shows the message about the new layout once. **すべて配置** opens the preview, and nothing changes until **適用**. The message does not come back after `/reload`.
-17. [ ] After **すべて配置**: `1` Totemic Call, `Shift+1` Call of the Elements and `Ctrl+1` Totemic Recall work; `Shift+E`, `Shift+R`, `Shift+F` put down Stoneskin, Searing and Tremor; `Shift+4` puts down Magma Totem, and `Ctrl+R` casts Fire Nova next to the Fire totem (and does nothing useful without one). Note the mana cost of Call of the Elements with a full set.
-18. [ ] **Potions:** `Z` drinks the best mana potion in the bags. Loot or buy a better one: the button changes to it after combat (or right away out of combat). The healing potion and Arcane Elixir buttons on bar 3 work by clicking. With none in the bags, the buttons show a potion icon (no question mark). `/sensei verify` lists `FS_MANA`, `FS_HEALTH`, `FS_HEALPOT` and `FS_ELIXIR` under [Layout] with no `bad` lines.
-19. [ ] **Ctrl and mouse keys:** after **すべて配置**, Action Bar 5 at the right edge has the Ctrl keys in the same order as Action Bar 2 (Ctrl+1 Totemic Recall on button 1, Ctrl+C Ghost Wolf on button 12), and the right half of Action Bar 3 holds the mouse spells (buttons 7-12). Every Ctrl key and `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5` cast their spells. `Ctrl+2`, `Ctrl+3`, `Ctrl+4` and `Ctrl+X` press their empty Action Bar 5 button (put a skill there to test). `Ctrl+R` casts Fire Nova and no longer toggles the framerate. The mouse side buttons are set to the default Button 4/5 in the mouse software. `/sensei verify` shows the bindings of `CTRL-2`, `CTRL-R`, `CTRL-X`, `SHIFT-BUTTON4`, `CTRL-BUTTON4` and of `5`, `SHIFT-5`, `CTRL-5`.
-20. [ ] **Ctrl+1 over the stance bar:** with Ghost Wolf on the stance bar, `Ctrl+1` casts Totemic Recall (not Ghost Wolf), and `Ctrl+C` casts Ghost Wolf.
+17. [ ] After **すべて配置**: `Shift+1` Totemic Call, `Shift+2` Call of the Elements and `Shift+5` Totemic Recall work; `Ctrl+R` Stoneskin, `Shift+R` Searing and `Ctrl+F` Tremor put down their totems; `Shift+E` puts down Magma Totem, and `Shift+F` casts Fire Nova next to the Fire totem (and does nothing useful without one). Note the mana cost of Call of the Elements with a full set.
+18. [ ] **Potions:** `Z` drinks the best mana potion in the bags. Loot or buy a better one: the button changes to it after combat (or right away out of combat). The healing potion (Action Bar 6) and Arcane Elixir (Action Bar 4) buttons work by clicking. With none in the bags, the buttons show a potion icon (no question mark). `/sensei verify` lists `FS_MANA`, `FS_HEALTH`, `FS_HEALPOT` and `FS_ELIXIR` under [Layout] with no `bad` lines.
+19. [ ] **Ctrl and mouse keys:** after **すべて配置**, Action Bar 3 at the bottom has the Ctrl keys in the same order as Action Bar 2 (Ctrl+1 Ghost Wolf on button 1, Ctrl+C Grace of Air Totem on button 12), and Action Bar 6 buttons 1-6 hold the mouse spells. Every Ctrl key and `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5` cast their spells. `Ctrl+4` and `Ctrl+5` press their empty Action Bar 3 button (put a skill there to test). `Ctrl+R` casts Stoneskin Totem and no longer toggles the framerate. The mouse side buttons are set to the default Button 4/5 in the mouse software. `/sensei verify` shows the bindings of `CTRL-4`, `CTRL-R`, `SHIFT-BUTTON4`, `CTRL-BUTTON4` and of `5`, `SHIFT-5`, `CTRL-5`.
+20. [ ] **Ctrl+1 is Ghost Wolf:** `Ctrl+1` casts Ghost Wolf from Action Bar 3 (not the stance bar), and the button lights up while you are a wolf.
 21. [ ] **Macros:** `Q` (FS_ES) during your own cast stops it and interrupts at once. `Mouse 5` (FS_NSHW) casts an instant Healing Wave in one press, and a normal one while Nature's Swiftness is on cooldown. `Shift+3` (FS_PURGE) purges the enemy under the mouse.
 22. [ ] **Healthstone:** `C` uses a Healthstone if you have one, else the best Healing Potion. Check whether the Healthstone and potions share a cooldown.
-23. [ ] **Levelling:** below level 20, `X` holds Lightning Shield; after learning Water Shield and **配置する**, `X` holds Water Shield and Lightning Shield moves to bar 3. A key whose spell is not learned yet stays empty.
+23. [ ] **Levelling:** below level 20, `X` holds Lightning Shield; after learning Water Shield and **配置する**, `X` holds Water Shield and Lightning Shield moves to Action Bar 4. A key whose spell is not learned yet stays empty.
 24. [ ] **Totem Bar:** the addon does not set up the Totem Bar (3 pages of 4 totems for Call of the Elements/Ancestors/Spirits). Set it up by hand and check that Call of the Elements puts down that set.
-25. [ ] **Update from 0.4.0:** with the 0.4.0 layout applied (Action Bars 6 and 7 in the middle of the screen), the first login shows the layout message once. **すべて配置** lists Action Bars 6 and 7 under the bars to hide; after **適用** they are gone, the Ctrl and mouse keys work from Action Bar 5, and nothing is left over the character. **元に戻す** brings bars 6 and 7 back as they were.
-26. [ ] **Update from 0.4.2:** the first login shows the layout message once. The preview lists the Ctrl spells moving to their new Action Bar 5 buttons, the mouse spells moving to Action Bar 3, the new empty-button keys, and Far Sight, Sentry Totem, Water Breathing, Water Walking and Frostbrand Weapon leaving the bars (they stay in the spellbook). The `Ctrl+5` button is cleared if it still holds the Mana Tide Totem that 0.4.2 put there (Mana Tide is now on `Ctrl+Z`); anything else you put there stays. **元に戻す** restores it all.
-27. [ ] **バーを空にする:** put a few things of your own on planned buttons, on spare buttons (e.g. the free buttons of Action Bar 3) and on `5` and `Shift+5`. The button asks first; after confirming, only the planned buttons are empty, and the spare buttons, `5`, `Shift+5` and the other bars are unchanged. **元に戻す** puts everything back. Out of combat only: in combat it says to try again after the fight.
+25. [ ] **Update from 0.4.0:** with the 0.4.0 layout applied (Action Bars 6 and 7 in the middle of the screen), the first login shows the layout message once. **すべて配置** lists Action Bar 7 under the bars to hide; after **適用** it is gone, the mouse keys work from Action Bar 6 and the Ctrl keys from Action Bar 3. **元に戻す** brings everything back as it was.
+26. [ ] **Update from 0.4.2:** the first login shows the layout message once. Action Bar 5 button 5 is cleared if it still holds the Mana Tide Totem that 0.4.2 put there (Mana Tide is now on `Shift+X`); anything else you put there stays. **元に戻す** restores it all.
+27. [ ] **バーを空にする:** put a few things of your own on planned buttons, on spare buttons (e.g. Action Bar 4 buttons 9-12) and on unused Action Bar 5 buttons. The button asks first; after confirming, only the planned buttons are empty, and the spare buttons and the other buttons are unchanged. **元に戻す** puts everything back. Out of combat only: in combat it says to try again after the fight.
 28. [ ] **Class pack (0.5.0):** the AddOns list shows **ForeverSensei** and **ForeverSensei - Shaman**. On the Shaman, everything works as in 0.4.3: cards, layout, talents, guide tabs, no new layout message, review progress and saved reports kept, Totem Bar unchanged. `/sensei verify` has no `bad` lines.
 29. [ ] **No pack:** turn off **ForeverSensei - Shaman** (or log in on a character of another class). The first login shows one short note that the class pack is missing, and `/reload` does not show it again. `/sensei` opens with only the translation check and settings tabs; no cards, toasts or layout messages appear. Turn the pack back on afterwards.
 30. [ ] **Language window (0.5.1):** on a test account (or after renaming `ForeverSensei.lua` in `WTF\Account\...\SavedVariables`), the first login shows only the language window: no skill card, welcome message, layout message or pack note. **English** switches everything to English at once and the welcome message follows; after `/reload` and after an update the window does not come back. Erika's account (data from 0.5.0) is not asked and stays Japanese. With the guide and a skill card open, `/sensei en` and `/sensei ja` switch their texts without `/reload`.
@@ -203,12 +205,12 @@ These cannot be tested outside the game. Please go through them once, then paste
 **Protection Paladin (0.6.0).** On a paladin, with **ForeverSensei - Paladin** ticked:
 
 31. [ ] **Pack:** the AddOns list shows **ForeverSensei - Paladin**. On the paladin, no "pack missing" note; on the Shaman, everything is as before (the Paladin pack is not loaded there).
-32. [ ] **Stance bar and Ctrl+1-4:** the stance bar shows the auras in the order Devotion, Retribution, Concentration, Shadow, Frost, Fire Resistance. After **すべて配置**, `Ctrl+1-4` still switch to the first four auras; `/run print(GetBindingAction("CTRL-1"))` prints a stance-bar binding. The preview does not list `Ctrl+1-4`, and Action Bar 5 buttons 1-4 stay empty.
-33. [ ] **Preview warnings:** the preview warns about `Ctrl+R` (framerate display) and the mouse side buttons, and not about the stance bar.
+32. [ ] **Auras on Ctrl+1-5 (0.7.0):** see items 43-47 below.
+33. [ ] **Preview warnings:** the preview warns about `Ctrl+1-5` (stance bar), `Ctrl+R` (framerate display), the mouse side buttons and moving Action Bar 6 in Edit Mode.
 34. [ ] **Taunt:** with Seal of Fury active, `Q` Judgement taunts. Note whether the taunt lasts 3 or 4 seconds, and whether Judgement keeps the seal.
-35. [ ] **Opener:** from 37, `Ctrl+Q` (FS_OPEN) casts Judgement, Swift Judgement and Holy Strike from one press and starts auto attack.
+35. [ ] **Opener:** from 37, `R` (FS_OPEN) casts Judgement, Swift Judgement and Holy Strike from one press and starts auto attack.
 36. [ ] **Help macros:** with a hostile target and nothing under the mouse, `4`, `Shift+4`, `Shift+Mouse 4`, `Mouse 5` and `Shift+Mouse 5` cast on you. `Mouse 4` (Blessing of Protection) and `Ctrl+Mouse 4` (Blessing of Sacrifice) do not. Over a party frame, all of them go to that player.
-37. [ ] **Hammer of Justice:** `E` during your own cast stops it and stuns the enemy under the mouse at once, else your target.
+37. [ ] **Hammer of Justice:** `F` during your own cast stops it and stuns the enemy under the mouse at once, else your target.
 38. [ ] **Purify → Cleanse:** before 42, `Mouse 5` holds Purify. After learning Cleanse and **配置する**, `Mouse 5` holds Cleanse and Purify is gone from the bars.
 39. [ ] **Ranks:** learning a new rank of Holy Strike, Seal of Fury or Holy Shield upgrades its button with a toast. `/sensei verify` has no `bad` lines (it checks every rank ID against the client, including Seal of Fury and Holy Light rank 1).
 40. [ ] **Talents:** from 10, the talent hint follows the Wowhead leveling path: Templar's Bulwark at 32, Swift Judgement at 37, Holy Shield at 42.
@@ -216,7 +218,16 @@ These cannot be tested outside the game. Please go through them once, then paste
 
 **Restoration Shaman, Fire totems (0.6.1).** On the Shaman, after updating from 0.6.0:
 
-42. [ ] **Layout message:** the first login shows the layout message about the Fire totems once, and nothing moves by itself. The **すべて配置** preview moves Magma Totem to `Shift+4` and Fire Nova to `Ctrl+R`, clears their old Action Bar 4 buttons (5 and 8), and warns about `Ctrl+R` (framerate display). After **適用**, `Shift+R` Searing, then `Ctrl+R` Fire Nova hits the enemies next to the totem; `Shift+4` Magma (from 26) works the same way. **元に戻す** puts both back on Action Bar 4.
+42. [ ] *(Superseded by 0.7.0: the Fire totems are now on `Shift+Q/E/R/F`, see below.)*
+
+**Layout v4, family blocks (0.7.0).** On both characters, after updating from 0.6.1 (Shaman layout 6, Paladin layout 1):
+
+43. [ ] **Layout message:** the first login shows the layout message once, and nothing moves by itself. The **すべて配置** preview lists Action Bar 6 under the bars to show, the moves to Action Bars 3 and 6, the old Action Bar 5 spells being cleared, and the notes about `Ctrl+1-5`, `Ctrl+R`, the mouse buttons and Edit Mode.
+44. [ ] **Action Bar 6:** after **適用**, Action Bar 6 is shown (in the middle of the screen). Its mouse bindings fire (`Mouse 4`, `Mouse 5`, `Shift+` and `Ctrl+Mouse 4/5`). Drag it next to the bottom bars in Edit Mode; after `/reload` and a relog it stays where you put it.
+45. [ ] **Paladin auras on Action Bar 3:** `Ctrl+1-5` cast Retribution, Devotion, Concentration, Shadow and Frost Resistance Aura, and the aura's button on Action Bar 3 lights up while it is active. If it does not light up, tell the repo owner: the fallback is to keep the auras on the stance bar's own `Ctrl+1-5`.
+46. [ ] **Ctrl+5 default:** before **適用**, `/run print(GetBindingAction("CTRL-5"))` prints the game default (expected `SHAPESHIFTBUTTON5`). After **適用** it prints `MULTIACTIONBAR2BUTTON5`.
+47. [ ] **Hidden stance bar:** hide the stance bar in Edit Mode. The Paladin auras still work from `Ctrl+1-5`, and the Shaman's Ghost Wolf from `Ctrl+1`.
+48. [ ] **元に戻す:** after **適用**, **元に戻す** restores the old keys, the spells layout 6 (or the Paladin's layout 1) had on Action Bar 5, and Action Bar 6's visibility from before.
 
 ## Translation reports
 
@@ -269,11 +280,11 @@ When the user pastes a report block (starting `[ForeverSensei v`) or asks you to
   - **texts:** both languages of every locale file have every ID; each ID lives in one file; the core's texts are class-neutral; Japanese rules; font glyphs; placeholders; no raw IDs on screen;
   - **packs:** each pack registers exactly its class with the core's API version; TOC fields; a character without a pack (one note, idle) and a pack with another API version (refused, one note);
   - **data:** spell and talent IDs, names and levels against the Forever client dump in `research/`;
-  - **layout:** unique slots and keys, allowed keys only, the exact approved key grid of each pack, key families, the player's own keys (`5`, `Shift+5`, `Ctrl+5`) never used, Ctrl/mouse bar fields, macro kinds and bodies, macro count, item slots;
+  - **layout:** unique slots and keys, allowed keys only, the exact approved key grid of each pack, every key of the three rows and the mouse bound, each family in its block (`1-5`, `Q-F`, `Z-C` or a mouse pair) with spill-overs on Action Bar 6, Action Bar 4 out-of-combat only, bar fields (only Action Bar 6 in Edit Mode), old-layout leftovers, macro kinds and bodies, macro count, item slots;
   - **items:** potion and elixir data (sources, ids, best-first order);
   - **talents:** one point per level, row requirements, max ranks, final 0/5/46 (Shaman) and 0/32/19 (Paladin);
-  - **scenarios:** layout apply → undo round-trip, potion and Healthstone macros, the Lightning Shield stand-in, clearing layout-2 leftovers, the login card fix and the one-time layout notice;
-  - **Paladin:** the Protection grid and families, the stance-bar keys left alone, the help macros with and without the self fallback, the opener, the Purify stand-in, level 30 and 42 snapshots, and that unverified spells appear nowhere;
+  - **scenarios:** layout apply → undo round-trip, potion and Healthstone macros, the Lightning Shield stand-in, clearing old-layout leftovers, the update from layout 6 to 7 (notice, apply, undo with bar settings), the login card fix and the one-time layout notice;
+  - **Paladin:** the Protection grid and families, the auras on Action Bar 3, the update from layout 1 to 2 (notice, apply, undo), the help macros with and without the self fallback, the opener, the Purify stand-in, level 30 and 42 snapshots, and that unverified spells appear nowhere;
   - **reports:** round-trip of the report format (with the pack name), that each ID is written to the file of the pack the report names, and that the zip holds every addon folder at its top level.
 - `make zip` builds `dist/ForeverSensei-v<version>.zip` with every addon folder at its top level (unzip straight into `AddOns`).
 - Layout of the core (`ForeverSensei/`):
@@ -296,8 +307,8 @@ A class pack is a separate addon folder, `ForeverSensei_<Class>`, named from the
 2. **Data** (in the addon's private table, `local _, P = ...`):
    - `P.sources`: source keys for the `src` fields (Forever sources only), added to the core's `wh_spell`, `wh_item`, `ui`;
    - `P.spells`: every class spell with `key`, `id`, `name`, `level`, `role`, `use`, `src` and `verified` (a date); `P.ranks` (generate it from the client dump with `tools/research/gen_ranks.py --class <class>`, after adding the class to its `CLASSES`) and `P.ranksSource`;
-   - `P.specs.<SPEC>`: `layout` (bars, `plan`, allowed and own keys, `version`, macros, `noSlot`, `spareOrder`; the core builds the slots with `ns.BuildLayout`), `talents` (path; the core builds the order with `ns.BuildTalents`), `guide` and `tabs` (the spec's own guide tabs, shown before the generic ones).
-   - Class-specific behaviour goes in the layout data, not in the core: macro kinds and bodies (`macroKind`, `macroBodies`, `macroVars`, e.g. the Shaman's Nature's Swiftness + Healing Wave macro, the Paladin's `help_nofb`), multi-spell macros (`combos`, `"!id"` in the plan, e.g. the Paladin opener), stand-ins (`{ "cleanse", standIn = "purify" }`), spells kept off the bars (`noSlot`, `noSlotLines`, e.g. the Totem Bar or the stance bar), game keys left alone (`keepDefault`, `false` in a bar's `keys`, `"x"` for a button the layout never uses, `keyNotes`), preview warnings (`defaultWarn`), and buttons an older layout version put on the player's own keys (`oldOwn`).
+   - `P.specs.<SPEC>`: `layout` (bars, `plan`, `families`, allowed keys, `version`, macros, `noSlot`, `spareOrder`, `retired` bars, `old` leftovers; the core builds the slots with `ns.BuildLayout`), `talents` (path; the core builds the order with `ns.BuildTalents`), `guide` and `tabs` (the spec's own guide tabs, shown before the generic ones).
+   - Class-specific behaviour goes in the layout data, not in the core: macro kinds and bodies (`macroKind`, `macroBodies`, `macroVars`, e.g. the Shaman's Nature's Swiftness + Healing Wave macro, the Paladin's `help_nofb`), multi-spell macros (`combos`, `"!id"` in the plan, e.g. the Paladin opener), stand-ins (`{ "cleanse", standIn = "purify" }`), spells kept off the bars (`noSlot`, `noSlotLines`, e.g. the Totem Bar or the spellbook), `"x"` for a button the layout never uses, a bar that starts in the middle of the screen (`editMode`), preview warnings (`defaultWarn`), bars an older layout used (`retired`, with `assigned` buttons and `keepShown`), and spells an older layout put in buttons the plan no longer fills (`old`).
 3. **Texts:** `Locales/en.lua` and `Locales/ja.lua` with every `spell.<key>.*`, `talent.<key>.*`, `guide.*` and `ui.tab.<tab>` text the pack uses, plus every ID in `ns.PackTexts` (`Core/Class.lua`): interface lines whose wording depends on the class. An ID must not also be in the core. The Japanese follows the rules in "For agents: processing translation reports".
 4. **Register.lua:** `ForeverSensei.RegisterClass("<CLASSFILE>", { api = 1, name = "ForeverSensei_<Class>", spells, ranks, ranksSource, sources, items = { ...item macro kinds from Data/Items.lua the layouts use }, locales, localeOrder, defaultSpec = "<SPEC>", specs })`. `defaultSpec` is the spec the core uses; there is no spec picker yet.
 5. **Checks:** add the pack's class-specific checks to `PACK_CHECKS` in `tools/check.py` (see `check_shaman` and `check_paladin`: client-dump ranks through `check_client_dump`, the approved key grid, macros), a runtime scenario like `tools/scenarios_paladin.lua` run from `check_runtime`, and its research sources to SOURCES.md. `make check` already loads every `ForeverSensei_*` folder, runs the generic text, data, layout, talent and guide checks on it, and checks its TOC. `make zip` adds it to the release zip.

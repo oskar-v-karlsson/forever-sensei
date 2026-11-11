@@ -1,51 +1,38 @@
--- ForeverSensei_Shaman/Data/Restoration/Layout.lua: the fixed slot and key plan (layout version 6, since
--- ForeverSensei 0.6.1; layout 5 came with 0.4.3 and moved into this class pack unchanged in 0.5.0).
--- Spec: research/keybind-layout.md (approved). The level-60 dungeon-healer layout comes first; lower levels use a
--- subset of it, and a key never moves once its spell is learned (a reserved key stays empty until then).
--- Rules from the pull walkthroughs in the spec:
--- * The spells pressed in most level-60 pulls get the top keys (1-3, Q, E, R, F, Mouse4/5, Shift+Q/E/R/F).
--- * Every heal is a key without a modifier: F Healing Wave, E Lesser Healing Wave, R Chain Heal (40),
---   Mouse4 Riptide (40), Mouse5 Nature's Swiftness + Healing Wave in one press (30).
--- * A family (spells for the same job) shares one base key with plain, Shift and Ctrl variants; the most used member
---   gets the easiest variant. A rare spell never takes a plain top key.
---     1      moving totems: Totemic Call (every pull) / Call of the Elements (when the 5-minute totems run out,
---            after a wipe) / Totemic Recall (when leaving)
---     Q      stop an enemy: Earth Shock interrupt / Frost Shock (a runner) / Earthbind Totem (several)
---     Z      mana: Mana Potion / Mana Spring Totem / Mana Tide Totem
---     Mouse4 help the player under the cursor: Riptide / Cure Poison / Poison Cleansing Totem
---     Mouse5 the same: NS + Healing Wave / Cure Disease / Disease Cleansing Totem
---     E, F   Shift and Ctrl hold the totems against physical damage (Stoneskin, Stoneclaw) and against enemy spells
---            (Tremor, Grounding); Shift+E Stoneskin, Shift+R Searing and Shift+F Tremor are the player's habit.
---     R/4    Fire totems (layout 6, 0.6.1, the player's request: they were far apart): Shift+R Searing Totem (every
---            pull, her habit) / Ctrl+R Fire Nova (it only hits enemies near the active Fire totem, so it goes with
---            them) / Shift+4 Magma Totem (packs; 4 sits right above R, on the Shift row that holds her totems).
---     2-4    the damage row, pressed left to right: Flame Shock, Lightning Bolt, Chain Lightning (32).
--- * X Water Shield (refreshed between pulls; Lightning Shield stands in on X until Water Shield at 20, then moves to
---   a clickable bar), C Healthstone else Healing Potion (FS_HEALTH, next to the Mana Potion), Shift+3 Purge,
---   Ctrl+C Ghost Wolf (the player's decision).
--- * 5, Shift+5 and Ctrl+5 belong to the player: never planned, never bound, never cleared.
--- * Spare keys: Shift+2, Shift+X, Shift+C, Ctrl+2, Ctrl+3, Ctrl+4 and Ctrl+X. They are bound to their empty buttons
---   anyway, so every key of the Shift and Ctrl bars works the same way and the bars look alike (the player's choice
---   in 0.4.3). Ctrl+2-4 replace stance-bar buttons and Ctrl+R (Fire Nova) the framerate display; the preview says so.
+-- ForeverSensei_Shaman/Data/Restoration/Layout.lua: the fixed slot and key plan (layout version 7, since
+-- ForeverSensei 0.7.0: "family blocks"). Spec: research/keybind-layout-v4.md (approved, commit 27b6754), which builds on
+-- research/keybind-layout.md (pull walkthroughs, reach tiers for small hands). The level-60 dungeon-healer layout
+-- comes first; lower levels use a subset of it, and a key never moves once its spell is learned (a reserved key stays
+-- empty until then).
+-- Rules (Oskar's decisions for v4):
+-- * Each modifier row splits into three blocks of neighbouring keys: 1-5, Q/E/R/F and Z/X/C. A family (spells for
+--   the same job) fills one block, so it sits together on the keyboard and, because button n is key n on bars 1-3,
+--   on screen. Frequency only picks a family's row and block and its order inside the block.
+-- * The plain row is the core rotation and stays usage-driven: 1-5 the enemy spells (Flame Shock, Lightning Bolt,
+--   Chain Lightning, Purge, Frost Shock), Q Earth Shock (interrupt), E/R/F the heals (Lesser Healing Wave, Chain
+--   Heal, Healing Wave), Z Mana Potion, X Water Shield (Lightning Shield stands in until 20, then moves to Action
+--   Bar 4), C Healthstone else Healing Potion.
+-- * Shift 1-5 totem calls (Totemic Call, Call of the Elements, Call of the Ancestors, Call of the Spirits, Totemic
+--   Recall); Shift Q/E/R/F Fire (Flametongue Totem, Magma Totem, Searing Totem, Fire Nova: it only hits enemies near
+--   the active Fire totem); Shift Z/X/C Water (Mana Spring, Mana Tide, Healing Stream).
+-- * Ctrl 1-3 travel (Ghost Wolf, Water Walking, Water Breathing; Ctrl+4 and Ctrl+5 spare); Ctrl Q/E/R/F Earth
+--   (Earthbind, Stoneclaw, Stoneskin, Tremor); Ctrl Z/X/C Air (Grounding, Windfury Totem, Grace of Air).
+-- * Mouse pairs: Mouse4/5 Riptide and NS + Healing Wave; Shift the cures; Ctrl the cleansing totems.
+-- * No key is the player's own any more (5, Shift+5 and Ctrl+5 are planned like every other key). Spare keys (Ctrl+4,
+--   Ctrl+5) are bound to their empty buttons, so every key of the three rows works the same way.
 -- Bars (Blizzard_ActionBar in the Forever UI code; slot = (page - 1) * 12 + button):
---   plain = main bar ACTIONBUTTON (1-12); Shift = Action Bar 2 MULTIACTIONBAR1BUTTON (page 6, 61-72);
---   Ctrl = Action Bar 5 MULTIACTIONBAR4BUTTON (MultiBarLeft, page 4, 37-48, at the right edge of the screen). Bar 5
---   mirrors bar 2: button n has the Ctrl version of button n's key (Ctrl+1, 2, 3, 4, 5, Q, E, R, F, Z, X, C), so the
---   three keyed bars line up key by key.
---   Mouse = Action Bar 3 MULTIACTIONBAR2BUTTON (page 5, 49-60) buttons 7-12: Mouse4, Mouse5, Shift+Mouse4,
---   Shift+Mouse5, Ctrl+Mouse4, Ctrl+Mouse5 (key strings BUTTON4/BUTTON5, Blizzard_FrameXML/BindingUtil). A key can be
---   bound to any button; the six mouse spells sit together as one block on a bar that is shown anyway, and Riptide's
---   and Nature's Swiftness' cooldowns are visible there.
---   Layout 3 (0.4.0) used Action Bars 6 and 7 for the Ctrl and mouse spells; those bars sat in the middle of the
---   screen, so the player did not want them. The addon never turns them on again: a full apply clears layout 3's
---   spells there, hides both bars and unbinds keys that still point at them (L.retired).
---   Action Bar 3 buttons 1-6 hold the weapon imbues and long buffs with the potion and elixir macros; Action Bar 4
---   (page 3, 25-36) holds out-of-combat spells, situational totems and the extra Totem Bar presets. Both are clicked.
---   To make room for the mouse block (0.4.3), the rarest out-of-combat spells have no bar slot (L.noSlot "spellbook").
---   Things moved out of a planned slot go to the spare buttons (bar 3, bar 4, bar 5, then bar 2) first.
--- Plan entries: a spell key; "@kind" an item macro (ForeverSensei/Data/Items.lua); "-" a spare button; "#" the
--- player's own button. The core builds L.slots, L.bySpell, L.byItem, L.own and L.spare from L.plan
--- (ns.BuildLayout in ForeverSensei/Core/Class.lua).
+--   plain = Action Bar 1 ACTIONBUTTON (1-12); Shift = Action Bar 2 MULTIACTIONBAR1BUTTON (61-72); Ctrl = Action Bar 3
+--   MULTIACTIONBAR2BUTTON (49-60). All three sit at the bottom of the screen by default.
+--   Action Bar 6 MULTIACTIONBAR5BUTTON (145-156, Bindings_Camelot.xml, MultiActionBars.xml) holds the six mouse keys
+--   (buttons 1-6, pair by pair) and the clicked spells used in combat (Strength of Earth, the healing potion). It
+--   starts in the middle of the screen; the guide tells the player to drag it down in Edit Mode.
+--   Action Bar 4 MULTIACTIONBAR3BUTTON (25-36, right edge) holds only out-of-combat clicks: resurrection, Astral
+--   Recall, weapon imbues, Lightning Shield, the elixir.
+--   Action Bar 5 (37-48) left the plan in layout 7. Its visibility is left as the player has it; a full apply only
+--   clears what earlier layouts put there (L.old) and the clean-up button empties the buttons layout 6 filled
+--   (L.retired keepShown). Action Bar 7 (layout 3) stays retired: hidden and unbound.
+--   Things moved out of a planned slot go to the spare buttons (bar 4, bar 6, then bar 3) first.
+-- Plan entries: a spell key; "@kind" an item macro (ForeverSensei/Data/Items.lua); "-" a spare button. The core builds
+-- L.slots, L.bySpell, L.byItem and L.spare from L.plan (ns.BuildLayout in ForeverSensei/Core/Class.lua).
 local _, P = ...
 P.specs = P.specs or {}
 P.specs.RESTORATION = P.specs.RESTORATION or {}
@@ -53,7 +40,7 @@ P.specs.RESTORATION = P.specs.RESTORATION or {}
 local L = {}
 P.specs.RESTORATION.layout = L
 
--- Display order (the guide's key page). keys: the key of each button, nil = no key.
+-- Display order (the guide's key page). keys: the key of each button, false/nil = no key.
 local KEYS = { "1", "2", "3", "4", "5", "Q", "E", "R", "F", "Z", "X", "C" }
 local function withMod(mod)
   local list = {}
@@ -63,72 +50,83 @@ end
 L.bars = {
   { id = "main", first = 1,   binding = "ACTIONBUTTON%d",          setting = nil,                      keys = KEYS },
   { id = "bar2", first = 61,  binding = "MULTIACTIONBAR1BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_2", keys = withMod("SHIFT-") },
-  { id = "bar5", first = 37,  binding = "MULTIACTIONBAR4BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_5", keys = withMod("CTRL-") },
-  { id = "bar3", first = 49,  binding = "MULTIACTIONBAR2BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_3",
-    keys = { false, false, false, false, false, false,
-      "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5" } },
+  { id = "bar3", first = 49,  binding = "MULTIACTIONBAR2BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_3", keys = withMod("CTRL-") },
+  -- editMode: the bar starts in the middle of the screen; the guide and the preview tell the player to move it.
+  { id = "bar6", first = 145, binding = "MULTIACTIONBAR5BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_6", editMode = true,
+    keys = { "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5",
+      false, false, false, false, false, false } },
   { id = "bar4", first = 25,  binding = "MULTIACTIONBAR3BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_4" },
 }
 
--- Bars the addon no longer uses (layout 3 put the Ctrl and mouse spells there). A full apply hides them, clears the
--- plan's spells from them and unbinds keys bound to their buttons. own: layout 3's Ctrl+5 button (the player's),
--- which a full apply leaves alone. assigned: the buttons layout 3 filled, the only ones the clean-up button empties.
+-- Bars the plan no longer uses. assigned: the buttons the last layout there filled, the only ones the clean-up
+-- button empties. Action Bar 5 (layouts 4-6, the Ctrl bar until 0.6.1) stays as the player has it (keepShown); its
+-- old spells are cleared through L.old. Action Bar 7 (layout 3, 0.4.0) is hidden by a full apply, which also clears
+-- the plan's spells there and unbinds keys that still point at its buttons.
 L.retired = {
-  { id = "bar6", first = 145, binding = "MULTIACTIONBAR5BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_6", own = 5,
-    assigned = { 1, 6, 7, 9, 10, 12 } },
+  { id = "bar5", first = 37,  binding = "MULTIACTIONBAR4BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_5", keepShown = true,
+    assigned = { 1, 6, 7, 8, 9, 10, 12 } },
   { id = "bar7", first = 157, binding = "MULTIACTIONBAR6BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_7",
     assigned = { 1, 2, 3, 4, 5, 6 } },
 }
 
 -- Bumped when slots or keys change: players who had the older layout get a one-time notice (Modules/Layout.lua).
-L.version = 6
+L.version = 7
 
 -- Every key the plan binds: the planned buttons' keys and the spare keyed buttons' keys.
 L.allowedKeys = {
-  "1", "2", "3", "4", "Q", "E", "R", "F", "Z", "X", "C",
-  "SHIFT-1", "SHIFT-2", "SHIFT-3", "SHIFT-4", "SHIFT-Q", "SHIFT-E", "SHIFT-R", "SHIFT-F", "SHIFT-Z", "SHIFT-X",
-  "SHIFT-C",
-  "CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F", "CTRL-Z", "CTRL-X", "CTRL-C",
+  "1", "2", "3", "4", "5", "Q", "E", "R", "F", "Z", "X", "C",
+  "SHIFT-1", "SHIFT-2", "SHIFT-3", "SHIFT-4", "SHIFT-5", "SHIFT-Q", "SHIFT-E", "SHIFT-R", "SHIFT-F", "SHIFT-Z",
+  "SHIFT-X", "SHIFT-C",
+  "CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-5", "CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F", "CTRL-Z", "CTRL-X", "CTRL-C",
   "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5",
 }
 
--- The player's own keys and buttons: the addon never binds these keys and never changes these slots.
-L.ownKeys = { "5", "SHIFT-5", "CTRL-5" }
-
--- One row per bar, button 1..12 left to right.
+-- One row per bar, button 1..12 left to right (button n = key n on the keyed bars).
 L.plan = {
   main = {
-    "totemic_call", "flame_shock", "lightning_bolt", "chain_lightning", "#",
+    "flame_shock", "lightning_bolt", "chain_lightning", "purge", "frost_shock",
     "earth_shock", "lesser_healing_wave", "chain_heal", "healing_wave",
     "@mana", { "water_shield", standIn = "lightning_shield" }, "@health",
   },
   bar2 = {
-    "call_of_the_elements", "-", "purge", "magma_totem", "#",
-    "frost_shock", "stoneskin_totem", "searing_totem", "tremor_totem",
-    "mana_spring_totem", "-", "-",
-  },
-  bar5 = {
-    "totemic_recall", "-", "-", "-", "#",
-    "earthbind_totem", "stoneclaw_totem", "fire_nova", "grounding_totem",
-    "mana_tide_totem", "-", "ghost_wolf",
+    "totemic_call", "call_of_the_elements", "call_of_the_ancestors", "call_of_the_spirits", "totemic_recall",
+    "flametongue_totem", "magma_totem", "searing_totem", "fire_nova",
+    "mana_spring_totem", "mana_tide_totem", "healing_stream_totem",
   },
   bar3 = {
-    "rockbiter_weapon", "flametongue_weapon", { "lightning_shield", after = "water_shield" }, "windfury_weapon",
-    "@elixir", "@healpot",
+    "ghost_wolf", "water_walking", "water_breathing", "-", "-",
+    "earthbind_totem", "stoneclaw_totem", "stoneskin_totem", "tremor_totem",
+    "grounding_totem", "windfury_totem", "grace_of_air_totem",
+  },
+  bar6 = {
     "riptide", "natures_swiftness", "cure_poison", "cure_disease", "poison_cleansing_totem", "disease_cleansing_totem",
+    "strength_of_earth_totem", "@healpot", "-", "-", "-", "-",
   },
   bar4 = {
-    "ancestral_spirit", "astral_recall", "strength_of_earth_totem", "healing_stream_totem", "-",
-    "windfury_totem", "grace_of_air_totem", "-", "call_of_the_ancestors", "call_of_the_spirits",
-    "flametongue_totem", "-",
+    "ancestral_spirit", "astral_recall", "rockbiter_weapon", "flametongue_weapon", "frostbrand_weapon",
+    "windfury_weapon", { "lightning_shield", after = "water_shield" }, "@elixir", "-", "-", "-", "-",
   },
 }
 
--- Spells without a bar slot: resistance totems and Windwall are situational (Totem Bar or spellbook);
--- Reincarnation is passive. "spellbook" (0.4.3, to make room for the mouse block on Action Bar 3): spells a dungeon
--- healer almost never casts, all out of combat: Far Sight and Sentry Totem (scouting), Water Breathing and Water
--- Walking (travel; a few swims a week), Frostbrand Weapon (a solo imbue against runners; a healer uses Rockbiter,
--- Flametongue or Windfury).
+-- Families (research/keybind-layout-v4.md S1/S2): each keyed family fills one block of one row, or one mouse pair;
+-- spill-overs are clicked on Action Bar 6. tools/check.py checks the plan against this list.
+L.families = {
+  { id = "damage", block = "1-5", row = "", members = { "flame_shock", "lightning_bolt", "chain_lightning", "purge", "frost_shock" } },
+  { id = "calls", block = "1-5", row = "SHIFT-",
+    members = { "totemic_call", "call_of_the_elements", "call_of_the_ancestors", "call_of_the_spirits", "totemic_recall" } },
+  { id = "fire", block = "QERF", row = "SHIFT-", members = { "flametongue_totem", "magma_totem", "searing_totem", "fire_nova" } },
+  { id = "water", block = "ZXC", row = "SHIFT-", members = { "mana_spring_totem", "mana_tide_totem", "healing_stream_totem" } },
+  { id = "travel", block = "1-5", row = "CTRL-", members = { "ghost_wolf", "water_walking", "water_breathing" } },
+  { id = "earth", block = "QERF", row = "CTRL-", spill = { "strength_of_earth_totem" },
+    members = { "earthbind_totem", "stoneclaw_totem", "stoneskin_totem", "tremor_totem" } },
+  { id = "air", block = "ZXC", row = "CTRL-", members = { "grounding_totem", "windfury_totem", "grace_of_air_totem" } },
+  { id = "cursorheals", block = "mouse", row = "", members = { "riptide", "natures_swiftness" } },
+  { id = "cures", block = "mouse", row = "SHIFT-", members = { "cure_poison", "cure_disease" } },
+  { id = "cleansing", block = "mouse", row = "CTRL-", members = { "poison_cleansing_totem", "disease_cleansing_totem" } },
+}
+
+-- Spells without a bar slot: resistance totems and Windwall are situational (Totem Bar or spellbook); Far Sight
+-- and Sentry Totem (scouting) are almost never cast by a dungeon healer (spellbook); Reincarnation is passive.
 L.noSlot = {
   frost_resistance_totem = "totembar",
   fire_resistance_totem = "totembar",
@@ -136,9 +134,6 @@ L.noSlot = {
   windwall_totem = "totembar",
   far_sight = "spellbook",
   sentry_totem = "spellbook",
-  water_breathing = "spellbook",
-  water_walking = "spellbook",
-  frostbrand_weapon = "spellbook",
   reincarnation = "passive",
 }
 -- The key page lists the spells without a slot, one line per kind (Reincarnation is passive and not listed).
@@ -183,30 +178,37 @@ L.macroBodies = {
 }
 L.macroVars = { heal = "healing_wave" }
 
--- Earlier layouts put these spells in buttons that are spare now. A full apply clears such a button when it still
--- holds that spell and the spell has its new place (or now lives in the spellbook), so no duplicates are left
--- (undoable like everything else). Layout 2 (0.3.0): bar 2. Layout 4 (0.4.1-0.4.2): Action Bar 5 buttons that are
--- spare Ctrl keys now, and Sentry Totem's old button on bar 4. Layout 5 (0.4.3-0.6.0): Fire Nova's and Magma Totem's
--- clicked buttons on bar 4. Only buttons that are spare now are listed: the old Shift+4 (Frost Shock, layout 2) and
--- Ctrl+R (Nature's Swiftness, layout 4) buttons hold Magma Totem and Fire Nova now, and the plan replaces what is
--- there (or clears a copy while the new spell is not learned yet). The player's own buttons 5 and Shift+5 are left alone,
--- also when layout 2 put a spell there. L.oldOwn: Ctrl+5's button (Action Bar 5 button 5) held Mana Tide Totem in
--- layout 4; it is the player's own now, so a full apply clears it only while it still holds exactly that spell.
-L.oldOwn = {
-  [41] = "mana_tide_totem",
-}
-
+-- Earlier layouts put these spells in buttons the plan no longer fills (spare now, or on Action Bar 5, which left the
+-- plan). A full apply clears such a button only while it still holds exactly that spell (or item macro) and it has
+-- its new place or lives in the spellbook now, so no duplicates are left (undoable like everything else). Buttons the
+-- plan fills now are not listed: the plan replaces what is there.
+-- Action Bar 5 (37-48): layout 6 (0.6.1) Ctrl row, and layout 4 (0.4.1-0.4.2) on buttons that were spare in layouts
+-- 5-6 (2, 3, 4, 11) and on button 5 (Mana Tide Totem on Ctrl+5's button).
+-- Action Bar 6 (145-156): layout 3 (0.4.0) buttons 9, 10 and 12, spare now (buttons 1-8 are planned again).
+-- Action Bar 4 buttons 9-12 and Action Bar 3 buttons 4-5: layout 6's clicked spells there (and layout 4's Sentry
+-- Totem).
 L.old = {
-  [62] = "cure_disease",
-  [71] = "mana_tide_totem",
-  [72] = "call_of_the_elements",
+  [37] = "totemic_recall",
   [38] = "earthbind_totem",
   [39] = "stoneclaw_totem",
   [40] = "grounding_totem",
+  [41] = "mana_tide_totem",
+  [42] = "earthbind_totem",
+  [43] = "stoneclaw_totem",
+  [44] = "fire_nova",
+  [45] = "grounding_totem",
+  [46] = "mana_tide_totem",
   [47] = "poison_cleansing_totem",
+  [48] = "ghost_wolf",
+  [153] = "grounding_totem",
+  [154] = "mana_tide_totem",
+  [156] = "ghost_wolf",
+  [33] = "call_of_the_ancestors",
+  [34] = "call_of_the_spirits",
+  [35] = "flametongue_totem",
   [36] = "sentry_totem",
-  [29] = "fire_nova",
-  [32] = "magma_totem",
+  [52] = "windfury_weapon",
+  [53] = "@elixir",
 }
 
 -- Keys whose default binding the preview explains (expected defaults, research/keybind-layout.md Q4).
@@ -215,8 +217,9 @@ L.defaultWarn = {
   ["CTRL-2"] = "ui.preview.warn.stance",
   ["CTRL-3"] = "ui.preview.warn.stance",
   ["CTRL-4"] = "ui.preview.warn.stance",
+  ["CTRL-5"] = "ui.preview.warn.stance",
   ["CTRL-R"] = "ui.preview.warn.fps",
 }
 
--- Spare buttons in this bar order are the first choice for things moved out of a planned slot.
-L.spareOrder = { "bar3", "bar4", "bar5", "bar2" }
+-- Spare buttons in this bar order are the first choice for things moved out of a planned slot (clicked ones first).
+L.spareOrder = { "bar4", "bar6", "bar3" }

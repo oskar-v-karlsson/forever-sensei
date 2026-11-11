@@ -886,6 +886,114 @@ def check_client_dump(pack, cls, talents):
         problem("research TSV missing: cannot cross-check spells")
 
 
+# --- Layout v4 (family blocks), shared by the packs ----------------------------------------------------------
+# research/keybind-layout-v4.md (approved, commit 27b6754): plain = Action Bar 1, Shift = Action Bar 2, Ctrl = Action
+# Bar 3, button n = key n; the six mouse keys and the clicked in-combat spells on Action Bar 6 (moved by the player in
+# Edit Mode); out-of-combat clicks on Action Bar 4. Action Bars 5, 7 and 8 are never planned.
+ROW_KEYS = ["1", "2", "3", "4", "5", "Q", "E", "R", "F", "Z", "X", "C"]
+BLOCKS = {"1-5": ROW_KEYS[0:5], "QERF": ROW_KEYS[5:9], "ZXC": ROW_KEYS[9:12]}
+MOUSE_KEYS = {"BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"}
+
+
+def slot_what(s):
+    return s.get("spell") or ("!" + s["combo"] if s.get("combo") else "@" + str(s.get("item")))
+
+
+def check_blocks(layout, label, grid, clicks, mouse_order, ooc):
+    """The exact grid (key → entry), the clicked buttons ((bar, button) → entry), the bars and the block rule."""
+    slots = layout["slots"]
+    bars = {b["id"]: b for b in layout["bars"]}
+    want_bars = [
+        ("main", 1, "ACTIONBUTTON%d", None, ROW_KEYS),
+        ("bar2", 61, "MULTIACTIONBAR1BUTTON%d", "PROXY_SHOW_ACTIONBAR_2", ["SHIFT-" + k for k in ROW_KEYS]),
+        ("bar3", 49, "MULTIACTIONBAR2BUTTON%d", "PROXY_SHOW_ACTIONBAR_3", ["CTRL-" + k for k in ROW_KEYS]),
+        ("bar6", 145, "MULTIACTIONBAR5BUTTON%d", "PROXY_SHOW_ACTIONBAR_6", mouse_order + [None] * 6),
+        ("bar4", 25, "MULTIACTIONBAR3BUTTON%d", "PROXY_SHOW_ACTIONBAR_4", [None] * 12),
+    ]
+    if [b["id"] for b in layout["bars"]] != [w[0] for w in want_bars]:
+        problem(f"{label}: bars must be main, bar2, bar3, bar6, bar4, are {[b['id'] for b in layout['bars']]}")
+        return
+    for bid, first, binding, setting, keys in want_bars:
+        b = bars[bid]
+        got = [k or None for k in (b.get("keys") or [])] or [None] * 12
+        got += [None] * (12 - len(got))
+        if (b["first"], b["binding"], b.get("setting"), got) != (first, binding, setting, keys):
+            problem(f"{label}: {bid} must be first {first}, {binding}, {setting}, keys {keys}")
+    if not bars["bar6"].get("editMode") or any(b.get("editMode") for b in layout["bars"] if b["id"] != "bar6"):
+        problem(f"{label}: only bar6 is an Edit Mode bar (it starts in the middle of the screen)")
+    if set(mouse_order) != MOUSE_KEYS:
+        problem(f"{label}: bar6 buttons 1-6 must be the six mouse keys")
+    for s in slots:
+        b = bars[s["bar"]]
+        want = ((b.get("keys") or [None] * 12) + [None] * 12)[s["button"] - 1] or None
+        if (s.get("key") or None) != want:
+            problem(f"{label}: slot {s['slot']} key {s.get('key')} is not its bar's key {want}")
+    # Exact grid and clicked buttons.
+    by_key = {s["key"]: slot_what(s) for s in slots if s.get("key")}
+    for k in sorted(set(grid) | set(by_key)):
+        if by_key.get(k) != grid.get(k):
+            problem(f"{label}: key {k} must be {grid.get(k)}, has {by_key.get(k)}")
+    by_click = {(s["bar"], s["button"]): slot_what(s) for s in slots if not s.get("key")}
+    for k in sorted(set(clicks) | set(by_click)):
+        if by_click.get(k) != clicks.get(k):
+            problem(f"{label}: clicked {k[0]} button {k[1]} must be {clicks.get(k)}, has {by_click.get(k)}")
+    for (bid, _), entry in clicks.items():
+        if bid not in ("bar6", "bar4"):
+            problem(f"{label}: clicked {entry} must be on Action Bar 6 (in combat) or 4 (out of combat)")
+        if bid == "bar4" and entry not in ooc:
+            problem(f"{label}: {entry} on Action Bar 4 is not an out-of-combat spell")
+    # Spare: every keyed button without an entry is bound and empty; allowedKeys = grid + spare keys.
+    spare_keys = {x["key"] for x in layout["spare"] if x.get("key")}
+    for x in layout["spare"]:
+        b = bars[x["bar"]]
+        want = ((b.get("keys") or [None] * 12) + [None] * 12)[x["button"] - 1] or None
+        if x.get("key") != want or (want and x.get("binding") != b["binding"] % x["button"]):
+            problem(f"{label}: spare slot {x['slot']} key {x.get('key')} is not its bar's key {want}")
+    allowed = set(layout["allowedKeys"])
+    if allowed != set(grid) | spare_keys:
+        problem(f"{label}: allowedKeys must be the grid's and spare keys (diff {sorted(allowed ^ (set(grid) | spare_keys))})")
+    all_keys = {m + k for m in ("", "SHIFT-", "CTRL-") for k in ROW_KEYS} | MOUSE_KEYS
+    if allowed != all_keys:
+        problem(f"{label}: every allowed key must be bound (no own keys since layout v4): missing {sorted(all_keys - allowed)}")
+    for k in ("ownKeys", "own", "oldOwn", "keepDefault", "keyNotes"):
+        if layout.get(k):
+            problem(f"{label}: {k} is gone since layout v4")
+    # The block rule: each family fills one block of one row in member order (or one mouse pair/column); spill-overs
+    # are clicked on Action Bar 6.
+    where = {slot_what(s): s for s in slots}
+    for f in layout.get("families") or []:
+        block, row, members = f.get("block"), f.get("row") or "", f.get("members") or []
+        if block in BLOCKS:
+            want = [row + k for k in BLOCKS[block][:len(members)]]
+            if len(members) > len(BLOCKS[block]):
+                problem(f"{label}: family {f['id']} is bigger than its block")
+        elif block == "mouse":
+            want = [row + "BUTTON4", row + "BUTTON5"][:len(members)]
+        elif block in ("BUTTON4", "BUTTON5"):
+            want = [m + block for m in ("", "SHIFT-", "CTRL-")][:len(members)]
+        else:
+            problem(f"{label}: family {f.get('id')} has an unknown block {block}")
+            continue
+        got = [(where.get(m) or {}).get("key") for m in members]
+        if got != want:
+            problem(f"{label}: family {f['id']} must sit on {want}, is on {got}")
+        for m in f.get("spill") or []:
+            s = where.get(m) or {}
+            if s.get("bar") != "bar6" or s.get("key"):
+                problem(f"{label}: {f['id']} spill-over {m} must be clicked on Action Bar 6")
+    # Retired bars and leftovers: L.old slots are off the plan (spare or on a retired bar).
+    planned = {s["slot"] for s in slots}
+    ranges = [(b["first"], b["first"] + 11) for b in layout["bars"] + (layout.get("retired") or [])]
+    for slot_, key in (layout.get("old") or {}).items():
+        slot_ = int(slot_)
+        if slot_ in planned or not any(a <= slot_ <= z for a, z in ranges):
+            problem(f"{label}: old slot {slot_} ({key}) must be off the plan, on a planned or retired bar")
+    for r in layout.get("retired") or []:
+        if r["first"] in (1, 61, 49, 145, 25):
+            problem(f"{label}: retired bar {r['id']} is a planned bar")
+    return by_key
+
+
 # --- Shaman ---------------------------------------------------------------------------------------------------
 def check_shaman(pack, sources):
     spells = pack["spells"]
@@ -898,17 +1006,36 @@ def check_shaman(pack, sources):
         problem("shaman: the pack must have the Restoration spec, the default")
     check_client_dump(pack, "shaman", talents)
 
-    # --- layout -----------------------------------------------------------------------------------------------
+    # --- layout: the approved grid (research/keybind-layout-v4.md S3, layout 7) ----------------------------------
     slots = layout["slots"]
-    seen_slot = {s["slot"]: s for s in slots}
-    allowed = set(layout["allowedKeys"])
-
-    def what(s):
-        return s.get("spell") or "@" + str(s.get("item"))
-
-    for s in slots:
-        if s.get("item") and s.get("key") not in (None, "Z", "C"):
-            problem(f"layout: item @{s['item']} on key {s.get('key')} (only FS_MANA on Z and FS_HEALTH on C have keys)")
+    grid = {
+        "1": "flame_shock", "2": "lightning_bolt", "3": "chain_lightning", "4": "purge", "5": "frost_shock",
+        "Q": "earth_shock", "E": "lesser_healing_wave", "R": "chain_heal", "F": "healing_wave",
+        "Z": "@mana", "X": "water_shield", "C": "@health",
+        "SHIFT-1": "totemic_call", "SHIFT-2": "call_of_the_elements", "SHIFT-3": "call_of_the_ancestors",
+        "SHIFT-4": "call_of_the_spirits", "SHIFT-5": "totemic_recall",
+        "SHIFT-Q": "flametongue_totem", "SHIFT-E": "magma_totem", "SHIFT-R": "searing_totem", "SHIFT-F": "fire_nova",
+        "SHIFT-Z": "mana_spring_totem", "SHIFT-X": "mana_tide_totem", "SHIFT-C": "healing_stream_totem",
+        "CTRL-1": "ghost_wolf", "CTRL-2": "water_walking", "CTRL-3": "water_breathing",
+        "CTRL-Q": "earthbind_totem", "CTRL-E": "stoneclaw_totem", "CTRL-R": "stoneskin_totem", "CTRL-F": "tremor_totem",
+        "CTRL-Z": "grounding_totem", "CTRL-X": "windfury_totem", "CTRL-C": "grace_of_air_totem",
+        "BUTTON4": "riptide", "BUTTON5": "natures_swiftness",
+        "SHIFT-BUTTON4": "cure_poison", "SHIFT-BUTTON5": "cure_disease",
+        "CTRL-BUTTON4": "poison_cleansing_totem", "CTRL-BUTTON5": "disease_cleansing_totem",
+    }
+    clicks = {
+        ("bar6", 7): "strength_of_earth_totem", ("bar6", 8): "@healpot",
+        ("bar4", 1): "ancestral_spirit", ("bar4", 2): "astral_recall", ("bar4", 3): "rockbiter_weapon",
+        ("bar4", 4): "flametongue_weapon", ("bar4", 5): "frostbrand_weapon", ("bar4", 6): "windfury_weapon",
+        ("bar4", 7): "lightning_shield", ("bar4", 8): "@elixir",
+    }
+    ooc = {"ancestral_spirit", "astral_recall", "rockbiter_weapon", "flametongue_weapon", "frostbrand_weapon",
+           "windfury_weapon", "lightning_shield", "@elixir"}
+    mouse = ["BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]
+    check_blocks(layout, "layout", grid, clicks, mouse, ooc)
+    if [f["id"] for f in layout.get("families") or []] != [
+            "damage", "calls", "fire", "water", "travel", "earth", "air", "cursorheals", "cures", "cleansing"]:
+        problem("layout: families must be damage, calls, fire, water, travel, earth, air and the three mouse pairs")
     if sorted(pack_items) != ["elixir", "healpot", "health", "mana"]:
         problem(f"shaman: items must be mana, health, healpot and elixir, are {sorted(pack_items)}")
     if layout.get("noSlotLines") != [{"kind": "totembar", "text": "ui.layout.nobar"},
@@ -916,95 +1043,20 @@ def check_shaman(pack, sources):
         problem("layout: noSlotLines must list the Totem Bar and the spellbook")
     if spec.get("tabs") != ["role", "healing", "damage", "totems", "manners"]:
         problem(f"shaman: Restoration tabs must be role, healing, damage, totems, manners, are {spec.get('tabs')}")
-    # The approved grid (research/keybind-layout.md (a) at ecf40ec; layout 5 keeps the keys, makes Action Bar 5 the
-    # Ctrl mirror of Action Bar 2 and moves the mouse buttons to Action Bar 3 7-12; layout 6 (0.6.1) puts the Fire
-    # totem family together: Magma Totem on Shift+4, Fire Nova on Ctrl+R): every key holds exactly this.
-    grid = {
-        "1": "totemic_call", "2": "flame_shock", "3": "lightning_bolt", "4": "chain_lightning",
-        "Q": "earth_shock", "E": "lesser_healing_wave", "R": "chain_heal", "F": "healing_wave",
-        "Z": "@mana", "X": "water_shield", "C": "@health",
-        "SHIFT-1": "call_of_the_elements", "SHIFT-3": "purge", "SHIFT-4": "magma_totem", "SHIFT-Q": "frost_shock",
-        "SHIFT-E": "stoneskin_totem", "SHIFT-R": "searing_totem", "SHIFT-F": "tremor_totem",
-        "SHIFT-Z": "mana_spring_totem",
-        "CTRL-1": "totemic_recall", "CTRL-Q": "earthbind_totem", "CTRL-E": "stoneclaw_totem", "CTRL-R": "fire_nova",
-        "CTRL-F": "grounding_totem", "CTRL-Z": "mana_tide_totem", "CTRL-C": "ghost_wolf",
-        "BUTTON4": "riptide", "BUTTON5": "natures_swiftness",
-        "SHIFT-BUTTON4": "cure_poison", "SHIFT-BUTTON5": "cure_disease",
-        "CTRL-BUTTON4": "poison_cleansing_totem", "CTRL-BUTTON5": "disease_cleansing_totem",
-    }
-    by_key = {s["key"]: what(s) for s in slots if s.get("key")}
-    for k in sorted(set(grid) | set(by_key)):
-        if by_key.get(k) != grid.get(k):
-            problem(f"layout: key {k} must be {grid.get(k)}, has {by_key.get(k)}")
-    # Keyed bars bind every button, also those without a skill (spare keys), so the plain, Shift and Ctrl rows match.
     spare_keys = {x["key"] for x in layout["spare"] if x.get("key")}
-    if spare_keys & set(grid):
-        problem(f"layout: spare key also in the grid {sorted(spare_keys & set(grid))}")
-    for x in layout["spare"]:
-        b = next(b for b in layout["bars"] if b["id"] == x["bar"])
-        want = (b.get("keys") or [None] * 12)[x["button"] - 1] or None
-        if x.get("key") != want or (want and x.get("binding") != b["binding"] % x["button"]):
-            problem(f"layout: spare slot {x['slot']} key {x.get('key')} is not its bar's key {want}")
-    if allowed != set(grid) | spare_keys:
-        problem(f"layout: allowedKeys must be exactly the grid's and spare keys (diff {sorted(allowed ^ (set(grid) | spare_keys))})")
+    if spare_keys != {"CTRL-4", "CTRL-5"}:
+        problem(f"layout: spare keys must be Ctrl+4 and Ctrl+5, are {sorted(spare_keys)}")
     # Lightning Shield stands in on X until Water Shield is learned, then moves to its own clickable button.
     x = next((s for s in slots if s.get("key") == "X"), {})
     ls = next((s for s in slots if s.get("spell") == "lightning_shield"), {})
     if x.get("standIn") != "lightning_shield" or ls.get("after") != "water_shield" or ls.get("key"):
         problem("layout: X must be Water Shield with Lightning Shield standing in until it is learned")
-    # 5, Shift+5 and Ctrl+5 are the player's own: never bound, never planned, never spare.
-    if layout.get("ownKeys") != ["5", "SHIFT-5", "CTRL-5"]:
-        problem("layout: ownKeys must be 5, SHIFT-5 and CTRL-5")
-    if set(layout.get("ownKeys") or []) & allowed:
-        problem("layout: an own key is in allowedKeys")
-    bars = {b["id"]: b for b in layout["bars"]}
-    spare_slots = {x["slot"] for x in layout["spare"]}
-    for bid in ("main", "bar2", "bar5"):
-        own = bars[bid]["first"] + 4
-        if own in seen_slot or own in spare_slots:
-            problem(f"layout: own button {own} ({bid} 5) is planned or spare")
-        if bars[bid]["keys"][4] not in layout["ownKeys"]:
-            problem(f"layout: {bid} button 5 key must be an own key")
-    if sorted(int(x) for x in (layout.get("own") or {})) != sorted(bars[b]["first"] + 4 for b in ("main", "bar2", "bar5")):
-        problem("layout: own slots must be exactly main 5, bar2 5 and bar5 5 (5, Shift+5 and Ctrl+5)")
-    for b in layout["bars"]:
-        mine = {"main": {"5"}, "bar2": {"SHIFT-5"}, "bar5": {"CTRL-5"}}.get(b["id"], set())
-        if (set(layout["ownKeys"]) - mine) & set(b.get("keys") or []):
-            problem(f"layout: bar {b['id']} lists another bar's own key")
-    # Action Bar 5 (MultiBarLeft, shown at the right edge) is the Ctrl mirror of Action Bar 2: button i has Ctrl where
-    # bar 2 has Shift. The mouse buttons use Action Bar 3 7-12. Action Bars 6 and 7 (layout 3) showed up in the middle
-    # of the screen: they are retired, never used or shown again.
-    b5 = bars.get("bar5", {})
-    want_keys = [k.replace("SHIFT-", "CTRL-") for k in bars["bar2"]["keys"]]
-    if not all(k.startswith("SHIFT-") for k in bars["bar2"]["keys"]) or len(want_keys) != 12:
-        problem("layout: bar2 must have 12 Shift keys")
-    if (b5.get("first"), b5.get("binding"), b5.get("setting"), b5.get("keys")) != (
-            37, "MULTIACTIONBAR4BUTTON%d", "PROXY_SHOW_ACTIONBAR_5", want_keys):
-        problem("layout: bar5 must be first 37, MULTIACTIONBAR4BUTTON%d, PROXY_SHOW_ACTIONBAR_5 with bar2's keys as Ctrl")
-    mouse = ["BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]
-    b3keys = [k or None for k in (bars.get("bar3", {}).get("keys") or [])]
-    if b3keys != [None] * 6 + mouse or bars.get("bar3", {}).get("binding") != "MULTIACTIONBAR2BUTTON%d":
-        problem("layout: bar3 buttons 7-12 must hold the mouse keys (MULTIACTIONBAR2BUTTON), 1-6 no key")
-    retired = {(r.get("id"), r.get("first"), r.get("binding"), r.get("setting"), r.get("own"))
-               for r in layout.get("retired") or []}
-    if retired != {("bar6", 145, "MULTIACTIONBAR5BUTTON%d", "PROXY_SHOW_ACTIONBAR_6", 5),
-                   ("bar7", 157, "MULTIACTIONBAR6BUTTON%d", "PROXY_SHOW_ACTIONBAR_7", None)}:
-        problem("layout: retired must be exactly Action Bars 6 and 7")
-    assigned = {r.get("id"): r.get("assigned") for r in layout.get("retired") or []}
-    if assigned.get("bar6") != [1, 6, 7, 9, 10, 12] or assigned.get("bar7") != [1, 2, 3, 4, 5, 6]:
-        problem("layout: retired assigned must be layout 3's buttons (bar6 1,6,7,9,10,12; bar7 1-6)")
-    for b in layout["bars"]:
-        if b["first"] >= 145 or b.get("setting") in ("PROXY_SHOW_ACTIONBAR_6", "PROXY_SHOW_ACTIONBAR_7") \
-                or re.match(r"MULTIACTIONBAR[56]BUTTON", b.get("binding") or ""):
-            problem(f"layout: bar {b['id']} uses retired Action Bar 6 or 7")
-    for s in slots:
-        if s["slot"] >= 145:
-            problem(f"layout: slot {s['slot']} is on retired Action Bar 6 or 7")
-    for s in slots:
-        b = bars[s["bar"]]
-        want = (b.get("keys") or [None] * 12)[s["button"] - 1] if s["button"] <= len(b.get("keys") or []) else None
-        if s.get("key") and s["key"] != want:
-            problem(f"layout: slot {s['slot']} key {s['key']} is not its bar's key {want}")
+    # Retired: Action Bar 5 (layouts 4-6) stays as the player has it; Action Bar 7 (layout 3) stays hidden.
+    retired = [(r.get("id"), r.get("first"), r.get("binding"), r.get("setting"), bool(r.get("keepShown")),
+                r.get("assigned")) for r in layout.get("retired") or []]
+    if retired != [("bar5", 37, "MULTIACTIONBAR4BUTTON%d", "PROXY_SHOW_ACTIONBAR_5", True, [1, 6, 7, 8, 9, 10, 12]),
+                   ("bar7", 157, "MULTIACTIONBAR6BUTTON%d", "PROXY_SHOW_ACTIONBAR_7", False, [1, 2, 3, 4, 5, 6])]:
+        problem("layout: retired must be Action Bar 5 (keepShown, layout 6's buttons) and Action Bar 7 (layout 3's)")
     # Macros: the kinds exist, mouseover heals and cures, interrupt with /stopcasting, NS + Healing Wave.
     bodies = layout["macroBodies"]
     want_macros = {"healing_wave", "lesser_healing_wave", "chain_heal", "riptide", "cure_poison", "cure_disease",
@@ -1034,28 +1086,24 @@ def check_shaman(pack, sources):
     kinds_used = {layout["macroKind"].get(k, "help") for k in layout["macros"]}
     if {"interrupt", "harm", "nshw", "help"} - kinds_used:
         problem("layout: earth_shock interrupt, purge harm and the NS + Healing Wave macro are required")
-    # Earlier layouts' leftovers are cleared only from buttons that are spare now.
-    for slot_, key in (layout.get("old") or {}).items():
-        if int(slot_) not in spare_slots or key not in keys:
-            problem(f"layout: old slot {slot_} ({key}) must be spare now and a spell")
-    # Own buttons an earlier layout filled: only Ctrl+5's button (Mana Tide Totem in layout 4).
-    old_own = {int(k): v for k, v in (layout.get("oldOwn") or {}).items()}
-    if old_own != {bars["bar5"]["first"] + 4: "mana_tide_totem"}:
-        problem("layout: oldOwn must be exactly Ctrl+5's button with layout 4's Mana Tide Totem")
-    for slot_ in old_own:
-        if str(slot_) not in {str(x) for x in (layout.get("own") or {})}:
-            problem(f"layout: oldOwn slot {slot_} is not an own button")
-    # Spare keys: every keyed button without a skill (the "-" of the grid), and nothing else.
-    want_spare = {"SHIFT-2", "SHIFT-X", "SHIFT-C", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-X"}
-    if spare_keys != want_spare:
-        problem(f"layout: spare keys must be {sorted(want_spare)}, are {sorted(spare_keys)}")
-    # Layout 6 (0.6.1) is the plan: the Fire totem family moved (Erika's request), so characters with layout 5 get
-    # the one-time "apply all" notice, and a full apply clears Fire Nova's and Magma Totem's old bar 4 buttons.
-    if layout.get("version") != 6:
-        problem(f"layout: version must be 6 (Fire totem family together, 0.6.1), is {layout.get('version')}")
-    for slot_, key in ((29, "fire_nova"), (32, "magma_totem")):
-        if (layout.get("old") or {}).get(slot_, (layout.get("old") or {}).get(str(slot_))) != key:
-            problem(f"layout: old must list layout 5's {key} on bar 4 slot {slot_}")
+    # Layout 7 (0.7.0, family blocks) is the plan: characters with layout 6 get the one-time "apply all" notice. A
+    # full apply clears layout 6's Action Bar 5 spells, layout 4's Mana Tide on Ctrl+5, layout 3's bar 6 spares and
+    # layout 5's bar 4 Fire spells while they still hold exactly that spell.
+    if layout.get("version") != 7:
+        problem(f"layout: version must be 7 (family blocks, 0.7.0), is {layout.get('version')}")
+    old = {int(k): v for k, v in (layout.get("old") or {}).items()}
+    for slot_, key in ((37, "totemic_recall"), (41, "mana_tide_totem"), (44, "fire_nova"), (48, "ghost_wolf"),
+                       (153, "grounding_totem"), (154, "mana_tide_totem"), (156, "ghost_wolf")):
+        if old.get(slot_) != key:
+            problem(f"layout: old must list {key} on slot {slot_}")
+    for v in old.values():
+        for k in (v if isinstance(v, list) else [v]):
+            if k not in keys and not k.startswith("@"):
+                problem(f"layout: old entry {k} is not a spell")
+    want_warn = {"CTRL-%d" % i: "ui.preview.warn.stance" for i in range(1, 6)}
+    want_warn["CTRL-R"] = "ui.preview.warn.fps"
+    if layout.get("defaultWarn") != want_warn:
+        problem("layout: defaultWarn must be Ctrl+1-5 (stance bar) and Ctrl+R (framerate)")
 
     # --- talents ----------------------------------------------------------------------------------------------
     tree_points = check_talents_points(talents)
@@ -1093,90 +1141,54 @@ def check_paladin(pack, sources):
     if spec.get("tabs") != ["role", "rotation", "seals", "auras", "cooldowns", "manners"]:
         problem(f"paladin: Protection tabs must be role, rotation, seals, auras, cooldowns, manners, are {spec.get('tabs')}")
 
-    # --- layout: the approved grid (research/keybind-layout-paladin.md, commit 824c74c) -----------------------
+    # --- layout: the approved grid (research/keybind-layout-v4.md P4, layout 2) ----------------------------------
     slots = layout["slots"]
-    bars = {b["id"]: b for b in layout["bars"]}
-
-    def what(s):
-        return s.get("spell") or ("!" + s["combo"] if s.get("combo") else "@" + str(s.get("item")))
-
     grid = {
-        "1": "holy_strike", "2": "consecration", "3": "holy_shield", "4": "flash_of_light",
-        "Q": "judgement", "E": "hammer_of_justice", "R": "exorcism", "F": "seal_of_fury",
-        "Z": "@health", "X": "righteous_fury", "C": "templars_bulwark",
-        "SHIFT-4": "holy_light", "SHIFT-Q": "swift_judgement", "SHIFT-E": "hammer_of_wrath",
-        "SHIFT-R": "holy_wrath", "SHIFT-F": "seal_of_righteousness", "SHIFT-Z": "@mana",
-        "SHIFT-X": "blessing_of_kings", "SHIFT-C": "divine_shield",
-        "CTRL-Q": "!opener", "CTRL-R": "turn_undead", "CTRL-F": "seal_of_the_crusader",
-        "CTRL-X": "redemption", "CTRL-C": "divine_protection",
-        "BUTTON4": "blessing_of_protection", "BUTTON5": "cleanse",
-        "SHIFT-BUTTON4": "lay_on_hands", "SHIFT-BUTTON5": "blessing_of_freedom",
-        "CTRL-BUTTON4": "blessing_of_sacrifice", "CTRL-BUTTON5": "voice_of_truth",
+        "1": "holy_strike", "2": "consecration", "3": "holy_shield", "4": "flash_of_light", "5": "holy_light",
+        "Q": "judgement", "E": "swift_judgement", "R": "!opener", "F": "hammer_of_justice",
+        "Z": "@health", "X": "@mana", "C": "righteous_fury",
+        "SHIFT-1": "seal_of_fury", "SHIFT-2": "seal_of_righteousness", "SHIFT-3": "seal_of_the_crusader",
+        "SHIFT-4": "seal_of_wisdom", "SHIFT-5": "seal_of_light",
+        "SHIFT-Q": "exorcism", "SHIFT-E": "hammer_of_wrath", "SHIFT-R": "holy_wrath", "SHIFT-F": "turn_undead",
+        "SHIFT-Z": "templars_bulwark", "SHIFT-X": "divine_shield", "SHIFT-C": "divine_protection",
+        "CTRL-1": "retribution_aura", "CTRL-2": "devotion_aura", "CTRL-3": "concentration_aura",
+        "CTRL-4": "shadow_resistance_aura", "CTRL-5": "frost_resistance_aura",
+        "CTRL-Z": "blessing_of_kings", "CTRL-X": "blessing_of_might", "CTRL-C": "blessing_of_wisdom",
+        "BUTTON4": "blessing_of_protection", "SHIFT-BUTTON4": "lay_on_hands", "CTRL-BUTTON4": "blessing_of_sacrifice",
+        "BUTTON5": "cleanse", "SHIFT-BUTTON5": "blessing_of_freedom", "CTRL-BUTTON5": "voice_of_truth",
     }
-    by_key = {s["key"]: what(s) for s in slots if s.get("key")}
-    for k in sorted(set(grid) | set(by_key)):
-        if by_key.get(k) != grid.get(k):
-            problem(f"paladin layout: key {k} must be {grid.get(k)}, has {by_key.get(k)}")
-    # Families: one base key, plain / Shift / Ctrl (what the grid above must keep together).
-    families = {
-        "Q": ("judgement", "swift_judgement", "!opener"), "E": ("hammer_of_justice", "hammer_of_wrath", None),
-        "R": ("exorcism", "holy_wrath", "turn_undead"),
-        "F": ("seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader"), "Z": ("@health", "@mana", None),
-        "X": ("righteous_fury", "blessing_of_kings", "redemption"),
-        "C": ("templars_bulwark", "divine_shield", "divine_protection"), "4": ("flash_of_light", "holy_light", None),
-        "BUTTON4": ("blessing_of_protection", "lay_on_hands", "blessing_of_sacrifice"),
-        "BUTTON5": ("cleanse", "blessing_of_freedom", "voice_of_truth"),
+    clicks = {
+        ("bar6", 7): "seal_of_justice", ("bar6", 8): "fire_resistance_aura", ("bar6", 9): "divine_intervention",
+        ("bar4", 1): "redemption", ("bar4", 2): "greater_blessing_of_kings", ("bar4", 3): "greater_blessing_of_might",
+        ("bar4", 4): "greater_blessing_of_wisdom",
     }
-    for base, fam in families.items():
-        got = tuple(by_key.get(m + base) for m in ("", "SHIFT-", "CTRL-"))
-        if got != fam:
-            problem(f"paladin layout: family on {base} must be {fam}, is {got}")
+    ooc = {"redemption", "greater_blessing_of_kings", "greater_blessing_of_might", "greater_blessing_of_wisdom"}
+    mouse = ["BUTTON4", "SHIFT-BUTTON4", "CTRL-BUTTON4", "BUTTON5", "SHIFT-BUTTON5", "CTRL-BUTTON5"]
+    check_blocks(layout, "paladin layout", grid, clicks, mouse, ooc)
+    if [f["id"] for f in layout.get("families") or []] != [
+            "judgement", "seals", "conditional", "forbearance", "auras", "blessings", "save", "free"]:
+        problem("paladin layout: families must be judgement, seals, conditional, forbearance, auras, blessings, save, free")
     spare_keys = {x["key"] for x in layout["spare"] if x.get("key")}
-    if spare_keys != {"SHIFT-1", "SHIFT-2", "SHIFT-3", "CTRL-E", "CTRL-Z"}:
-        problem(f"paladin layout: spare keys must be Shift+1/2/3, Ctrl+E and Ctrl+Z, are {sorted(spare_keys)}")
-    allowed = set(layout["allowedKeys"])
-    if allowed != set(grid) | spare_keys:
-        problem(f"paladin layout: allowedKeys must be the grid's and spare keys (diff {sorted(allowed ^ (set(grid) | spare_keys))})")
-    # 5, Shift+5, Ctrl+5 are his own; Ctrl+1-4 keep the stance bar (auras): never bound, filled or spare.
-    if layout.get("ownKeys") != ["5", "SHIFT-5", "CTRL-5"]:
-        problem("paladin layout: ownKeys must be 5, SHIFT-5 and CTRL-5")
-    keep = layout.get("keepDefault") or []
-    if keep != ["CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4"]:
-        problem("paladin layout: keepDefault must be Ctrl+1-4 (the stance bar, auras)")
-    if (set(keep) | set(layout["ownKeys"])) & allowed:
-        problem("paladin layout: an own or kept default key is in allowedKeys")
-    b5 = bars.get("bar5", {})
-    if (b5.get("first"), b5.get("binding")) != (37, "MULTIACTIONBAR4BUTTON%d") or \
-            [k or None for k in b5.get("keys") or []] != [None] * 4 + ["CTRL-" + k for k in "5QERFZXC"]:
-        problem("paladin layout: bar5 must be Action Bar 5 with Ctrl+5..C on buttons 5-12 and buttons 1-4 unbound")
-    planned = {s["slot"] for s in slots} | {x["slot"] for x in layout["spare"]}
-    for i in range(4):
-        if b5.get("first", 37) + i in planned:
-            problem(f"paladin layout: Action Bar 5 button {i + 1} (Ctrl+{i + 1}, stance bar) is planned or spare")
-    b3keys = [k or None for k in (bars.get("bar3", {}).get("keys") or [])]
-    if b3keys != [None] * 6 + ["BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]:
-        problem("paladin layout: bar3 buttons 7-12 must hold the mouse keys, 1-6 no key")
-    for b in layout["bars"]:
-        if b["first"] >= 145 or re.match(r"MULTIACTIONBAR[56]BUTTON", b.get("binding") or ""):
-            problem(f"paladin layout: bar {b['id']} uses Action Bar 6 or 7")
-    own_slots = sorted(int(x) for x in (layout.get("own") or {}))
-    if own_slots != [5, 41, 65]:
-        problem(f"paladin layout: own slots must be main 5, bar5 5 and bar2 5, are {own_slots}")
-    if layout.get("old") or layout.get("oldOwn") or layout.get("retired"):
-        problem("paladin layout: a first layout has no earlier layouts' leftovers")
-    # Auras on the stance bar; Purify stands in on Cleanse's button until 42, then is in the spellbook.
-    auras = [s["key"] for s in pack["spells"] if s["key"].endswith("_aura")]
-    for k in auras:
-        if layout["noSlot"].get(k) != "stancebar":
-            problem(f"paladin layout: {k} must be on the stance bar (noSlot)")
+    if spare_keys != {"CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F"}:
+        problem(f"paladin layout: spare keys must be Ctrl+Q, E, R and F, are {sorted(spare_keys)}")
+    # Action Bar 5 (layout 1's Ctrl bar) stays as the player has it; L.old clears layout 1's spells there and on
+    # Action Bar 3 buttons that are spare now, while they still hold exactly that spell.
+    retired = [(r.get("id"), r.get("first"), r.get("binding"), r.get("setting"), bool(r.get("keepShown")),
+                r.get("assigned")) for r in layout.get("retired") or []]
+    if retired != [("bar5", 37, "MULTIACTIONBAR4BUTTON%d", "PROXY_SHOW_ACTIONBAR_5", True, [6, 8, 9, 11, 12])]:
+        problem("paladin layout: retired must be Action Bar 5 only (keepShown, layout 1's buttons 6, 8, 9, 11, 12)")
+    old = {int(k): v for k, v in (layout.get("old") or {}).items()}
+    if old != {42: "!opener", 44: "turn_undead", 45: "seal_of_the_crusader", 47: "redemption",
+               48: "divine_protection", 55: "blessing_of_protection", 56: ["cleanse", "purify"], 57: "lay_on_hands"}:
+        problem(f"paladin layout: old must be layout 1's Action Bar 5 spells and its Action Bar 3 buttons 7-9, is {old}")
+    # Auras are normal spells on Action Bar 3 since layout 2; Purify stands in on Cleanse's button until 42.
+    if any(v == "stancebar" for v in layout["noSlot"].values()):
+        problem("paladin layout: no spell is left on the stance bar (layout 2 places the auras)")
+    if layout["noSlot"] != {"purify": "spellbook", "summon_warhorse": "spellbook", "summon_charger": "spellbook"}:
+        problem("paladin layout: noSlot must be Purify and the two mounts (spellbook)")
     m5 = next((s for s in slots if s.get("key") == "BUTTON5"), {})
-    if m5.get("standIn") != "purify" or layout["noSlot"].get("purify") != "spellbook":
-        problem("paladin layout: Mouse5 must be Cleanse with Purify standing in until it is learned")
-    clicked = {what(s) for s in slots if not s.get("key")}
-    for k in ("blessing_of_might", "blessing_of_wisdom", "greater_blessing_of_kings", "greater_blessing_of_might",
-              "greater_blessing_of_wisdom", "seal_of_wisdom", "seal_of_light", "seal_of_justice", "divine_intervention"):
-        if k not in clicked:
-            problem(f"paladin layout: {k} must be on a clicked button (no key)")
+    if m5.get("standIn") != "purify":
+        problem("paladin layout: Mouse5 must be Cleanse with Purify standing in until 42")
     # Macros: help with the self fallback, help_nofb (Blessing of Protection, Sacrifice) without, Hammer of Justice
     # stops the cast, the opener fires Judgement, Swift Judgement and Holy Strike once Swift Judgement is known.
     want = {"flash_of_light", "holy_light", "lay_on_hands", "cleanse", "purify", "blessing_of_freedom",
@@ -1201,10 +1213,12 @@ def check_paladin(pack, sources):
     names = set(layout["macros"].values()) | {"FS_OPEN", "FS_HEALTH", "FS_MANA"}
     if len(names) > 15:
         problem(f"paladin layout: {len(names)} macros, over the budget of 15")
-    if layout.get("defaultWarn", {}).get("CTRL-R") != "ui.preview.warn.fps":
-        problem("paladin layout: the preview must warn that Ctrl+R loses its default")
-    if layout.get("version") != 1:
-        problem(f"paladin layout: version must be 1, is {layout.get('version')}")
+    want_warn = {"CTRL-%d" % i: "ui.preview.warn.stance" for i in range(1, 6)}
+    want_warn["CTRL-R"] = "ui.preview.warn.fps"
+    if layout.get("defaultWarn") != want_warn:
+        problem("paladin layout: defaultWarn must be Ctrl+1-5 (stance bar) and Ctrl+R (framerate)")
+    if layout.get("version") != 2:
+        problem(f"paladin layout: version must be 2 (family blocks, 0.7.0), is {layout.get('version')}")
 
     # --- talents: Wowhead 0/32/19, one point per level 10-60 ---------------------------------------------------
     tree_points = check_talents_points(talents)

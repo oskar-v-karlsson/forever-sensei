@@ -199,10 +199,10 @@ renderers.layout = function(frame)
   local n = 0
   for bi, bar in ipairs(layout.bars) do
     y = y + label(frame, bi, y, ns.T("ui.bar." .. bar.id), 13, "gold") + 4
-    -- Action Bar 3: the clicked buttons (1-6), then the mouse keys (7-12, long labels like "Shift+Mouse 4") in a
-    -- second row. Keyed bars show all 12 buttons, empty ones (spare keys, the player's 5) as dark squares with their
-    -- key, so the plain, Shift and Ctrl rows line up key by key.
-    local twoRows = bar.id == "bar3"
+    -- Action Bar 6: the mouse keys (buttons 1-6, long labels like "Shift+Mouse 4"), then the clicked buttons (7-12)
+    -- in a second row. Keyed bars show all 12 buttons, empty ones (spare keys) as dark squares with their key, so the
+    -- plain, Shift and Ctrl rows line up key by key.
+    local twoRows = bar.editMode
     local byButton = {}
     for _, s in ipairs(layout.slots) do
       if s.bar == bar.id then byButton[s.button] = s end
@@ -213,7 +213,7 @@ renderers.layout = function(frame)
       if s or key then
         n = n + 1
         local second = twoRows and i > 6
-        local step = second and 80 or 46
+        local step = (twoRows and not second) and 80 or 46
         local x = ((second and i - 6 or i) - 1) * step
         local rowY = second and y + 58 or y
         local e = s and s.spell and Spells.Get(s.spell)
@@ -229,10 +229,10 @@ renderers.layout = function(frame)
       end
     end
     y = y + (twoRows and 116 or 58)
-  end
-  -- Keys the spec leaves on their game default (the paladin's Ctrl+1-4 = auras on the stance bar).
-  for i, id in ipairs(layout.keyNotes or {}) do
-    y = y + label(frame, 15 + i, y, ns.T(id), 12, "grey") + 4
+    -- A bar that starts in the middle of the screen (Action Bar 6): how to move it next to the bottom bars.
+    if bar.editMode then
+      y = y + paragraph(frame, 7, y, "ui.layout.editmode") + 8
+    end
   end
   -- Spells without a bar slot, one line per kind the spec lists (noSlotLines: { kind, text }).
   for i, line in ipairs(layout.noSlotLines or {}) do

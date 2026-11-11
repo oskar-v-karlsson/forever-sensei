@@ -332,6 +332,37 @@ local function placedElsewhere(planKey)
   return e ~= nil and Spells.LayoutSlot(e) ~= nil and Layout.Desired(e) ~= nil
 end
 
+-- Has this plan key (a spell, "@kind" item macro or "!id" multi-spell macro) its own planned slot to go to?
+local function hasHome(planKey)
+  if type(planKey) ~= "string" then return false end
+  local layout = L()
+  local item = planKey:match("^@(%w+)$")
+  if item then return layout.byItem[item] ~= nil end
+  local combo = planKey:match("^!(%w+)$")
+  if combo then return layout.byCombo[combo] ~= nil and Layout.DesiredCombo(combo) ~= nil end
+  return placedElsewhere(planKey)
+end
+
+-- The bar and button of a slot on a planned or retired bar. → { bar, button, slot } or nil
+local function whereOf(slot)
+  local layout = L()
+  for _, list in ipairs({ layout.bars, layout.retired }) do
+    for _, bar in ipairs(list) do
+      if slot >= bar.first and slot < bar.first + 12 then
+        return { bar = bar.id, button = slot - bar.first + 1, slot = slot }
+      end
+    end
+  end
+end
+
+-- The buttons of a retired bar that the addon used (all 12 when the bar does not list them).
+local function retiredButtons(bar)
+  if bar.assigned then return bar.assigned end
+  local all = {}
+  for i = 1, 12 do all[i] = i end
+  return all
+end
+
 -- Work out every change. onlyKey limits it to one spell (the card's 配置する button).
 -- → plan { place, moves, clears, lost, binds, bars, hide }
 function Layout.BuildPlan(onlyKey)
@@ -348,13 +379,13 @@ function Layout.BuildPlan(onlyKey)
     end
   end
 
-  -- Displaced actions go to empty free slots: the spare buttons (bar 4, then the keyed spares of bar 5 and bar 2) first,
-  -- then slots reserved for spells the player does not know yet, bar 4 then bar 3, right to left.
+  -- Displaced actions go to empty free slots: the spare buttons (in L.spareOrder bar order) first, then slots
+  -- reserved for spells the player does not know yet, in the same bar order, right to left.
   local free = {}
   for _, s in ipairs(layout.spare) do
     if Layout.Current(s.slot) == nil then table.insert(free, s) end
   end
-  for _, barId in ipairs({ "bar4", "bar3" }) do
+  for _, barId in ipairs(layout.spareOrder or { "bar4", "bar3" }) do
     for i = #layout.slots, 1, -1 do
       local s = layout.slots[i]
       if s.bar == barId and not targets[s.slot] and reservedUnknown(s) and Layout.Current(s.slot) == nil then
@@ -413,49 +444,46 @@ function Layout.BuildPlan(onlyKey)
       end
     end
   end
-  -- Buttons that earlier layouts used and that are spare now: clear them if they still hold that layout's spell and
-  -- the spell has its new place or lives in the spellbook now.
+  -- Buttons that earlier layouts used and that the plan no longer fills (spare now, or on a retired bar): clear them
+  -- only while they still hold exactly that layout's spell or macro and it has its new place or lives in the
+  -- spellbook now. Anything else the player put there stays.
+  local cleared = {}
   if not onlyKey then
-    for slot, key in pairs(layout.old) do
-      local cur = not layout.own[slot] and Layout.Current(slot)
-      if cur and cur.planKey == key and (placedElsewhere(key) or layout.noSlot[key] == "spellbook") then
-        local spare
-        for _, sp in ipairs(layout.spare) do
-          if sp.slot == slot then spare = sp end
-        end
-        if spare then table.insert(plan.clears, { slot = slot, where = spare, label = Layout.Label(cur) }) end
-      end
-    end
-    -- Own buttons that an earlier layout filled (Ctrl+5 = Mana Tide Totem in layout 4): cleared only while they still
-    -- hold exactly that spell and it has its new place. Anything the player put there stays.
-    for slot, key in pairs(layout.oldOwn or {}) do
-      local cur = Layout.Current(slot)
-      if cur and cur.planKey == key and placedElsewhere(key) then
-        local where
-        for _, bar in ipairs(layout.bars) do
-          if slot >= bar.first and slot < bar.first + 12 then
-            where = { bar = bar.id, button = slot - bar.first + 1, slot = slot }
+    for _, c in ipairs(plan.clears) do cleared[c.slot] = true end
+    local planned = {}
+    for _, s in ipairs(layout.slots) do planned[s.slot] = true end
+    for slot, keys in pairs(layout.old) do
+      local cur = not planned[slot] and not cleared[slot] and Layout.Current(slot)
+      local where = cur and cur.planKey and whereOf(slot)
+      if where then
+        for _, key in ipairs(type(keys) == "table" and keys or { keys }) do
+          if cur.planKey == key and (hasHome(key) or layout.noSlot[key] == "spellbook") then
+            table.insert(plan.clears, { slot = slot, where = where, label = Layout.Label(cur) })
+            cleared[slot] = true
+            break
           end
         end
-        table.insert(plan.clears, { slot = slot, where = where, label = Layout.Label(cur) })
       end
     end
   end
-  -- Retired bars (Action Bars 6 and 7, layout 3), full apply only: clear the plan's spells there once they have their
-  -- own slot, hide the bars and unbind keys that still point at their buttons (never the player's own keys).
+  -- Retired bars, full apply only. A hidden one (Action Bar 7, layout 3): clear the plan's spells on the buttons the
+  -- addon used once they have their own slot, hide the bar and unbind keys that still point at its buttons. A bar
+  -- that stays shown (keepShown: Action Bar 5) is the player's now; only L.old leftovers are cleared there.
   if not onlyKey then
     for _, bar in ipairs(layout.retired) do
-      for i = 1, 12 do
-        local slot = bar.first + i - 1
-        local cur = i ~= bar.own and Layout.Current(slot)
-        if cur and cur.planKey and placedElsewhere(cur.planKey) then
-          table.insert(plan.clears, { slot = slot, where = { bar = bar.id, button = i, slot = slot }, label = Layout.Label(cur) })
+      if not bar.keepShown then
+        for _, i in ipairs(retiredButtons(bar)) do
+          local slot = bar.first + i - 1
+          local cur = not cleared[slot] and Layout.Current(slot)
+          if cur and cur.planKey and placedElsewhere(cur.planKey) then
+            table.insert(plan.clears, { slot = slot, where = { bar = bar.id, button = i, slot = slot }, label = Layout.Label(cur) })
+            cleared[slot] = true
+          end
         end
       end
     end
     local skip = {}
     for _, b in ipairs(plan.binds) do skip[b.key] = true end
-    for _, k in ipairs(layout.ownKeys) do skip[k] = true end
     local candidates, seen = {}, {}
     local function add(k)
       if type(k) == "string" and k ~= "" and not seen[k] then
@@ -465,12 +493,14 @@ function Layout.BuildPlan(onlyKey)
     end
     for _, k in ipairs(layout.allowedKeys) do add(k) end
     for _, bar in ipairs(layout.retired) do
-      for i = 1, 12 do
-        local ok, k1, k2 = call(API.bindingKey, string.format(bar.binding, i))
-        if ok then add(k1); add(k2) end
+      if not bar.keepShown then
+        for i = 1, 12 do
+          local ok, k1, k2 = call(API.bindingKey, string.format(bar.binding, i))
+          if ok then add(k1); add(k2) end
+        end
+        local ok, shown = call(API.getSetting, bar.setting)
+        if ok and shown == true then table.insert(plan.hide, bar) end
       end
-      local ok, shown = call(API.getSetting, bar.setting)
-      if ok and shown == true then table.insert(plan.hide, bar) end
     end
     for _, key in ipairs(candidates) do
       if not skip[key] then
@@ -499,15 +529,15 @@ function Layout.IsEmptyPlan(plan)
     and #(plan.hide or {}) == 0
 end
 
--- Is this binding action a button of a retired bar ("MULTIACTIONBAR5BUTTON3")?
+-- Is this binding action a button of a hidden retired bar ("MULTIACTIONBAR6BUTTON3")? Bars that stay shown
+-- (keepShown) are the player's: keys that point there are left alone.
 function Layout.IsRetiredBinding(action)
   for _, bar in ipairs(L().retired) do
-    local prefix = bar.binding:gsub("%%d", "")
-    if action:sub(1, #prefix) == prefix and action:sub(#prefix + 1):match("^%d+$") then return true end
+    local prefix = not bar.keepShown and bar.binding:gsub("%%d", "")
+    if prefix and action:sub(1, #prefix) == prefix and action:sub(#prefix + 1):match("^%d+$") then return true end
   end
   return false
 end
-
 -- Is a known spell in its planned slot, with its key bound and its bar shown? nil when it has no slot or is unknown.
 function Layout.IsPlaced(entry)
   if not Spells.LayoutSlot(entry) or not Spells.IsKnown(entry) then return nil end
@@ -696,7 +726,21 @@ function Layout.Describe(plan)
   end
   head("ui.preview.notes")
   for _, w in ipairs(Layout.Warnings(plan)) do table.insert(lines, w) end
-  table.insert(lines, ns.T("ui.preview.warn.own"))
+  -- A bar that starts in the middle of the screen (Action Bar 6): tell the player to move it in Edit Mode.
+  local moveBar
+  for _, list in ipairs({ plan.place, plan.binds }) do
+    for _, x in ipairs(list) do
+      local bar = x.where and barById(x.where.bar)
+      if not bar and x.binding then
+        for _, b in ipairs(L().bars) do
+          local prefix = b.binding:gsub("%%d", "")
+          if x.binding:sub(1, #prefix) == prefix and x.binding:sub(#prefix + 1):match("^%d+$") then bar = b end
+        end
+      end
+      if bar and bar.editMode then moveBar = moveBar or bar end
+    end
+  end
+  if moveBar then table.insert(lines, ns.T("ui.preview.warn.editmode", { bar = ns.T("ui.bar." .. moveBar.id) })) end
   return lines
 end
 
@@ -755,8 +799,9 @@ ns.OnLanguage(function()
 end)
 
 -- The clean-up button: only the buttons the addon configures. Those are every slot of the plan (spells, item macros,
--- stand-ins, and slots kept free for spells not learned yet) and the buttons layout 3 filled on the retired Action
--- Bars 6 and 7. Spare buttons, the player's own buttons and any other button are never touched.
+-- stand-ins, and slots kept free for spells not learned yet) and the buttons the last layout there filled on the
+-- retired bars (L.retired assigned: Action Bar 5 from layouts 4-6 or the paladin's layout 1, Action Bar 7 from layout
+-- 3). Spare buttons and any other button are never touched.
 -- → plan with clears only (Execute backs them up, Undo restores them)
 function Layout.BuildCleanPlan()
   local layout = L()

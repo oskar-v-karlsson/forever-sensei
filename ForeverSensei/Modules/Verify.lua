@@ -119,19 +119,16 @@ function Verify.Run()
       add(string.format("  %s %s = %s", bar.id, bar.setting, ok and tostring(v) or ("error " .. tostring(v))))
     end
   end
-  -- The player's own keys (never bound by the addon) and the defaults the layout may replace (spec Q4).
-  for _, key in ipairs(layout.ownKeys) do
-    local ok, action = ns.Call("GetBindingAction", key)
-    add(string.format("  own key %s = %s", key, ok and tostring(action) or "?"))
-  end
-  for _, key in ipairs({ "CTRL-2", "CTRL-R", "CTRL-X", "SHIFT-BUTTON4", "CTRL-BUTTON4" }) do
+  -- Keys whose game default the layout may replace (the stance bar on Ctrl+1-5, the framerate on Ctrl+R) and the
+  -- mouse keys on Action Bar 6 (research/keybind-layout-v4.md, "Verify in game").
+  for _, key in ipairs({ "CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-5", "CTRL-R", "BUTTON4", "SHIFT-BUTTON4",
+    "CTRL-BUTTON4" }) do
     local ok, action = ns.Call("GetBindingAction", key)
     add(string.format("  key %s = %s", key, ok and tostring(action) or "?"))
   end
-  -- Keys the spec leaves on their game default (the paladin's Ctrl+1-4 on the stance bar).
-  for _, key in ipairs(layout.keepDefault or {}) do
-    local ok, action = ns.Call("GetBindingAction", key)
-    add(string.format("  default key %s = %s", key, ok and tostring(action) or "?"))
+  for _, bar in ipairs(layout.retired) do
+    local ok, v = ns.Call("Settings.GetValue", bar.setting)
+    add(string.format("  retired %s %s = %s", bar.id, bar.setting, ok and tostring(v) or ("error " .. tostring(v))))
   end
   -- In-game question: does "/cast Name" in a macro cast the highest rank? GetMacroSpell tells which id it casts.
   -- A body that also casts other spells (a macroVars {var}, like NS + Healing Wave's {heal}) is not compared.
