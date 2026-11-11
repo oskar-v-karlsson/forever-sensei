@@ -1,6 +1,6 @@
 # ForeverSensei
 
-A Japanese class coach addon for **World of Warcraft: Forever**. It covers the **Restoration Shaman** healer (made for a Skyborne / Horde player) from level 1 to 60.
+A class coach addon for **World of Warcraft: Forever**, in Japanese or English. It covers the **Restoration Shaman** healer (made for a Skyborne / Horde player) from level 1 to 60.
 
 It comes as two addons, like the voice packs of WoW Forever Japanese:
 - `ForeverSensei`: the core (windows, cards, layout engine, talent advisor, guide, translation reports, settings);
@@ -8,7 +8,8 @@ It comes as two addons, like the voice packs of WoW Forever Japanese:
 
 A class pack loads only on characters of its class. Turn off packs you don't play in the AddOns list. On a character whose class has no pack, ForeverSensei shows one short note and stays idle; `/sensei` still opens the translation check and settings.
 
-- **New skill cards (新しいスキル):** when you learn a skill, a card explains in Japanese what it does, when to use it, where it goes on your bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
+- **Language (日本語 / English):** the first time the addon runs, a small window asks for the language with two buttons, **日本語** and **English**. Nothing else shows until you choose. The choice is saved for the whole account and kept through updates. Change it any time in the settings tab or with `/sensei ja` / `/sensei en`; open windows switch at once, no `/reload` needed. Players who used a version before 0.5.1 are not asked and keep their language.
+- **New skill cards (新しいスキル):** when you learn a skill, a card explains in the chosen language what it does, when to use it, where it goes on your bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
 - **Fixed bar layout and keys (キー配置):** every skill has a fixed slot and key, planned for a level-60 dungeon healer, so a key never moves as you level. Only keys near WASD are used: `1-4`, `Q E R F`, `Z X C`, the same keys with Shift or Ctrl, and the two mouse side buttons. The heals have keys without a modifier (`F`, `E`, `R`, Mouse 4, Mouse 5), and spells for the same job share one key with Shift and Ctrl (e.g. `1` / `Shift+1` / `Ctrl+1` move your totems). `5`, `Shift+5` and `Ctrl+5` are yours: the addon never touches them. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them. **バーを空にする** first empties only the buttons the layout uses, so the full layout starts clean; your other buttons stay.
 - **New ranks:** the game does not put a new rank on the bars, so the addon upgrades bar buttons to the highest rank automatically (after combat if you are fighting), with a toast and **元に戻す** to keep the old rank. It can be turned off in the settings. Healing macros are checked to cast the highest rank too.
 - **Healing targeting:** mouseover healing macros, or plain spells for click-target healing. One setting switches between them.
@@ -44,13 +45,14 @@ To update, delete the old `ForeverSensei` and `ForeverSensei_Shaman` folders and
 
 ## First steps in the game
 
-1. Type `/sensei`, or click the minimap button, or use the addon compartment (the AddOns button at the minimap). The guide opens.
-2. Open **キー配置** (layout), choose how to pick a healing target (**マウスオーバーで回復** or **ターゲットを回復**), then press **すべて配置** to see the preview.
-3. The preview lists every slot and key that changes. Press **適用** to apply. `/sensei undo` or the **元に戻す** button restores the old bars and keys.
+1. On the very first login, choose **日本語** or **English** in the language window.
+2. Type `/sensei`, or click the minimap button, or use the addon compartment (the AddOns button at the minimap). The guide opens.
+3. Open **キー配置** (layout), choose how to pick a healing target (**マウスオーバーで回復** or **ターゲットを回復**), then press **すべて配置** to see the preview.
+4. The preview lists every slot and key that changes. Press **適用** to apply. `/sensei undo` or the **元に戻す** button restores the old bars and keys.
    To start from empty bars, press **バーを空にする** first (`/sensei clean`). It asks first and empties only the buttons the addon configures: every planned slot (spells, item macros, and slots kept free for spells you haven't learned yet) and the buttons 0.4.0 used on Action Bars 6 and 7. Spare buttons, `5`, `Shift+5` and every other button stay. It saves the bars first, so **元に戻す** puts them back.
 
    Note: the full layout binds `Q`/`E` (strafe by default), `Shift+1-4` (bar paging by default), `Ctrl+1-4` (stance-bar buttons, e.g. Ghost Wolf), `Ctrl+R` (framerate display) and the mouse side buttons. The preview warns about this.
-4. Play. New skills show a card out of combat. Cards wait until combat ends, and bar or key changes started in combat are applied when it ends.
+5. Play. New skills show a card out of combat. Cards wait until combat ends, and bar or key changes started in combat are applied when it ends.
 
 The game's 12.x API hides health, cooldowns and auras from addons in combat, so ForeverSensei only coaches outside combat. It has no rotation helper.
 
@@ -70,7 +72,7 @@ The game's 12.x API hides health, cooldowns and auras from addons in combat, so 
 | `/sensei report` | Send translation reports (copy box) |
 | `/sensei settings` | Settings |
 | `/sensei verify` | Check every spell and talent in the data against the live client |
-| `/sensei en` / `/sensei ja` | Interface language (English is for testing) |
+| `/sensei en` / `/sensei ja` | Interface language (also in the settings tab); open windows switch at once |
 | `/sensei debug` | Toggle debug output |
 
 ### Key layout
@@ -161,6 +163,7 @@ These cannot be tested outside the game. Please go through them once, then paste
 27. [ ] **バーを空にする:** put a few things of your own on planned buttons, on spare buttons (e.g. the free buttons of Action Bar 3) and on `5` and `Shift+5`. The button asks first; after confirming, only the planned buttons are empty, and the spare buttons, `5`, `Shift+5` and the other bars are unchanged. **元に戻す** puts everything back. Out of combat only: in combat it says to try again after the fight.
 28. [ ] **Class pack (0.5.0):** the AddOns list shows **ForeverSensei** and **ForeverSensei - Shaman**. On the Shaman, everything works as in 0.4.3: cards, layout, talents, guide tabs, no new layout message, review progress and saved reports kept, Totem Bar unchanged. `/sensei verify` has no `bad` lines.
 29. [ ] **No pack:** turn off **ForeverSensei - Shaman** (or log in on a character of another class). The first login shows one short note that the class pack is missing, and `/reload` does not show it again. `/sensei` opens with only the translation check and settings tabs; no cards, toasts or layout messages appear. Turn the pack back on afterwards.
+30. [ ] **Language window (0.5.1):** on a test account (or after renaming `ForeverSensei.lua` in `WTF\Account\...\SavedVariables`), the first login shows only the language window: no skill card, welcome message, layout message or pack note. **English** switches everything to English at once and the welcome message follows; after `/reload` and after an update the window does not come back. Erika's account (data from 0.5.0) is not asked and stays Japanese. With the guide and a skill card open, `/sensei en` and `/sensei ja` switch their texts without `/reload`.
 
 ## Translation reports
 

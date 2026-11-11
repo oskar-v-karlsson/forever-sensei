@@ -194,3 +194,20 @@ function Feedback.Send()
 end
 
 ns.Command("report", function() Feedback.Send() end)
+
+-- Language change: an open report keeps what the player has typed.
+ns.OnLanguage(function()
+  if not dlg then return end
+  local shown, id, reason = dlg:IsShown(), dlg.id, dlg.reason
+  local suggestion, note = dlg.suggest.edit:GetText(), dlg.note.edit:GetText()
+  ns.UI.Discard(dlg)
+  dlg = nil
+  if not shown or not id then return end
+  Feedback.Open(id)
+  dlg.reason = reason
+  for _, b in ipairs(dlg.reasonButtons) do b:Refresh() end
+  dlg.suggest.edit:SetText(suggestion or "")
+  dlg.note.edit:SetText(note or "")
+  layoutDialog()
+  ns.UI.Refit(dlg)
+end)

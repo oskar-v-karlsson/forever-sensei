@@ -82,9 +82,19 @@ function UI.Window(name, width, height, title)
   local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
   close:SetPoint("TOPRIGHT", -3, -3)
   f.close = close
-  if name and UISpecialFrames then table.insert(UISpecialFrames, name) end
+  if name and UISpecialFrames then
+    local listed = false
+    for _, n in ipairs(UISpecialFrames) do listed = listed or n == name end
+    if not listed then table.insert(UISpecialFrames, name) end
+  end
   f:Hide()
   return f
+end
+
+-- A window that is built again (language change): hidden for good; the module makes a new one.
+function UI.Discard(f)
+  f:Hide()
+  f.discarded = true
 end
 
 function UI.Button(parent, text, width, height, onClick)
@@ -342,3 +352,9 @@ function UI.Input(parent, width, height, multiLine)
   holder.edit = eb
   return holder
 end
+
+-- Language change: the dialogs are built again in the new language the next time they open.
+ns.OnLanguage(function()
+  if confirm then UI.Discard(confirm); confirm = nil end
+  if copy then UI.Discard(copy); copy = nil end
+end)

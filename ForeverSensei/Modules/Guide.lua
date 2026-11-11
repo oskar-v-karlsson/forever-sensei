@@ -376,8 +376,8 @@ renderers.settings = function(frame)
   end
   li = li + 1
   y = y + label(frame, li, y, ns.T("ui.settings.language"), 13, "gold") + 6
-  toggle("ui.settings.ja", s.language == "ja", function() s.language = "ja"; Guide.Rebuild() end)
-  toggle("ui.settings.en", s.language == "en", function() s.language = "en"; Guide.Rebuild() end)
+  toggle("ui.settings.ja", s.language == "ja", function() ns.SetLanguage("ja") end)
+  toggle("ui.settings.en", s.language == "en", function() ns.SetLanguage("en") end)
   y = y + 8
   li = li + 1
   y = y + label(frame, li, y, ns.T("ui.settings.show"), 13, "gold") + 6
@@ -450,11 +450,12 @@ function Guide.Refresh()
   Guide.RefreshFooter()
 end
 
--- Language change: rebuild every window text by reloading the frames' labels.
-function Guide.Rebuild()
-  ns.Print("language changed - type /reload to refresh every window")
-  if win then win.title:SetText(ns.T("ui.guide.title")) end
-end
+-- Language change: the title is the only text set once; Refresh sets the rest.
+ns.OnLanguage(function()
+  if not win then return end
+  win.title:SetText(ns.T("ui.guide.title"))
+  Guide.Refresh()
+end)
 
 function Guide.Open(tab)
   if not win then build() end

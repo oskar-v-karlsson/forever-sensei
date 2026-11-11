@@ -250,6 +250,7 @@ function NewSkill.ShowTrainer(level)
     return
   end
   if not trainer then buildTrainer() end
+  trainer.level = level
   trainer.intro:SetText(ns.T("ui.trainer.intro"))
   for i, e in ipairs(list) do
     local row = trainer.rows[i]
@@ -334,6 +335,22 @@ ns.On("PLAYER_LEVEL_UP", function(level)
   if not ns.ready or not ns.Active() then return end
   ns.char.lastLevel = level
   C_Timer.After(2, function() NewSkill.ShowTrainer(level) end)
+end)
+
+-- Language change: open windows are built again in the new language.
+ns.OnLanguage(function()
+  if card then
+    local shown, entry, fromList = card:IsShown() or hiddenForCombat.card, card.entry, card.fromList
+    UI.Discard(card)
+    card, hiddenForCombat.card = nil, nil
+    if shown and entry then NewSkill.ShowCard(entry, fromList) end
+  end
+  if trainer then
+    local shown, level = trainer:IsShown() or hiddenForCombat.trainer, trainer.level
+    UI.Discard(trainer)
+    trainer, hiddenForCombat.trainer = nil, nil
+    if shown then NewSkill.ShowTrainer(level) end
+  end
 end)
 
 ns.On("PLAYER_REGEN_DISABLED", function()

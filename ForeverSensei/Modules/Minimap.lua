@@ -12,7 +12,9 @@ local function hintText()
 end
 
 local function click(mouseButton)
-  if mouseButton == "RightButton" then
+  if not ns.settings.languageChosen then
+    ns.LanguagePicker.Show()
+  elseif mouseButton == "RightButton" then
     ns.Feedback.Send()
   else
     ns.Guide.Toggle()

@@ -445,6 +445,7 @@ return function(ns, lang)
     -- A reload starts with an empty card queue (cards re-queued by the list cards above are session state).
     for _ = 1, 30 do ns.NewSkill.Next() end
     card:Hide()
+    ns.ready = false -- a /reload starts a new Lua session
     STUB.fire("PLAYER_LOGIN")
     STUB.runTimers()
   end
@@ -506,6 +507,7 @@ return function(ns, lang)
   if confirm and confirm:IsShown() then fail("layout notice: shown twice") end
   ns.char.layoutVersion = nil
   ns.char.initialised = false
+  ns.ready = false
   STUB.fire("PLAYER_LOGIN")
   if ns.char.layoutVersion ~= L.version then fail("layout notice: new character did not get the current version") end
   ns.char.initialised = true
@@ -657,10 +659,17 @@ return function(ns, lang)
 
   STUB.runLongTimers()
 
-  -- Every clickable and hoverable thing, once.
+  -- Every clickable and hoverable thing, once (not in windows thrown away on a language change: hidden for good).
+  local function discarded(f)
+    while f do
+      if f.discarded then return true end
+      f = f.__parent
+    end
+    return false
+  end
   for _, f in ipairs(STUB.frames) do
     for _, script in ipairs({ "OnEnter", "OnLeave", "OnClick" }) do
-      local fn = f.__scripts[script]
+      local fn = not discarded(f) and f.__scripts[script]
       if fn then
         local ok2, err = pcall(fn, f, "LeftButton", false)
         if not ok2 then fail(script .. " " .. tostring(f.__name or f.__kind) .. ": " .. tostring(err)) end

@@ -703,6 +703,14 @@ function Layout.Preview()
   ns.UI.Refit(preview)
 end
 
+ns.OnLanguage(function()
+  if not preview then return end
+  local shown = preview:IsShown()
+  ns.UI.Discard(preview)
+  preview = nil
+  if shown then Layout.Preview() end
+end)
+
 -- The clean-up button: only the buttons the addon configures. Those are every slot of the plan (spells, item macros,
 -- stand-ins, and slots kept free for spells not learned yet) and the buttons layout 3 filled on the retired Action
 -- Bars 6 and 7. Spare buttons, the player's own buttons and any other button are never touched.

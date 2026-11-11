@@ -198,5 +198,12 @@ end)
 ns.On("TRAIT_CONFIG_UPDATED", refresh)
 ns.On("PLAYER_TALENT_UPDATE", refresh)
 ns.On("PLAYER_REGEN_DISABLED", function() if hint then hint:Hide() end end)
+ns.OnLanguage(function()
+  if not hint then return end
+  local shown = hint:IsShown()
+  UI.Discard(hint)
+  hint = nil
+  if shown then Talents.ShowHint(true) end
+end)
 
 ns.Command("talents", function() Talents.ShowHint(true) end, true)

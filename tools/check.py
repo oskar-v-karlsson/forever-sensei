@@ -214,7 +214,8 @@ def check_shown(lua, lang):
 def check_runtime():
     reports = []
     for lang in ("ja", "en"):
-        lua, ns = new_runtime()
+        # A player from before 0.5.1 (saved settings): no language window.
+        lua, ns = new_runtime(db="{ settings = { language = %r } }" % lang)
         if problems:
             return reports
         stub = lua.globals().STUB
@@ -232,7 +233,114 @@ def check_runtime():
     for lang in ("ja", "en"):
         check_idle(lang)
         check_api_mismatch(lang)
+    check_language()
     return reports
+
+
+WINDOWS = ("ForeverSenseiCard", "ForeverSenseiTrainer", "ForeverSenseiTalentHint", "ForeverSenseiPreview",
+           "ForeverSenseiGuide", "ForeverSenseiConfirm", "ForeverSenseiCopy")
+
+
+def shown_windows(lua):
+    g = lua.globals()
+    return [w for w in WINDOWS if g[w] is not None and g[w].IsShown(g[w])]
+
+
+def picker_shown(lua):
+    g = lua.globals()
+    return g.ForeverSenseiLanguage is not None and g.ForeverSenseiLanguage.IsShown(g.ForeverSenseiLanguage)
+
+
+def check_language():
+    """The language window: fresh install asks once, holds everything back, and the choice is kept."""
+    label = "runtime language"
+    # Fresh install (no ForeverSenseiDB): the window, nothing else.
+    lua, ns = new_runtime()
+    stub = lua.globals().STUB
+    g = lua.globals()
+    login(lua, ns)
+    welcome = {ns.Raw("ui.welcome", "ja"), ns.Raw("ui.welcome", "en")}
+    if not picker_shown(lua):
+        problem(f"{label}: fresh install did not show the language window")
+    if ns.settings.languageChosen:
+        problem(f"{label}: fresh install counts as chosen")
+    stub.level = 21
+    for ev, args in (("PLAYER_LEVEL_UP", (21,)), ("SPELLS_CHANGED", ()), ("LEARNED_SPELL_IN_SKILL_LINE", (331, 0)),
+                     ("BAG_UPDATE_DELAYED", ()), ("PLAYER_REGEN_ENABLED", ())):
+        stub.fire(ev, *args)
+    stub.runTimers()
+    g.SlashCmdList.FOREVERSENSEI("")
+    stub.runTimers()
+    if shown_windows(lua) or welcome & set(py(stub.shown) or []):
+        problem(f"{label}: before a choice something else was shown: {shown_windows(lua)}")
+    if py(stub.actions) or py(stub.macros):
+        problem(f"{label}: bars or macros changed before a choice")
+    if not picker_shown(lua):
+        problem(f"{label}: /sensei before a choice did not bring back the language window")
+    # 「English」: applied at once, the modules start (welcome toast in English).
+    win = g.ForeverSenseiLanguage
+    if win.jaButton.GetText(win.jaButton) != "日本語" or win.enButton.GetText(win.enButton) != "English":
+        problem(f"{label}: the buttons must read 日本語 and English")
+    win.enButton.Click(win.enButton)
+    stub.runTimers()
+    if picker_shown(lua) or ns.settings.language != "en" or not ns.settings.languageChosen or not ns.ready:
+        problem(f"{label}: choosing English did not apply (language {ns.settings.language}, ready {ns.ready})")
+    if ns.Raw("ui.welcome", "en") not in (py(stub.shown) or []):
+        problem(f"{label}: no English welcome after the choice")
+    if stub.loadCalls != 1:
+        problem(f"{label}: LoadAddOn calls {stub.loadCalls}, expected 1")
+    for e in unexpected_errors(ns):
+        problem(f"{label}: ns.errors: {e}")
+    # Next session (an update): no window, still English.
+    db = stub.serialize(g.ForeverSenseiDB)
+    lua2, ns2 = new_runtime(db=db)
+    login(lua2, ns2)
+    if picker_shown(lua2) or ns2.settings.language != "en" or not ns2.ready:
+        problem(f"{label}: the English choice was not kept after a reload")
+
+    # Fresh install of a class without a pack: the pack note waits for the choice, then shows once.
+    lua, ns = new_runtime(cls="WARRIOR")
+    login(lua, ns)
+    if note_count(lua, ns) != 0:
+        problem(f"{label}: the pack note was shown before a choice")
+    g = lua.globals()
+    g.ForeverSenseiLanguage.jaButton.Click(g.ForeverSenseiLanguage.jaButton)
+    lua.globals().STUB.runTimers()
+    if ns.settings.language != "ja" or note_count(lua, ns) != 1:
+        problem(f"{label}: choosing 日本語 did not show the pack note once")
+
+    # 0.5.0 data (Erika): no window, Japanese kept, marked chosen.
+    db050 = '{ settings = { language = "ja", showCards = true }, chars = { ["Erika-Forever"] = { lastLevel = 26 } }, reports = {} }'
+    lua, ns = new_runtime(db=db050)
+    stub = lua.globals().STUB
+    g = lua.globals()
+    login(lua, ns)
+    if picker_shown(lua) or ns.settings.language != "ja" or ns.settings.languageChosen is not True or not ns.ready:
+        problem(f"{label}: 0.5.0 data was asked again or lost its language ({ns.settings.language})")
+    # /sensei en and ja still work, and open windows follow without /reload.
+    g.SlashCmdList.FOREVERSENSEI("")
+    entry = ns.Spells.List()[1]
+    ns.NewSkill.ShowCard(entry)
+    ns.Talents.ShowHint(True)
+    stub.runTimers()
+    g.SlashCmdList.FOREVERSENSEI("en")
+    stub.runTimers()
+    if ns.settings.language != "en" or not ns.settings.languageChosen:
+        problem(f"{label}: /sensei en did not switch to English")
+    for frame, text_id in (("ForeverSenseiGuide", "ui.guide.title"), ("ForeverSenseiCard", "ui.card.title"),
+                           ("ForeverSenseiTalentHint", "ui.talent.title")):
+        f = g[frame]
+        if f is None or not f.IsShown(f) or f.title.GetText(f.title) != ns.Raw(text_id, "en"):
+            problem(f"{label}: {frame} did not switch to English without /reload")
+    if any("reload" in str(p) for p in py(stub.prints) or []):
+        problem(f"{label}: /sensei en still asks for /reload")
+    g.SlashCmdList.FOREVERSENSEI("ja")
+    stub.runTimers()
+    f = g.ForeverSenseiGuide
+    if ns.settings.language != "ja" or f.title.GetText(f.title) != ns.Raw("ui.guide.title", "ja"):
+        problem(f"{label}: /sensei ja did not switch back")
+    for e in unexpected_errors(ns):
+        problem(f"{label}: ns.errors: {e}")
 
 
 def note_count(lua, ns):

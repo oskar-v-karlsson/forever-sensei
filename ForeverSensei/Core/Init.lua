@@ -1,7 +1,7 @@
 -- Core/Init.lua: namespace, safe event bus, combat queue, saved variables and the /sensei command.
 local ADDON, ns = ...
 ns.ADDON = ADDON
-ns.VERSION = "0.5.0"
+ns.VERSION = "0.5.1"
 do
   local getMeta = C_AddOns and C_AddOns.GetAddOnMetadata
   if getMeta then
@@ -99,7 +99,8 @@ end)
 -- Saved variables.
 local DEFAULTS = {
   settings = {
-    language = "ja",          -- "ja" or "en"
+    language = "ja",          -- "ja" or "en"; chosen once in the language window (Modules/Language.lua)
+    -- languageChosen = true once the player picked a language (or had data from before 0.5.1); never reset
     targeting = "mouseover",  -- "mouseover" (macros) or "click" (plain spells)
     showCards = true,
     showTalentHints = true,
@@ -148,8 +149,14 @@ end
 
 ns.On("ADDON_LOADED", function(name)
   if name ~= ADDON then return end
+  -- Saved data from before 0.5.1 means the player already uses the addon in the stored language: not asked again.
+  if type(ForeverSenseiDB) == "table" and next(ForeverSenseiDB) ~= nil then
+    ForeverSenseiDB.settings = ForeverSenseiDB.settings or {}
+    if ForeverSenseiDB.settings.languageChosen == nil then ForeverSenseiDB.settings.languageChosen = true end
+  end
   ForeverSenseiDB = ForeverSenseiDB or {}
   fill(ForeverSenseiDB, DEFAULTS)
+  if ForeverSenseiDB.settings.languageChosen == nil then ForeverSenseiDB.settings.languageChosen = false end
   ns.db = ForeverSenseiDB
   ns.settings = ns.db.settings
 end)
@@ -160,20 +167,54 @@ function ns.OnLogin(fn)
   table.insert(ns.loginCallbacks, fn)
 end
 
+-- Starts the modules (cards, notes, hints, item macros): at login, or on a fresh install once a language is chosen.
+-- Until then ns.ready is false, so event handlers do nothing.
+function ns.Start()
+  if ns.ready or not ns.char then return end
+  ns.ready = true
+  for _, fn in ipairs(ns.loginCallbacks) do
+    local ok, err = pcall(fn)
+    if not ok then ns.Debug("login: " .. tostring(err)) end
+  end
+end
+
+-- Language change. Windows rebuild themselves through ns.OnLanguage callbacks, so no /reload is needed.
+local languageCallbacks = {}
+function ns.OnLanguage(fn)
+  table.insert(languageCallbacks, fn)
+end
+
+ns.LANGUAGES = { ja = true, en = true }
+
+-- Sets and keeps the player's choice (account-wide, ForeverSenseiDB.settings). → true when language is valid
+function ns.SetLanguage(language)
+  if not ns.LANGUAGES[language] or not ns.settings then return false end
+  local changed = ns.settings.language ~= language
+  ns.settings.language = language
+  ns.settings.languageChosen = true
+  for _, fn in ipairs(languageCallbacks) do
+    local ok, err = pcall(fn, changed)
+    if not ok then ns.Debug("language: " .. tostring(err)) end
+  end
+  return true
+end
+
 ns.On("PLAYER_LOGIN", function()
   local key = ns.CharKey()
   ns.db.chars[key] = ns.db.chars[key] or {}
   fill(ns.db.chars[key], CHAR_DEFAULTS)
   ns.char = ns.db.chars[key]
-  ns.ready = true
   -- The class pack loads first (Core/Class.lua), so the modules' login callbacks see ns.class and ns.spec.
   local ok, err = pcall(ns.LoadClass)
   if not ok then ns.Debug("class pack: " .. tostring(err)) end
-  for _, fn in ipairs(ns.loginCallbacks) do
-    local ok, err = pcall(fn)
-    if not ok then ns.Debug("login: " .. tostring(err)) end
+  if ns.settings.languageChosen then
+    ns.Start()
+  else
+    ns.LanguagePicker.Show()
   end
 end)
+
+ns.OnLanguage(function() ns.Start() end)
 
 -- /sensei
 local commands, needsClass = {}, {}
@@ -206,7 +247,9 @@ SlashCmdList.FOREVERSENSEI = function(msg)
   local cmd, rest = msg:match("^(%S*)%s*(.-)$")
   cmd = (cmd or ""):lower()
   local fn = commands[cmd]
-  if fn and needsClass[cmd] and not ns.Active() then
+  if not ns.settings.languageChosen and cmd ~= "en" and cmd ~= "ja" and cmd ~= "debug" then
+    ns.LanguagePicker.Show()
+  elseif fn and needsClass[cmd] and not ns.Active() then
     ns.Print(ns.PackNoteText("en") or "no class pack")
   elseif fn then
     local ok, err = pcall(fn, rest)
@@ -221,5 +264,5 @@ ns.Command("debug", function()
   ns.Print("debug " .. (ns.settings.debug and "on" or "off"))
   for _, e in ipairs(ns.errors) do ns.Print(e) end
 end)
-ns.Command("en", function() ns.settings.language = "en"; ns.Print("language: English (type /reload to refresh open windows)") end)
-ns.Command("ja", function() ns.settings.language = "ja"; ns.Print("language: Japanese (type /reload to refresh open windows)") end)
+ns.Command("en", function() ns.SetLanguage("en"); ns.Print("language: English") end)
+ns.Command("ja", function() ns.SetLanguage("ja"); ns.Print("language: Japanese") end)

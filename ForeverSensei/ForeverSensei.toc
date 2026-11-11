@@ -1,9 +1,9 @@
 ## Interface: 16001
 ## Title: ForeverSensei
-## Notes: Japanese class coach for World of Warcraft: Forever. Needs the class pack for your class (ForeverSensei_<Class>).
-## Notes-jaJP: World of Warcraft: Forever のクラスコーチ。自分のクラス用のパック（ForeverSensei_<クラス>）が必要。
+## Notes: Class coach for World of Warcraft: Forever, in Japanese or English. Needs the class pack for your class (ForeverSensei_<Class>).
+## Notes-jaJP: World of Warcraft: Forever のクラスコーチ（日本語・英語）。自分のクラス用のパック（ForeverSensei_<クラス>）が必要。
 ## Author: oskar-v-karlsson
-## Version: 0.5.0
+## Version: 0.5.1
 ## SavedVariables: ForeverSenseiDB
 ## OptionalDeps: WoWForeverJapanese
 ## IconTexture: Interface\Icons\Spell_Nature_MagicImmunity
@@ -20,6 +20,7 @@ Core\Locale.lua
 Core\Class.lua
 Data\Items.lua
 Modules\UI.lua
+Modules\Language.lua
 Modules\Spells.lua
 Modules\Feedback.lua
 Modules\Layout.lua
