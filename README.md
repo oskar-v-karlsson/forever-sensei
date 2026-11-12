@@ -38,11 +38,11 @@ Download the newest zip from [Releases](https://github.com/oskar-v-karlsson/fore
    - **Zip:** or run `make zip` and use `dist/ForeverSensei-v<version>.zip`.
    - **Copy:** or copy the `ForeverSensei`, `ForeverSensei_Paladin` and `ForeverSensei_Shaman` folders from this repo.
 2. In the **Battle.net** app, choose **World of Warcraft**, then the **Forever** version in the version drop-down. Click the gear next to Play → **Show in Explorer**.
-3. Open the game folder for Forever (most likely `_classic_beta_`), then `Interface\AddOns`. If `AddOns` (or `Interface`) is missing, create it.
+3. Open the Forever game folder, `_forever_`, then `Interface\AddOns`. If `AddOns` (or `Interface`) is missing, create it.
 4. Put all three folders, `ForeverSensei`, `ForeverSensei_Paladin` and `ForeverSensei_Shaman`, there. The result must be `...\Interface\AddOns\ForeverSensei\ForeverSensei.toc`, `...\Interface\AddOns\ForeverSensei_Paladin\ForeverSensei_Paladin.toc` and `...\Interface\AddOns\ForeverSensei_Shaman\ForeverSensei_Shaman.toc`. The folders must keep exactly these names and not be nested twice (`ForeverSensei\ForeverSensei\...`), which happens easily with Extract All.
 5. Start the game. At character select, open **AddOns** (bottom left), make sure **ForeverSensei** and the pack for your class (**ForeverSensei - Shaman** or **ForeverSensei - Paladin**) are ticked, and turn on **Load out of date AddOns** if the game asks. A pack you don't play can be unticked, or its folder left out.
 
-To update, delete the old `ForeverSensei`, `ForeverSensei_Paladin` and `ForeverSensei_Shaman` folders and put the new ones in their place. Your settings and saved reports are kept, because they are stored in `WTF\Account\...\SavedVariables\ForeverSensei.lua`.
+To update, delete the old `ForeverSensei`, `ForeverSensei_Paladin` and `ForeverSensei_Shaman` folders and put the new ones in their place. Your settings and saved reports are kept, because they are stored in `_forever_\WTF\Account\...\SavedVariables\ForeverSensei.lua`.
 
 ## First steps in the game
 
@@ -200,7 +200,7 @@ These cannot be tested outside the game. Please go through them once, then paste
 27. [ ] **バーを空にする:** put a few things of your own on planned buttons, on spare buttons (e.g. Action Bar 4 buttons 9-12) and on unused Action Bar 5 buttons. The button asks first; after confirming, only the planned buttons are empty, and the spare buttons and the other buttons are unchanged. **元に戻す** puts everything back. Out of combat only: in combat it says to try again after the fight.
 28. [ ] **Class pack (0.5.0):** the AddOns list shows **ForeverSensei** and **ForeverSensei - Shaman**. On the Shaman, everything works as in 0.4.3: cards, layout, talents, guide tabs, no new layout message, review progress and saved reports kept, Totem Bar unchanged. `/sensei verify` has no `bad` lines.
 29. [ ] **No pack:** turn off **ForeverSensei - Shaman** (or log in on a character of another class). The first login shows one short note that the class pack is missing, and `/reload` does not show it again. `/sensei` opens with only the translation check and settings tabs; no cards, toasts or layout messages appear. Turn the pack back on afterwards.
-30. [ ] **Language window (0.5.1):** on a test account (or after renaming `ForeverSensei.lua` in `WTF\Account\...\SavedVariables`), the first login shows only the language window: no skill card, welcome message, layout message or pack note. **English** switches everything to English at once and the welcome message follows; after `/reload` and after an update the window does not come back. Erika's account (data from 0.5.0) is not asked and stays Japanese. With the guide and a skill card open, `/sensei en` and `/sensei ja` switch their texts without `/reload`.
+30. [ ] **Language window (0.5.1):** on a test account (or after renaming `ForeverSensei.lua` in `_forever_\WTF\Account\...\SavedVariables`), the first login shows only the language window: no skill card, welcome message, layout message or pack note. **English** switches everything to English at once and the welcome message follows; after `/reload` and after an update the window does not come back. Erika's account (data from 0.5.0) is not asked and stays Japanese. With the guide and a skill card open, `/sensei en` and `/sensei ja` switch their texts without `/reload`.
 
 **Protection Paladin (0.6.0).** On a paladin, with **ForeverSensei - Paladin** ticked:
 
