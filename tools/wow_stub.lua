@@ -331,9 +331,16 @@ function IsPlayerSpell(id) return STUB.known[id] == true end
 function IsSpellKnown(id) return STUB.known[id] == true end
 
 -- Action bars, cursor, macros ------------------------------------------------------------------------
+-- Like the Forever client (Blizzard_ActionBar/Shared/ActionButton.lua: actionType == "macro" and subType == "spell"):
+-- a macro that shows a spell reports that spell's id, not the macro index; only GetActionText names the macro.
 function GetActionInfo(slot)
   local a = STUB.actions[slot]
   if not a then return nil end
+  if a[1] == "macro" then
+    local spell = GetMacroSpell(a[2])
+    if spell then return "macro", spell, "spell" end
+    return "macro", a[2], nil
+  end
   return a[1], a[2], a[1] == "spell" and "spell" or nil
 end
 function GetActionText(slot)
@@ -367,6 +374,11 @@ C_Item = {
 function GetMacroIndexByName(name)
   for i, m in pairs(STUB.macros) do if m.name == name then return i end end
   return 0
+end
+function GetNumMacros()
+  local n = 0
+  for _ in pairs(STUB.macros) do n = n + 1 end
+  return 0, n
 end
 function GetMacroInfo(i) local m = STUB.macros[i]; if m then return m.name, m.icon, m.body end end
 function CreateMacro(name, icon, body)

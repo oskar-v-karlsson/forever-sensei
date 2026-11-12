@@ -283,7 +283,7 @@ Light and Hammer of the Righteous stay out of every key and text (unverified, pa
 | Plain 1-5 | 1 Holy Strike, 2 Consecration, 3 Holy Shield, 4 Flash of Light, 5 Holy Light | The core loop on the three easiest digits (unchanged); the heal pair fills 4 and 5. |
 | Plain Q/E/R/F | Q Judgement, E Swift Judgement, R opener, F Hammer of Justice | The Judgement family together under 1-3 (Judgement is pressed with Holy Strike); the opener becomes a tier-1 key. Hammer of Justice, the only "stop that cast", keeps a tier-1 key. |
 | Plain Z/X/C | Z Healthstone, X Mana Potion, C Righteous Fury | Both potions side by side (the mana potion was Shift+Z). Righteous Fury must never be missing (Iron Creed needs it), so it keeps a plain key. |
-| **Shift 1-5** | **Seals**: 1 Fury, 2 Righteousness, 3 Crusader, 4 Wisdom, 5 Light | Oskar's own example and order. Seal of Justice spills to bar 6. |
+| **Shift 1-5** | **Seals**: 1 Fury, 2 Righteousness, 3 Crusader, 4 Justice, 5 Wisdom | Oskar's own example and order. Seal of Light spills to bar 6. *(0.7.1, at Oskar's request: was 4 Wisdom, 5 Light with Justice spilled; see "Changed in 0.7.1" below P7.)* |
 | **Shift Q/E/R/F** | **Conditional attacks**: Q Exorcism, E Hammer of Wrath, R Holy Wrath, F Turn Undead | Order by frequency (Exorcism is a rotation spell on undead). Hammer of Wrath and Holy Wrath keep Shift+E and Shift+R. |
 | **Shift Z/X/C** | **Forbearance**: Z Templar's Bulwark, X Divine Shield, C Divine Protection | The key teaches "one of these per minute". Same order as before (keep tanking → halve damage → stop attacking). |
 | **Ctrl 1-5** | **Auras**: 1 Retribution, 2 Devotion, 3 Concentration, 4 Shadow Resistance, 5 Frost Resistance | See P3. Retribution first: the default aura in `wh_guide` and `moba`. Fire Resistance Aura spills to bar 6. |
@@ -330,15 +330,15 @@ Layout 1's reasons for the stance bar, weighed again:
 Runner-up: keep Ctrl+1-5 on the stance bar (no new bindings). Pick it if the in-game check shows that auras cast
 from an action button don't light up.
 
-## P4. Grid (Protection layout 2)
+## P4. Grid (Protection layout 3; layout 2 until 0.7.0)
 
 | Key | Plain (Action Bar 1) | Shift (Action Bar 2) | Ctrl (Action Bar 3) |
 |---|---|---|---|
 | 1 | Holy Strike *(6)* | Seal of Fury *(10)* | Retribution Aura *(16)* |
 | 2 | Consecration *(20)* | Seal of Righteousness *(1)* | Devotion Aura *(1)* |
 | 3 | Holy Shield *(42, talent)* | Seal of the Crusader *(6)* | Concentration Aura *(22)* |
-| 4 | Flash of Light, MO + self *(20)* | Seal of Wisdom *(38)* | Shadow Resistance Aura *(28)* |
-| 5 | Holy Light, MO + self *(1)* | Seal of Light *(30)* | Frost Resistance Aura *(32)* |
+| 4 | Flash of Light, MO + self *(20)* | Seal of Justice *(22)* | Shadow Resistance Aura *(28)* |
+| 5 | Holy Light, MO + self *(1)* | Seal of Wisdom *(38)* | Frost Resistance Aura *(32)* |
 | Q | Judgement *(4)* | Exorcism *(20)* | – |
 | E | Swift Judgement *(37, talent)* | Hammer of Wrath *(44)* | – |
 | R | Opener: Judgement + Swift Judgement + Holy Strike (`FS_OPEN`) *(37)* | Holy Wrath *(50)* | – |
@@ -346,7 +346,7 @@ from an action button don't light up.
 | Z | Healthstone, else Healing Potion (`FS_HEALTH`) | Templar's Bulwark *(32, talent)* | Blessing of Kings *(20)* |
 | X | Mana Potion (`FS_MANA`) | Divine Shield *(34)* | Blessing of Might *(4)* |
 | C | Righteous Fury *(10)* | Divine Protection *(6)* | Blessing of Wisdom *(14)* |
-| Mouse4 | Blessing of Protection, MO *(10)* | Lay on Hands, MO + self *(10)* | Blessing of Sacrifice, MO *(46)* |
+| Mouse4 | Blessing of Protection, MO + self *(10)* | Lay on Hands, MO + self *(10)* | Blessing of Sacrifice, MO *(46)* |
 | Mouse5 | Cleanse, MO + self *(42)*; Purify *(8)* until then | Blessing of Freedom, MO + self *(18)* | Voice of Truth *(20)* |
 
 Spare keys: Ctrl+Q, Ctrl+E, Ctrl+R, Ctrl+F. 38 of 42 keys hold a spell at 60.
@@ -363,7 +363,7 @@ Button order keeps each mouse column together (the families are the columns):
 | 4 | Mouse5 | Cleanse (Purify until 42) |
 | 5 | Shift+Mouse5 | Blessing of Freedom |
 | 6 | Ctrl+Mouse5 | Voice of Truth |
-| 7 | – | Seal of Justice (seal spill-over) |
+| 7 | – | Seal of Light (seal spill-over; Seal of Justice until 0.7.1) |
 | 8 | – | Fire Resistance Aura (aura spill-over) |
 | 9 | – | Divine Intervention (a wipe tool, used in combat) |
 | 10-12 | – | spare |
@@ -409,6 +409,23 @@ Wrath Shift+E, Holy Wrath Shift+R, all six mouse spells.
 | Redemption | Ctrl+X → bar 4 | key → clicked (out of combat, rule 3) |
 | Greater Blessings, Divine Intervention | bar 4 → bar 4 / bar 6 | clicked |
 | Mouse spells | Action Bar 3 buttons 7-12 → Action Bar 6 buttons 1-6 | keys unchanged |
+
+### Changed in 0.7.1 (layout 3), at Oskar's request
+
+Oskar, in game: "why isn't seal of justice on shift 4 next to the otehr seals?" and "My mouse over macros for lay
+on hands and blessing of protection etc. aren't casting properly on my self if I am not mousing over any party
+member". Decided by the coordinator while Oskar was away:
+
+| Change | Layout 2 → 3 | Why |
+|---|---|---|
+| Seal of Justice *(22)* | bar 6 button 7 (clicked) → Shift+4 | Stops fleeing humanoids (Judgement: no fleeing for 10 s, `simc`/`wh_tt`), which would pull more enemies. |
+| Seal of Wisdom *(38)* | Shift+4 → Shift+5 | Order by level inside the block after Fury/Righteousness/Crusader. |
+| Seal of Light *(30)* | Shift+5 → bar 6 button 7 (clicked) | `moba`: it "isn't usually necessary" for a tank. |
+| Blessing of Protection (Mouse4) | `help_nofb` → `help` macro, MO + self | Oskar wants the self fallback. On yourself it stops your attacks for 6 s and applies Forbearance (`simc` 1022, 25771), which blocks Templar's Bulwark, Divine Shield and Divine Protection for 1 min. Blessing of Sacrifice stays without (it moves the target's damage to the caster). |
+
+The keys don't change, only the spells on Action Bar 2 buttons 4-5 and Action Bar 6 button 7, so a full apply
+replaces exactly those three buttons (no `L.old` entry needed). One-time layout notice, nothing moves by itself,
+元に戻す restores.
 
 ## P8. Trade-offs (urgent spells that got a worse key)
 

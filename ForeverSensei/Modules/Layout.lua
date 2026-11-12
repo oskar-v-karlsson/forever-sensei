@@ -71,7 +71,9 @@ function Layout.Current(slot)
   elseif t == "macro" then
     local ok2, text = call(API.actionText, slot)
     local name = ok2 and text or nil
-    if not name or name == "" then
+    -- The Forever client reports a macro that shows a spell as ("macro", spellID, "spell"): id is only the macro
+    -- index when there is no subType.
+    if (not name or name == "") and (sub == nil or sub == "") then
       local ok3, n = call(API.macroInfo, id)
       name = ok3 and n or nil
     end

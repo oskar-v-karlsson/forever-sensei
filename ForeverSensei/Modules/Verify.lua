@@ -159,6 +159,20 @@ function Verify.Run()
     end
     if line then add(line) end
   end
+  -- A planned macro button that holds the plain spell instead (left from click mode, or placed when the macro could
+  -- not be made, e.g. no free character macro): the mouseover and self fallback don't work there. すべて配置 fixes it.
+  local okN, nGlobal, nChar = ns.Call("GetNumMacros")
+  add(string.format("  character macros: %s of 30  (account %s)", okN and tostring(nChar) or "?", okN and tostring(nGlobal) or "?"))
+  for _, s in ipairs(layout.slots) do
+    local d = ns.Layout.DesiredFor(s)
+    if d and d.kind == "macro" and d.entry then
+      local cur = ns.Layout.Current(s.slot)
+      if cur and cur.type == "spell" and cur.planKey == d.entry.key then
+        bad(string.format("  slot %d (%s): plain spell %s, not macro %s (apply the full layout)", s.slot,
+          tostring(s.key or "click"), d.entry.name, d.macro))
+      end
+    end
+  end
   -- Multi-spell macros (the paladin's opener): does one press cast every spell? Only the game can tell.
   for id, c in pairs(layout.combos) do
     local ok, idx = ns.Call("GetMacroIndexByName", c.macro)

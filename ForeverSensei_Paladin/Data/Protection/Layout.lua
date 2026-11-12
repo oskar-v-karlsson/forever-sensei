@@ -1,8 +1,8 @@
 -- ForeverSensei_Paladin/Data/Protection/Layout.lua: the fixed bar and key plan for a Protection Paladin (dungeon tank),
--- layout version 2 (since ForeverSensei 0.7.0: "family blocks"). Spec: research/keybind-layout-v4.md P1-P8 (approved,
--- commit 27b6754), which builds on research/keybind-layout-paladin.md (pull walkthroughs, reach tiers for normal
--- hands). Planned for level 60; keys never move while levelling, and a spell learned later keeps its slot empty until
--- it is learned.
+-- layout version 3 (0.7.0: "family blocks"; 0.7.1: Seal of Justice on Shift+4, at Oskar's request). Spec:
+-- research/keybind-layout-v4.md P1-P8 (approved, commit 27b6754), which builds on research/keybind-layout-paladin.md
+-- (pull walkthroughs, reach tiers for normal hands). Planned for level 60; keys never move while levelling, and a
+-- spell learned later keeps its slot empty until it is learned.
 --
 -- Hands: normal-sized, WASD. Allowed keys: 1-5, Q, E, R, F, Z, X, C and the mouse side buttons, each plain, with
 -- Shift or with Ctrl. No key is the player's own any more: 5, Shift+5 and Ctrl+5 are planned like the others.
@@ -11,9 +11,9 @@
 --   block, so it sits together on the keyboard and, because button n is key n on bars 1-3, on screen.
 -- * Plain row = the core rotation: 1 Holy Strike, 2 Consecration, 3 Holy Shield, 4 Flash of Light, 5 Holy Light;
 --   Q Judgement, E Swift Judgement, R the opener macro, F Hammer of Justice; Z health, X mana, C Righteous Fury.
--- * Shift 1-5 seals (Fury, Righteousness, Crusader, Wisdom, Light; Justice is clicked on Action Bar 6); Shift Q/E/R/F
---   conditional attacks (Exorcism, Hammer of Wrath, Holy Wrath, Turn Undead); Shift Z/X/C Forbearance (Templar's
---   Bulwark, Divine Shield, Divine Protection).
+-- * Shift 1-5 seals (Fury, Righteousness, Crusader, Justice, Wisdom; Light, which a tank rarely needs, is clicked on
+--   Action Bar 6); Shift Q/E/R/F conditional attacks (Exorcism, Hammer of Wrath, Holy Wrath, Turn Undead); Shift
+--   Z/X/C Forbearance (Templar's Bulwark, Divine Shield, Divine Protection).
 -- * Ctrl 1-5 auras on Action Bar 3 (Retribution, Devotion, Concentration, Shadow and Frost Resistance; Fire
 --   Resistance is clicked on Action Bar 6). The stance bar still shows every aura as the game draws it; the addon
 --   doesn't touch it. Ctrl Q/E/R/F spare (bound, empty); Ctrl Z/X/C blessings (Kings, Might, Wisdom).
@@ -56,7 +56,8 @@ L.retired = {
 }
 
 -- Bump when slots or keys change (characters then get the one-time "apply all" notice).
-L.version = 2
+-- 3 (0.7.1): Shift+4 Seal of Justice, Shift+5 Seal of Wisdom, Seal of Light clicked on Action Bar 6 button 7.
+L.version = 3
 
 L.allowedKeys = {
   "1", "2", "3", "4", "5", "Q", "E", "R", "F", "Z", "X", "C",
@@ -73,7 +74,7 @@ L.plan = {
     "@health", "@mana", "righteous_fury",
   },
   bar2 = {
-    "seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader", "seal_of_wisdom", "seal_of_light",
+    "seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader", "seal_of_justice", "seal_of_wisdom",
     "exorcism", "hammer_of_wrath", "holy_wrath", "turn_undead",
     "templars_bulwark", "divine_shield", "divine_protection",
   },
@@ -85,7 +86,7 @@ L.plan = {
   bar6 = {
     "blessing_of_protection", "lay_on_hands", "blessing_of_sacrifice",
     { "cleanse", standIn = "purify" }, "blessing_of_freedom", "voice_of_truth",
-    "seal_of_justice", "fire_resistance_aura", "divine_intervention", "-", "-", "-",
+    "seal_of_light", "fire_resistance_aura", "divine_intervention", "-", "-", "-",
   },
   bar4 = {
     "redemption", "greater_blessing_of_kings", "greater_blessing_of_might", "greater_blessing_of_wisdom",
@@ -98,8 +99,8 @@ L.plan = {
 -- plan against this list.
 L.families = {
   { id = "judgement", block = "QERF", row = "", members = { "judgement", "swift_judgement", "!opener" } },
-  { id = "seals", block = "1-5", row = "SHIFT-", spill = { "seal_of_justice" },
-    members = { "seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader", "seal_of_wisdom", "seal_of_light" } },
+  { id = "seals", block = "1-5", row = "SHIFT-", spill = { "seal_of_light" },
+    members = { "seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader", "seal_of_justice", "seal_of_wisdom" } },
   { id = "conditional", block = "QERF", row = "SHIFT-", members = { "exorcism", "hammer_of_wrath", "holy_wrath", "turn_undead" } },
   { id = "forbearance", block = "ZXC", row = "SHIFT-", members = { "templars_bulwark", "divine_shield", "divine_protection" } },
   { id = "auras", block = "1-5", row = "CTRL-", spill = { "fire_resistance_aura" },
@@ -133,14 +134,14 @@ L.macros = {
   hammer_of_justice = "FS_HOJ",
 }
 L.macroKind = {
-  blessing_of_protection = "help_nofb",
   blessing_of_sacrifice = "help_nofb",
   hammer_of_justice = "interrupt",
 }
 L.macroAlways = { hammer_of_justice = true }
--- help: a friendly mouseover, else a friendly target, else yourself. help_nofb: never yourself (Blessing of
--- Protection would stop your attacks; Blessing of Sacrifice can't target yourself). interrupt: Hammer of Justice
--- (a stun, the paladin has no interrupt) stops your own cast first.
+-- help: a friendly mouseover, else a friendly target, else yourself (Lay on Hands, the heals, Cleanse, Freedom and,
+-- since 0.7.1 at Oskar's request, Blessing of Protection: on yourself it stops your attacks and gives Forbearance,
+-- simc 1022/25771). help_nofb: never yourself (Blessing of Sacrifice moves the target's damage to the caster).
+-- interrupt: Hammer of Justice (a stun, the paladin has no interrupt) stops your own cast first.
 L.macroBodies = {
   help = "#showtooltip {spell}\n/cast [@mouseover,help,nodead][help,nodead][@player] {spell}",
   help_nofb = "#showtooltip {spell}\n/cast [@mouseover,help,nodead][help,nodead] {spell}",
@@ -161,8 +162,10 @@ L.combos = {
   },
 }
 
--- What layout 1 put on buttons that are now off the plan or spare (Action Bar 5, Action Bar 3 buttons 7-9). A full
--- apply clears such a button only while it still holds exactly that spell and the spell has a new home.
+-- What layout 1 put on buttons that are now off the plan or spare (Action Bar 5, Action Bar 3 buttons 7-9). Layout
+-- 2's seal buttons (Action Bar 2 buttons 4-5, Action Bar 6 button 7) are all still planned, so a full apply from
+-- layout 2 replaces them and needs no entry here. A full apply clears such a button only while it still holds exactly
+-- that spell and the spell has a new home.
 L.old = {
   [42] = "!opener", [44] = "turn_undead", [45] = "seal_of_the_crusader", [47] = "redemption", [48] = "divine_protection",
   [55] = "blessing_of_protection", [56] = { "cleanse", "purify" }, [57] = "lay_on_hands",

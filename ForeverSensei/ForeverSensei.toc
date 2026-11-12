@@ -3,7 +3,7 @@
 ## Notes: Class coach for World of Warcraft: Forever, in Japanese or English. Needs the class pack for your class (ForeverSensei_<Class>).
 ## Notes-jaJP: World of Warcraft: Forever のクラスコーチ（日本語・英語）。自分のクラス用のパック（ForeverSensei_<クラス>）が必要。
 ## Author: oskar-v-karlsson
-## Version: 0.7.0
+## Version: 0.7.1
 ## SavedVariables: ForeverSenseiDB
 ## OptionalDeps: WoWForeverJapanese
 ## IconTexture: Interface\Icons\Spell_Nature_MagicImmunity

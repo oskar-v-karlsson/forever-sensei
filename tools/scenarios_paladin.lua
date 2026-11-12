@@ -179,19 +179,41 @@ return function(ns, lang)
   end
   if not ns.Layout.IsEmptyPlan(ns.Layout.BuildPlan()) then fail("plan not empty after apply") end
   if STUB.cursor then fail("cursor not empty after apply") end
-  -- The macros: help with the self fallback, Protection and Sacrifice without, Hammer of Justice stops the cast, the
-  -- opener fires Judgement, Swift Judgement, Holy Strike.
-  for _, key in ipairs({ "flash_of_light", "holy_light", "lay_on_hands", "cleanse", "blessing_of_freedom" }) do
-    local b = bodyOf(key)
-    if not b:find("[@mouseover,help,nodead][help,nodead][@player] " .. ns.Spells.Get(key).name, 1, true) then
-      fail("macro " .. key .. " body: " .. b)
+  -- The macros (0.7.1, Oskar: "aren't casting ... on my self if I am not mousing over any party member"): each help
+  -- slot holds its FS_ macro, falling back to yourself (Blessing of Protection too since 0.7.1); Sacrifice never
+  -- targets yourself; Hammer of Justice stops the cast; the opener fires Judgement, Swift Judgement, Holy Strike.
+  local function selfMacro(what, key, slot)
+    local a, m = STUB.actions[slot], macroAt(slot)
+    if not m or m.name ~= L.macros[key] then
+      fail(what .. ": slot " .. slot .. " should hold macro " .. L.macros[key] .. ", holds " .. (a and (a[1] .. ":" .. tostring(a[2])) or "nothing"))
+    elseif not m.body:find("/cast [@mouseover,help,nodead][help,nodead][@player] " .. ns.Spells.Get(key).name, 1, true) then
+      fail(what .. ": macro " .. m.name .. " has no self fallback: " .. m.body)
     end
   end
-  for _, key in ipairs({ "blessing_of_protection", "blessing_of_sacrifice" }) do
-    local b = bodyOf(key)
-    if b:find("@player", 1, true) or not b:find("[@mouseover,help,nodead][help,nodead] " .. ns.Spells.Get(key).name, 1, true) then
-      fail("macro " .. key .. " should have no self fallback: " .. b)
+  for _, key in ipairs({ "lay_on_hands", "blessing_of_protection", "flash_of_light", "holy_light", "cleanse",
+    "blessing_of_freedom" }) do
+    selfMacro("mouseover", key, L.bySpell[key].slot)
+  end
+  do
+    local b = bodyOf("blessing_of_sacrifice")
+    if macroAt(L.bySpell.blessing_of_sacrifice.slot) == nil or b:find("@player", 1, true)
+      or not b:find("[@mouseover,help,nodead][help,nodead] Blessing of Sacrifice", 1, true) then
+      fail("macro Blessing of Sacrifice should have no self fallback: " .. b)
     end
+  end
+  -- The client reports a macro button as ("macro", spellID, "spell"); the layout still knows it by its name.
+  if not ns.Layout.IsEmptyPlan(ns.Layout.BuildPlan()) then fail("macro buttons not recognised after apply") end
+  -- /sensei verify flags a help button that holds the plain spell instead of its macro (no mouseover, no self
+  -- fallback there); a full apply puts the macro back.
+  do
+    local slot = L.bySpell.lay_on_hands.slot
+    STUB.actions[slot] = { "spell", ns.Spells.CurrentID(ns.Spells.Get("lay_on_hands")) }
+    local ok, report = pcall(ns.Verify.Run)
+    if not ok or type(report) ~= "string" or not report:find("slot " .. slot .. " (SHIFT-BUTTON4): plain spell Lay on Hands, not macro FS_LOH", 1, true) then
+      fail("verify: no warning for the plain Lay on Hands on Shift+Mouse4")
+    end
+    try("apply over plain Lay on Hands", ns.Layout.Execute, ns.Layout.BuildPlan())
+    selfMacro("re-apply", "lay_on_hands", slot)
   end
   local hoj = bodyOf("hammer_of_justice")
   if not hoj:find("/stopcasting\n/cast [@mouseover,harm,nodead][] Hammer of Justice", 1, true) then fail("macro HoJ: " .. hoj) end
@@ -334,6 +356,56 @@ return function(ns, lang)
     if not ok2 then fail("layout 2 undo: key bindings differ: " .. why2) end
     ok2, why2 = same(v1S, settingsSnap())
     if not ok2 then fail("layout 2 undo: bar settings differ: " .. why2) end
+  end
+
+  -- Update from layout 2 (0.7.0) to 3 (0.7.1, Oskar: "why isn't seal of justice on shift 4 next to the other seals?"):
+  -- Shift+4 Seal of Justice, Shift+5 Seal of Wisdom, Seal of Light clicked on Action Bar 6 button 7. One notice,
+  -- nothing moves by itself; a full apply changes only those three buttons (the keys stay) and 元に戻す restores them.
+  do
+    local function cur(key) return ns.Spells.CurrentID(ns.Spells.Get(key)) end
+    STUB.actions, STUB.macros = {}, {}
+    try("layout 3 setup", ns.Layout.Execute, ns.Layout.BuildPlan())
+    local s4, s5, b7 = L.bySpell.seal_of_justice.slot, L.bySpell.seal_of_wisdom.slot, L.bySpell.seal_of_light.slot
+    if s4 ~= 64 or s5 ~= 65 or b7 ~= 151 then fail("layout 3: seal slots are " .. s4 .. ", " .. s5 .. ", " .. b7) end
+    STUB.actions[64] = { "spell", cur("seal_of_wisdom") }
+    STUB.actions[65] = { "spell", cur("seal_of_light") }
+    STUB.actions[151] = { "spell", cur("seal_of_justice") }
+    local v2A, v2B = snapshot()
+    ns.char.layoutVersion = 2
+    ns.ready = false
+    STUB.fire("PLAYER_LOGIN")
+    STUB.runTimers()
+    for _ = 1, 60 do ns.NewSkill.Next() end
+    if _G.ForeverSenseiCard then _G.ForeverSenseiCard:Hide() end
+    if _G.ForeverSenseiToast then _G.ForeverSenseiToast:Hide() end
+    local confirm = _G.ForeverSenseiConfirm
+    if not confirm or not confirm:IsShown() or confirm.text:GetText() ~= ns.T("ui.layout.changed") then
+      fail("layout 3: no notice for a player with layout 2")
+    else
+      confirm:Hide()
+    end
+    if ns.char.layoutVersion ~= 3 then fail("layout 3: version not saved after the notice") end
+    local nA, nB = snapshot()
+    if not same(v2A, nA) or not same(v2B, nB) then fail("layout 3: the notice moved something by itself") end
+    local plan = ns.Layout.BuildPlan()
+    try("layout 3 apply", ns.Layout.Execute, plan)
+    checkLayout("layout 3")
+    local aA, aB = snapshot()
+    local diff = {}
+    for k, v in pairs(aA) do if v2A[k] ~= v then diff[#diff + 1] = k end end
+    for k in pairs(v2A) do if aA[k] == nil then diff[#diff + 1] = k end end
+    table.sort(diff)
+    if table.concat(diff, ",") ~= "64,65,151" then fail("layout 3: apply changed slots " .. table.concat(diff, ",") .. ", expected 64,65,151") end
+    local okB, whyB = same(v2B, aB)
+    if not okB then fail("layout 3: apply changed key bindings: " .. whyB) end
+    if STUB.bindings["SHIFT-4"] ~= "MULTIACTIONBAR1BUTTON4" then fail("layout 3: Shift+4 not on Action Bar 2 button 4") end
+    if STUB.names[STUB.actions[64][2]] ~= "Seal of Justice" then fail("layout 3: Shift+4 is not Seal of Justice") end
+    try("layout 3 undo", ns.Layout.Undo)
+    local uA, uB = snapshot()
+    local ok3, why3 = same(v2A, uA)
+    if not ok3 then fail("layout 3 undo: action slots differ: " .. why3) end
+    ok3, why3 = same(v2B, uB)
+    if not ok3 then fail("layout 3 undo: key bindings differ: " .. why3) end
   end
 
   -- Level 30: no Swift Judgement (talent at 37) → E empty but bound; no Cleanse (42) → Purify stands in on

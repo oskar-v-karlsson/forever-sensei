@@ -1141,14 +1141,14 @@ def check_paladin(pack, sources):
     if spec.get("tabs") != ["role", "rotation", "seals", "auras", "cooldowns", "manners"]:
         problem(f"paladin: Protection tabs must be role, rotation, seals, auras, cooldowns, manners, are {spec.get('tabs')}")
 
-    # --- layout: the approved grid (research/keybind-layout-v4.md P4, layout 2) ----------------------------------
+    # --- layout: the approved grid (research/keybind-layout-v4.md P4, layout 3: Justice on Shift+4 since 0.7.1) ----------------------------------
     slots = layout["slots"]
     grid = {
         "1": "holy_strike", "2": "consecration", "3": "holy_shield", "4": "flash_of_light", "5": "holy_light",
         "Q": "judgement", "E": "swift_judgement", "R": "!opener", "F": "hammer_of_justice",
         "Z": "@health", "X": "@mana", "C": "righteous_fury",
         "SHIFT-1": "seal_of_fury", "SHIFT-2": "seal_of_righteousness", "SHIFT-3": "seal_of_the_crusader",
-        "SHIFT-4": "seal_of_wisdom", "SHIFT-5": "seal_of_light",
+        "SHIFT-4": "seal_of_justice", "SHIFT-5": "seal_of_wisdom",
         "SHIFT-Q": "exorcism", "SHIFT-E": "hammer_of_wrath", "SHIFT-R": "holy_wrath", "SHIFT-F": "turn_undead",
         "SHIFT-Z": "templars_bulwark", "SHIFT-X": "divine_shield", "SHIFT-C": "divine_protection",
         "CTRL-1": "retribution_aura", "CTRL-2": "devotion_aura", "CTRL-3": "concentration_aura",
@@ -1158,7 +1158,7 @@ def check_paladin(pack, sources):
         "BUTTON5": "cleanse", "SHIFT-BUTTON5": "blessing_of_freedom", "CTRL-BUTTON5": "voice_of_truth",
     }
     clicks = {
-        ("bar6", 7): "seal_of_justice", ("bar6", 8): "fire_resistance_aura", ("bar6", 9): "divine_intervention",
+        ("bar6", 7): "seal_of_light", ("bar6", 8): "fire_resistance_aura", ("bar6", 9): "divine_intervention",
         ("bar4", 1): "redemption", ("bar4", 2): "greater_blessing_of_kings", ("bar4", 3): "greater_blessing_of_might",
         ("bar4", 4): "greater_blessing_of_wisdom",
     }
@@ -1168,6 +1168,10 @@ def check_paladin(pack, sources):
     if [f["id"] for f in layout.get("families") or []] != [
             "judgement", "seals", "conditional", "forbearance", "auras", "blessings", "save", "free"]:
         problem("paladin layout: families must be judgement, seals, conditional, forbearance, auras, blessings, save, free")
+    seals = next((f for f in layout.get("families") or [] if f.get("id") == "seals"), {})
+    if seals.get("members") != ["seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader", "seal_of_justice",
+                                "seal_of_wisdom"] or seals.get("spill") != ["seal_of_light"]:
+        problem("paladin layout: seals must be Fury, Righteousness, Crusader, Justice, Wisdom on Shift+1-5, Light spilled")
     spare_keys = {x["key"] for x in layout["spare"] if x.get("key")}
     if spare_keys != {"CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F"}:
         problem(f"paladin layout: spare keys must be Ctrl+Q, E, R and F, are {sorted(spare_keys)}")
@@ -1189,7 +1193,8 @@ def check_paladin(pack, sources):
     m5 = next((s for s in slots if s.get("key") == "BUTTON5"), {})
     if m5.get("standIn") != "purify":
         problem("paladin layout: Mouse5 must be Cleanse with Purify standing in until 42")
-    # Macros: help with the self fallback, help_nofb (Blessing of Protection, Sacrifice) without, Hammer of Justice
+    # Macros: help with the self fallback (Blessing of Protection too, since 0.7.1), help_nofb (Sacrifice) without,
+    # Hammer of Justice
     # stops the cast, the opener fires Judgement, Swift Judgement and Holy Strike once Swift Judgement is known.
     want = {"flash_of_light", "holy_light", "lay_on_hands", "cleanse", "purify", "blessing_of_freedom",
             "blessing_of_protection", "blessing_of_sacrifice", "hammer_of_justice"}
@@ -1200,8 +1205,8 @@ def check_paladin(pack, sources):
             or "@mouseover,help" not in bodies.get("help_nofb", ""):
         problem("paladin layout: help must fall back to yourself, help_nofb must not")
     if {k: v for k, v in layout["macroKind"].items()} != {
-            "blessing_of_protection": "help_nofb", "blessing_of_sacrifice": "help_nofb", "hammer_of_justice": "interrupt"}:
-        problem("paladin layout: macroKind must be help_nofb for Protection and Sacrifice, interrupt for Hammer of Justice")
+            "blessing_of_sacrifice": "help_nofb", "hammer_of_justice": "interrupt"}:
+        problem("paladin layout: macroKind must be help_nofb for Sacrifice only, interrupt for Hammer of Justice")
     if "/stopcasting" not in bodies.get("interrupt", "") or "@mouseover,harm" not in bodies.get("interrupt", ""):
         problem("paladin layout: the Hammer of Justice macro must /stopcasting and use the enemy mouseover")
     op = (layout.get("combos") or {}).get("opener") or {}
@@ -1217,8 +1222,8 @@ def check_paladin(pack, sources):
     want_warn["CTRL-R"] = "ui.preview.warn.fps"
     if layout.get("defaultWarn") != want_warn:
         problem("paladin layout: defaultWarn must be Ctrl+1-5 (stance bar) and Ctrl+R (framerate)")
-    if layout.get("version") != 2:
-        problem(f"paladin layout: version must be 2 (family blocks, 0.7.0), is {layout.get('version')}")
+    if layout.get("version") != 3:
+        problem(f"paladin layout: version must be 3 (Seal of Justice on Shift+4, 0.7.1), is {layout.get('version')}")
 
     # --- talents: Wowhead 0/32/19, one point per level 10-60 ---------------------------------------------------
     tree_points = check_talents_points(talents)

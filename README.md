@@ -136,15 +136,15 @@ It heals the friend under the mouse, otherwise the friendly target, otherwise yo
 
 ### Key layout: Protection Paladin
 
-The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (layout 2, "family blocks", 0.7.0), which builds on [research/keybind-layout-paladin.md](research/keybind-layout-paladin.md) (pull walkthroughs at levels 20, 40 and 60, reach for normal hands, sources). It uses the same allowed keys and bars as the Shaman layout. *(n)* is the level the spell becomes available; MO = mouseover macro.
+The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (layout 3: "family blocks" since 0.7.0, Seal of Justice on `Shift+4` since 0.7.1), which builds on [research/keybind-layout-paladin.md](research/keybind-layout-paladin.md) (pull walkthroughs at levels 20, 40 and 60, reach for normal hands, sources). It uses the same allowed keys and bars as the Shaman layout. *(n)* is the level the spell becomes available; MO = mouseover macro.
 
 | Key | Plain (Action Bar 1) | Shift (Action Bar 2) | Ctrl (Action Bar 3) |
 |---|---|---|---|
 | 1 | Holy Strike *(6)* | Seal of Fury *(10)* | Retribution Aura *(16)* |
 | 2 | Consecration *(20)* | Seal of Righteousness *(1)* | Devotion Aura *(1)* |
 | 3 | Holy Shield *(42, talent)* | Seal of the Crusader *(6)* | Concentration Aura *(22)* |
-| 4 | Flash of Light, MO + self *(20)* | Seal of Wisdom *(38)* | Shadow Resistance Aura *(28)* |
-| 5 | Holy Light, MO + self *(1)* | Seal of Light *(30)* | Frost Resistance Aura *(32)* |
+| 4 | Flash of Light, MO + self *(20)* | Seal of Justice *(22)* | Shadow Resistance Aura *(28)* |
+| 5 | Holy Light, MO + self *(1)* | Seal of Wisdom *(38)* | Frost Resistance Aura *(32)* |
 | Q | Judgement *(4)* | Exorcism *(20)* | – |
 | E | Swift Judgement *(37, talent)* | Hammer of Wrath *(44)* | – |
 | R | Opener: Judgement + Swift Judgement + Holy Strike *(37)* | Holy Wrath *(50)* | – |
@@ -152,18 +152,18 @@ The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (l
 | Z | Healthstone, else Healing Potion | Templar's Bulwark *(32, talent)* | Blessing of Kings *(20)* |
 | X | Mana Potion | Divine Shield *(34)* | Blessing of Might *(4)* |
 | C | Righteous Fury *(10)* | Divine Protection *(6)* | Blessing of Wisdom *(14)* |
-| Mouse 4 | Blessing of Protection, MO *(10)* | Lay on Hands, MO + self *(10)* | Blessing of Sacrifice, MO *(46)* |
+| Mouse 4 | Blessing of Protection, MO + self *(10)* | Lay on Hands, MO + self *(10)* | Blessing of Sacrifice, MO *(46)* |
 | Mouse 5 | Cleanse, MO + self *(42)*; Purify *(8)* until then | Blessing of Freedom, MO + self *(18)* | Voice of Truth *(20)* |
 
-- **Blocks:** plain `1-3` the core loop (Holy Strike, Consecration, Holy Shield), `4-5` the heals, `Q-R` the Judgement family, `F` Hammer of Justice, `Z-C` potions and Righteous Fury. Shift: seals on `1-5`, the conditional attacks (undead, low health) on `Q-F`, the Forbearance cooldowns on `Z-C` (Bulwark, Divine Shield and Divine Protection share Forbearance). Ctrl: auras on `1-5`, blessings on `Z-C`; `Ctrl+Q/E/R/F` are spare. The mouse buttons are two columns: Mouse 4 saves a player, Mouse 5 frees or cleanses one.
+- **Blocks:** plain `1-3` the core loop (Holy Strike, Consecration, Holy Shield), `4-5` the heals, `Q-R` the Judgement family, `F` Hammer of Justice, `Z-C` potions and Righteous Fury. Shift: seals on `1-5` (Fury, Righteousness, Crusader, Justice, Wisdom; Seal of Light, which a tank rarely needs, is clicked on Action Bar 6), the conditional attacks (undead, low health) on `Q-F`, the Forbearance cooldowns on `Z-C` (Bulwark, Divine Shield and Divine Protection share Forbearance). Ctrl: auras on `1-5`, blessings on `Z-C`; `Ctrl+Q/E/R/F` are spare. The mouse buttons are two columns: Mouse 4 saves a player, Mouse 5 frees or cleanses one.
 - **Bars:** as for the Shaman. Plain keys are Action Bar 1, Shift Action Bar 2, Ctrl Action Bar 3, the mouse keys Action Bar 6 buttons 1-6 (`Mouse 4`, `Shift+Mouse 4`, `Ctrl+Mouse 4`, `Mouse 5`, `Shift+Mouse 5`, `Ctrl+Mouse 5`). Move Action Bar 6 down in Edit Mode.
 - **Auras:** the auras are on Action Bar 3 buttons 1-5 with `Ctrl+1-5`, next to the seals on `Shift+1-5`. `Ctrl+1-5` no longer press the stance bar (the preview says so); the stance bar still shows your auras. Fire Resistance Aura is clicked on Action Bar 6 (button 8). If an aura button on Action Bar 3 does not light up while the aura is on (checklist), the fallback is the stance bar's own `Ctrl+1-5`.
 - **Taunt:** the Paladin has no taunt button. Judgement (`Q`) while Seal of Fury is active taunts for 3 seconds. There is no interrupt either: `F` Hammer of Justice stuns (the macro stops your own cast first and stuns the enemy under the mouse, else your target).
-- **Help macros:** with **マウスオーバーで回復**, Flash of Light, Holy Light, Lay on Hands, Cleanse, Purify and Blessing of Freedom go to the friend under the mouse, else a friendly target, else you. Blessing of Protection and Blessing of Sacrifice never fall back to you (Protection would stop your attacks; Sacrifice can't be cast on yourself). With **ターゲットを回復**, plain spells.
+- **Help macros:** with **マウスオーバーで回復**, Flash of Light, Holy Light, Lay on Hands, Cleanse, Purify, Blessing of Freedom and (since 0.7.1) Blessing of Protection go to the friend under the mouse, else a friendly target, else you. On yourself Blessing of Protection stops your attacks for 6 seconds and gives Forbearance (no Templar's Bulwark, Divine Shield or Divine Protection for 1 minute). Blessing of Sacrifice never falls back to you (it moves the target's damage to the caster). If a help key casts only on a mouseover or target, run `/sensei verify`: a `plain spell ..., not macro FS_...` line means that button holds the plain spell; **すべて配置** puts the macro back. With **ターゲットを回復**, plain spells.
 - **Opener** (`R`, macro `FS_OPEN`, from level 37): `/startattack`, Judgement, Swift Judgement and Holy Strike in one press. Judgement and Swift Judgement are off the global cooldown. Its button stays empty until Swift Judgement is learned.
 - **Purify → Cleanse:** Purify stands in on `Mouse 5` until Cleanse at 42. Then Cleanse takes the button and Purify stays in the spellbook.
 - Spare keys, bound to empty buttons for your own use: `Ctrl+Q`, `Ctrl+E`, `Ctrl+R`, `Ctrl+F`. No key is reserved any more: `5`, `Shift+5` and `Ctrl+5` are planned, and anything you had there moves to a spare button.
-- Clicked, no key: Action Bar 6 buttons 7-9 (in combat) hold Seal of Justice, Fire Resistance Aura and Divine Intervention; Action Bar 4 (out of combat) holds Redemption and Greater Blessing of Kings, Might and Wisdom. Summon Warhorse and Summon Charger stay in the spellbook (mount journal). Action Bar 5 is no longer used; **すべて配置** clears what 0.6.x put there and leaves the bar as you have it.
+- Clicked, no key: Action Bar 6 buttons 7-9 (in combat) hold Seal of Light, Fire Resistance Aura and Divine Intervention; Action Bar 4 (out of combat) holds Redemption and Greater Blessing of Kings, Might and Wisdom. Summon Warhorse and Summon Charger stay in the spellbook (mount journal). Action Bar 5 is no longer used; **すべて配置** clears what 0.6.x put there and leaves the bar as you have it.
 - Character macros: `FS_FOL`, `FS_HL`, `FS_LOH`, `FS_CLEANSE` (`FS_PURIFY` before 42), `FS_BOF`, `FS_BOP`, `FS_BOS` (mouseover mode only), `FS_HOJ` and `FS_OPEN` (always), `FS_HEALTH` and `FS_MANA`: at most 12 of 30.
 - The source of truth is `ForeverSensei_Paladin/Data/Protection/Layout.lua`.
 
@@ -209,7 +209,7 @@ These cannot be tested outside the game. Please go through them once, then paste
 33. [ ] **Preview warnings:** the preview warns about `Ctrl+1-5` (stance bar), `Ctrl+R` (framerate display), the mouse side buttons and moving Action Bar 6 in Edit Mode.
 34. [ ] **Taunt:** with Seal of Fury active, `Q` Judgement taunts. Note whether the taunt lasts 3 or 4 seconds, and whether Judgement keeps the seal.
 35. [ ] **Opener:** from 37, `R` (FS_OPEN) casts Judgement, Swift Judgement and Holy Strike from one press and starts auto attack.
-36. [ ] **Help macros:** with a hostile target and nothing under the mouse, `4`, `Shift+4`, `Shift+Mouse 4`, `Mouse 5` and `Shift+Mouse 5` cast on you. `Mouse 4` (Blessing of Protection) and `Ctrl+Mouse 4` (Blessing of Sacrifice) do not. Over a party frame, all of them go to that player.
+36. [ ] **Help macros:** with a hostile target and nothing under the mouse, `4`, `Shift+4`, `Shift+Mouse 4`, `Mouse 5` and `Shift+Mouse 5` cast on you. *(0.7.1: `Mouse 4`, Blessing of Protection, now does too, see item 49.)* `Ctrl+Mouse 4` (Blessing of Sacrifice) does not. Over a party frame, all of them go to that player.
 37. [ ] **Hammer of Justice:** `F` during your own cast stops it and stuns the enemy under the mouse at once, else your target.
 38. [ ] **Purify → Cleanse:** before 42, `Mouse 5` holds Purify. After learning Cleanse and **配置する**, `Mouse 5` holds Cleanse and Purify is gone from the bars.
 39. [ ] **Ranks:** learning a new rank of Holy Strike, Seal of Fury or Holy Shield upgrades its button with a toast. `/sensei verify` has no `bad` lines (it checks every rank ID against the client, including Seal of Fury and Holy Light rank 1).
@@ -228,6 +228,11 @@ These cannot be tested outside the game. Please go through them once, then paste
 46. [ ] **Ctrl+5 default:** before **適用**, `/run print(GetBindingAction("CTRL-5"))` prints the game default (expected `SHAPESHIFTBUTTON5`). After **適用** it prints `MULTIACTIONBAR2BUTTON5`.
 47. [ ] **Hidden stance bar:** hide the stance bar in Edit Mode. The Paladin auras still work from `Ctrl+1-5`, and the Shaman's Ghost Wolf from `Ctrl+1`.
 48. [ ] **元に戻す:** after **適用**, **元に戻す** restores the old keys, the spells layout 6 (or the Paladin's layout 1) had on Action Bar 5, and Action Bar 6's visibility from before.
+
+**Paladin help macros and seals (0.7.1).** On the Paladin, after updating from 0.7.0 (layout 2):
+
+49. [ ] **Self fallback:** with **マウスオーバーで回復**, no friend under the mouse and a hostile or no target, `Shift+Mouse 4` (Lay on Hands), `Mouse 4` (Blessing of Protection), `4`, `5`, `Mouse 5` and `Shift+Mouse 5` cast on you. `Ctrl+Mouse 4` (Blessing of Sacrifice) does not. If one doesn't, run `/sensei verify` and send the `plain spell ..., not macro` and `character macros` lines; then **すべて配置** and try again.
+50. [ ] **Seals:** the layout message shows once and nothing moves by itself. After **すべて配置** → **適用**, `Shift+1-5` are Seal of Fury, Righteousness, the Crusader, Justice and Wisdom, and Seal of Light is on Action Bar 6 button 7. **元に戻す** puts Wisdom, Light and Justice back where they were.
 
 ## Translation reports
 
@@ -284,7 +289,7 @@ When the user pastes a report block (starting `[ForeverSensei v`) or asks you to
   - **items:** potion and elixir data (sources, ids, best-first order);
   - **talents:** one point per level, row requirements, max ranks, final 0/5/46 (Shaman) and 0/32/19 (Paladin);
   - **scenarios:** layout apply → undo round-trip, potion and Healthstone macros, the Lightning Shield stand-in, clearing old-layout leftovers, the update from layout 6 to 7 (notice, apply, undo with bar settings), the login card fix and the one-time layout notice;
-  - **Paladin:** the Protection grid and families, the auras on Action Bar 3, the update from layout 1 to 2 (notice, apply, undo), the help macros with and without the self fallback, the opener, the Purify stand-in, level 30 and 42 snapshots, and that unverified spells appear nowhere;
+  - **Paladin:** the Protection grid and families, the auras on Action Bar 3, the updates from layout 1 to 2 and 2 to 3 (notice, apply, undo), the help macros with and without the self fallback (each help button holds its macro, `/sensei verify` flags a plain spell there), the opener, the Purify stand-in, level 30 and 42 snapshots, and that unverified spells appear nowhere;
   - **reports:** round-trip of the report format (with the pack name), that each ID is written to the file of the pack the report names, and that the zip holds every addon folder at its top level.
 - `make zip` builds `dist/ForeverSensei-v<version>.zip` with every addon folder at its top level (unzip straight into `AddOns`).
 - Layout of the core (`ForeverSensei/`):
