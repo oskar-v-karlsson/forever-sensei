@@ -1,7 +1,7 @@
 -- Core/Init.lua: namespace, safe event bus, combat queue, saved variables and the /sensei command.
 local ADDON, ns = ...
 ns.ADDON = ADDON
-ns.VERSION = "0.7.1"
+ns.VERSION = "0.8.0"
 do
   local getMeta = C_AddOns and C_AddOns.GetAddOnMetadata
   if getMeta then
@@ -105,6 +105,7 @@ local DEFAULTS = {
     showCards = true,
     showTalentHints = true,
     autoRanks = true,         -- put a newly learned rank on the bars in place of the older rank
+    unitFrameClicks = true,   -- Mouse 4/5 over the Blizzard unit frames do what their bar buttons do (Modules/UnitFrames.lua)
     minimap = true,
     minimapAngle = 200,
     debug = false,

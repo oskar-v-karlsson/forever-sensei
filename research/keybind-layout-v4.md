@@ -266,8 +266,8 @@ Ctrl+1-4. Now that 5 is planned: 5 is tier 2 (like 4), Shift+5 tier 3, Ctrl+5 ti
 | **Conditional attacks** | Exorcism *(20)*, Hammer of Wrath *(44)*, Holy Wrath *(50)*, Turn Undead *(24)* | 4 |
 | **Forbearance** | Templar's Bulwark *(32, talent)*, Divine Shield *(34)*, Divine Protection *(6)* | 3 |
 | **Blessings** | Kings *(20)*, Might *(4)*, Wisdom *(14)*; the Greater Blessings *(52-60)* are 1 h out-of-combat buffs (bar 4) | 3 |
-| **Save a party member** (Mouse4) | Blessing of Protection *(10)*, Lay on Hands *(10)*, Blessing of Sacrifice *(46)* | 3 |
-| **Free a party member** (Mouse5) | Cleanse *(42)* / Purify *(8)*, Blessing of Freedom *(18)*, Voice of Truth *(20)* | 3 |
+| **Save a party member** (Ctrl+Q/E/R since 0.8.0; Mouse4 before) | Lay on Hands *(10)*, Blessing of Protection *(10)*, Blessing of Sacrifice *(46)* | 3 |
+| **Cleanse and free** (mouse buttons since 0.8.0; Mouse5 before) | Cleanse *(42)* / Purify *(8)*, Blessing of Freedom *(18)*, Voice of Truth *(20)* | 3 |
 
 "Conditional attacks": each only works under one condition (Exorcism and Holy Wrath against undead or demons, Turn
 Undead against undead, Hammer of Wrath on a target under 20%; `wh_tt`, paladin doc). It replaces the old "against undead" family and
@@ -287,10 +287,9 @@ Light and Hammer of the Righteous stay out of every key and text (unverified, pa
 | **Shift Q/E/R/F** | **Conditional attacks**: Q Exorcism, E Hammer of Wrath, R Holy Wrath, F Turn Undead | Order by frequency (Exorcism is a rotation spell on undead). Hammer of Wrath and Holy Wrath keep Shift+E and Shift+R. |
 | **Shift Z/X/C** | **Forbearance**: Z Templar's Bulwark, X Divine Shield, C Divine Protection | The key teaches "one of these per minute". Same order as before (keep tanking → halve damage → stop attacking). |
 | **Ctrl 1-5** | **Auras**: 1 Retribution, 2 Devotion, 3 Concentration, 4 Shadow Resistance, 5 Frost Resistance | See P3. Retribution first: the default aura in `wh_guide` and `moba`. Fire Resistance Aura spills to bar 6. |
-| **Ctrl Q/E/R/F** | spare (bound, empty) | Kept free as a block for a later family, e.g. Hammer of the Righteous if it turns out to be trainable. |
+| **Ctrl Q/E/R/F** | **Save** (0.8.0): Q Lay on Hands, E Blessing of Protection, R Blessing of Sacrifice; F spare | Long cooldowns that hurt when pressed by mistake, so on deliberate keys, not the mouse buttons (see "Changed in 0.8.0"). Spare until 0.7.1. |
 | **Ctrl Z/X/C** | **Blessings**: Z Kings, X Might, C Wisdom | Out of combat, so the Ctrl block. Kings first (the default; re-apply after Protection/Freedom/Sacrifice replaced it). |
-| Mouse4 column | **Save**: Mouse4 Blessing of Protection, Shift Lay on Hands, Ctrl Blessing of Sacrifice | Unchanged. |
-| Mouse5 column | **Free**: Mouse5 Cleanse (Purify until 42), Shift Blessing of Freedom, Ctrl Voice of Truth | Unchanged. |
+| Mouse pairs | **Cleanse and free** (0.8.0): Mouse4 Cleanse (Purify until 42), Mouse5 Blessing of Freedom, Shift+Mouse4 Voice of Truth; Shift+Mouse5 and Ctrl+Mouse4/5 spare | Only low-risk spells on the buttons that are easy to press by mistake. Until 0.7.1 the columns were Mouse4 "save" and Mouse5 "free". |
 
 ## P3. Auras: stance-bar defaults or Action Bar 3? (decided with evidence)
 
@@ -330,7 +329,7 @@ Layout 1's reasons for the stance bar, weighed again:
 Runner-up: keep Ctrl+1-5 on the stance bar (no new bindings). Pick it if the in-game check shows that auras cast
 from an action button don't light up.
 
-## P4. Grid (Protection layout 3; layout 2 until 0.7.0)
+## P4. Grid (Protection layout 4 since 0.8.0; layout 3 in 0.7.1, layout 2 in 0.7.0)
 
 | Key | Plain (Action Bar 1) | Shift (Action Bar 2) | Ctrl (Action Bar 3) |
 |---|---|---|---|
@@ -339,30 +338,32 @@ from an action button don't light up.
 | 3 | Holy Shield *(42, talent)* | Seal of the Crusader *(6)* | Concentration Aura *(22)* |
 | 4 | Flash of Light, MO + self *(20)* | Seal of Justice *(22)* | Shadow Resistance Aura *(28)* |
 | 5 | Holy Light, MO + self *(1)* | Seal of Wisdom *(38)* | Frost Resistance Aura *(32)* |
-| Q | Judgement *(4)* | Exorcism *(20)* | – |
-| E | Swift Judgement *(37, talent)* | Hammer of Wrath *(44)* | – |
-| R | Opener: Judgement + Swift Judgement + Holy Strike (`FS_OPEN`) *(37)* | Holy Wrath *(50)* | – |
+| Q | Judgement *(4)* | Exorcism *(20)* | Lay on Hands, MO + self *(10)* |
+| E | Swift Judgement *(37, talent)* | Hammer of Wrath *(44)* | Blessing of Protection, MO + self *(10)* |
+| R | Opener: Judgement + Swift Judgement + Holy Strike (`FS_OPEN`) *(37)* | Holy Wrath *(50)* | Blessing of Sacrifice, MO *(46)* |
 | F | Hammer of Justice, `/stopcasting` + MO harm *(8)* | Turn Undead *(24)* | – |
 | Z | Healthstone, else Healing Potion (`FS_HEALTH`) | Templar's Bulwark *(32, talent)* | Blessing of Kings *(20)* |
 | X | Mana Potion (`FS_MANA`) | Divine Shield *(34)* | Blessing of Might *(4)* |
 | C | Righteous Fury *(10)* | Divine Protection *(6)* | Blessing of Wisdom *(14)* |
-| Mouse4 | Blessing of Protection, MO + self *(10)* | Lay on Hands, MO + self *(10)* | Blessing of Sacrifice, MO *(46)* |
-| Mouse5 | Cleanse, MO + self *(42)*; Purify *(8)* until then | Blessing of Freedom, MO + self *(18)* | Voice of Truth *(20)* |
+| Mouse4 | Cleanse, MO + self *(42)*; Purify *(8)* until then | Voice of Truth *(20)* | – |
+| Mouse5 | Blessing of Freedom, MO + self *(18)* | – | – |
 
-Spare keys: Ctrl+Q, Ctrl+E, Ctrl+R, Ctrl+F. 38 of 42 keys hold a spell at 60.
+Spare keys: Ctrl+F, Shift+Mouse5, Ctrl+Mouse4, Ctrl+Mouse5. 38 of 42 keys hold a spell at 60. Ctrl+R still
+replaces the framerate toggle (the preview warns).
 
 ## P5. Action Bar 6 (mouse block + in-combat clicks)
 
-Button order keeps each mouse column together (the families are the columns):
+Button order is in pairs since 0.8.0, as for the Shaman: the plain pair, the Shift pair, the Ctrl pair (until 0.7.1
+it was the Mouse4 column, then the Mouse5 column).
 
 | Button | Key | Content |
 |---|---|---|
-| 1 | Mouse4 | Blessing of Protection |
-| 2 | Shift+Mouse4 | Lay on Hands |
-| 3 | Ctrl+Mouse4 | Blessing of Sacrifice |
-| 4 | Mouse5 | Cleanse (Purify until 42) |
-| 5 | Shift+Mouse5 | Blessing of Freedom |
-| 6 | Ctrl+Mouse5 | Voice of Truth |
+| 1 | Mouse4 | Cleanse (Purify until 42) |
+| 2 | Mouse5 | Blessing of Freedom |
+| 3 | Shift+Mouse4 | Voice of Truth |
+| 4 | Shift+Mouse5 | spare |
+| 5 | Ctrl+Mouse4 | spare |
+| 6 | Ctrl+Mouse5 | spare |
 | 7 | – | Seal of Light (seal spill-over; Seal of Justice until 0.7.1) |
 | 8 | – | Fire Resistance Aura (aura spill-over) |
 | 9 | – | Divine Intervention (a wipe tool, used in combat) |
@@ -427,6 +428,39 @@ The keys don't change, only the spells on Action Bar 2 buttons 4-5 and Action Ba
 replaces exactly those three buttons (no `L.old` entry needed). One-time layout notice, nothing moves by itself,
 元に戻す restores.
 
+### Changed in 0.8.0 (layout 4), at Oskar's request
+
+Oskar, in game: "Having expensive/high risk spells on the mouse buttons are a bit risky since it is easy to misclick
+them I think lay on hands, blessing of protection that have long cooldowns and are also dangerous when used in the
+wrong circumstances should probably be somewhere else. Also the non shift mouse button should be placed paired next
+to each other and the shift modified mouse buttons should be placed paired next to each other." Decided by the
+coordinator while Oskar was away:
+
+| Change | Layout 3 → 4 | Why |
+|---|---|---|
+| Lay on Hands *(10)* | Shift+Mouse4 (bar 6 button 2) → Ctrl+Q (bar 3 button 6) | 20 min cooldown (`simc`); a misclick wastes it. |
+| Blessing of Protection *(10)* | Mouse4 (bar 6 button 1) → Ctrl+E (bar 3 button 7) | Stops the target's attacks and applies Forbearance (`simc` 1022, 25771); harmful on the wrong player. |
+| Blessing of Sacrifice *(46)* | Ctrl+Mouse4 (bar 6 button 3) → Ctrl+R (bar 3 button 8) | Moves the target's damage to you; same family. Ctrl+R keeps the framerate warning. |
+| Cleanse / Purify | Mouse5 (bar 6 button 4) → Mouse4 (bar 6 button 1) | Low-risk, the most used party spell, so the plain mouse key. |
+| Blessing of Freedom *(18)* | Shift+Mouse5 (bar 6 button 5) → Mouse5 (bar 6 button 2) | Low-risk; the plain pair. |
+| Voice of Truth *(20)* | Ctrl+Mouse5 (bar 6 button 6) → Shift+Mouse4 (bar 6 button 3) | Low-risk; the Shift pair. |
+| Bar 6 key order | column order → pair order (`BUTTON4`, `BUTTON5`, `SHIFT-BUTTON4`, `SHIFT-BUTTON5`, `CTRL-BUTTON4`, `CTRL-BUTTON5`) | Oskar's pairing; the same as the Shaman. |
+
+All three save spells keep their mouseover macros (`FS_LOH` and `FS_BOP` with the self fallback, `FS_BOS` without),
+so a key pressed over a portrait still goes to that player. Divine Intervention stays clicked on bar 6 button 9 (a
+misfire sacrifices you). Bar 6 buttons 7-9 are unchanged. Old slots in `L.old` so a full apply moves them; one-time
+layout notice, nothing moves by itself, 元に戻す restores.
+
+Oskar also reported "my mouse over purify doesn't seem to work on party portraits". Cause (Forever UI code,
+`reckhou/WoWBlzCode` @7245053): `PartyMemberFrame.lua`, `CompactUnitFrame.lua`, `PlayerFrame.lua` and
+`TargetFrame.lua` call `SecureUnitButton_OnLoad` without click arguments, which runs `RegisterForClicks("AnyUp")`
+(`SecureTemplates.lua`), so the portrait takes Button4/5 as its own click and the `BUTTON4`/`BUTTON5` binding never
+fires. Keyboard keys are not affected. Since 0.8.0 the core gives these frames click-cast attributes (`type4`,
+`shift-type4`, `ctrl-type5`, ...) that do what the bar 6 button does: `macro` + the `FS_` macro name, or `spell` +
+the spell ID in click mode. It only touches them out of combat, never overwrites another addon's attribute, stays
+off with Clique or a game Click Casting binding on that button, and has a setting. This fixes Erika's Riptide,
+Nature's Swiftness + Healing Wave and cures over portraits too.
+
 ## P8. Trade-offs (urgent spells that got a worse key)
 
 1. **Templar's Bulwark: C → Shift+Z (tier 2 → 3).** The one reaction that got worse: the Forbearance family is one
@@ -436,6 +470,8 @@ replaces exactly those three buttons (no `L.old` entry needed). One-time layout 
    tier 1 in exchange.
 3. **Seal of Fury: F → Shift+1 (tier 1 → 2).** Refreshed every 30 s, planned, never a reaction.
 4. **Redemption loses its key** (rule 3: resurrection on the out-of-combat bars).
+5. **The save block: Mouse → Ctrl+Q/E/R (tier 1-3 → tier 3), 0.8.0.** Slower on purpose: Lay on Hands and Blessing of
+   Protection are rare, deliberate presses, and a misclick costs a 5-20 minute cooldown or a party member's attacks.
 
 ---
 
@@ -479,6 +515,8 @@ replaces exactly those three buttons (no `L.old` entry needed). One-time layout 
 3. Ctrl+5's default action (`/run print(GetBindingAction("CTRL-5"))`; expected `SHAPESHIFTBUTTON5`).
 4. Hiding the stance bar in Edit Mode doesn't stop the auras from working from Action Bar 3.
 5. 元に戻す after the apply restores bar 6's old visibility, bar 5's spells and the old keys.
+6. *(0.8.0)* Mouse4/5 over a party, player or target portrait cast that button's spell on that unit; left and right
+   click still target and open the menu; no blocked-action error when the group changes in combat.
 
 ## Open questions for Oskar
 

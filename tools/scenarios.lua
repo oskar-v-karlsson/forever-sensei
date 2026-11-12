@@ -172,10 +172,30 @@ return function(ns, lang)
   if not ns.Layout.IsEmptyPlan(planAfter) then fail("plan not empty after apply") end
   if STUB.cursor then fail("cursor not empty after apply") end
 
+  -- Mouse 4/5 over a party portrait (0.8.0): the frame takes those buttons, so it gets the bar buttons' actions.
+  local function portrait(what, button, mod, wantT, wantV)
+    local t, v, unit = STUB.unitClick(PartyFrame.MemberFrame1, button, mod)
+    if t ~= wantT or v ~= wantV or unit ~= "party1" then
+      fail("unit frames " .. what .. ": " .. (mod and (mod .. "-") or "") .. button .. " is " .. tostring(t) .. " " ..
+        tostring(v) .. ", expected " .. tostring(wantT) .. " " .. tostring(wantV))
+    end
+  end
+  local spellId = function(key) return ns.Spells.CurrentID(ns.Spells.Get(key)) end
+  portrait("mouseover", "Button4", nil, "macro", "FS_RT")
+  portrait("mouseover", "Button5", nil, "macro", "FS_NSHW")
+  portrait("mouseover", "Button4", "shift", "macro", "FS_CP")
+  portrait("mouseover", "Button5", "shift", "macro", "FS_CD")
+  portrait("mouseover", "Button4", "ctrl", "spell", spellId("poison_cleansing_totem"))
+  portrait("mouseover", "Button5", "ctrl", "spell", spellId("disease_cleansing_totem"))
+  portrait("mouseover", "LeftButton", nil, "target", nil)
+  portrait("mouseover", "RightButton", nil, "menu", nil)
+
   try("targeting click", ns.Layout.SetTargeting, "click")
   checkLayout("click")
+  portrait("click", "Button4", nil, "spell", spellId("riptide"))
   try("targeting mouseover", ns.Layout.SetTargeting, "mouseover")
   checkLayout("mouseover")
+  portrait("mouseover again", "Button4", nil, "macro", "FS_RT")
 
   -- Undo the targeting swaps and the full layout: back to the starting bars and keys.
   local undos = 0

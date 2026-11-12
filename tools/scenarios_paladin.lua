@@ -173,8 +173,10 @@ return function(ns, lang)
   auraKeys("apply")
   if STUB.settings.PROXY_SHOW_ACTIONBAR_6 ~= true then fail("apply: Action Bar 6 (mouse buttons) not shown") end
   for key, want in pairs({ ["5"] = "ACTIONBUTTON5", ["SHIFT-5"] = "MULTIACTIONBAR1BUTTON5", ["SHIFT-1"] = "MULTIACTIONBAR1BUTTON1",
-    ["CTRL-Z"] = "MULTIACTIONBAR2BUTTON10", ["BUTTON4"] = "MULTIACTIONBAR5BUTTON1", ["BUTTON5"] = "MULTIACTIONBAR5BUTTON4",
-    ["CTRL-BUTTON5"] = "MULTIACTIONBAR5BUTTON6", ["CTRL-Q"] = "MULTIACTIONBAR2BUTTON6" }) do
+    ["CTRL-Z"] = "MULTIACTIONBAR2BUTTON10", ["BUTTON4"] = "MULTIACTIONBAR5BUTTON1", ["BUTTON5"] = "MULTIACTIONBAR5BUTTON2",
+    ["SHIFT-BUTTON4"] = "MULTIACTIONBAR5BUTTON3", ["SHIFT-BUTTON5"] = "MULTIACTIONBAR5BUTTON4",
+    ["CTRL-BUTTON5"] = "MULTIACTIONBAR5BUTTON6", ["CTRL-Q"] = "MULTIACTIONBAR2BUTTON6", ["CTRL-R"] = "MULTIACTIONBAR2BUTTON8",
+    ["CTRL-F"] = "MULTIACTIONBAR2BUTTON9" }) do
     if STUB.bindings[key] ~= want then fail("apply: " .. key .. " should be bound to " .. want) end
   end
   if not ns.Layout.IsEmptyPlan(ns.Layout.BuildPlan()) then fail("plan not empty after apply") end
@@ -209,8 +211,8 @@ return function(ns, lang)
     local slot = L.bySpell.lay_on_hands.slot
     STUB.actions[slot] = { "spell", ns.Spells.CurrentID(ns.Spells.Get("lay_on_hands")) }
     local ok, report = pcall(ns.Verify.Run)
-    if not ok or type(report) ~= "string" or not report:find("slot " .. slot .. " (SHIFT-BUTTON4): plain spell Lay on Hands, not macro FS_LOH", 1, true) then
-      fail("verify: no warning for the plain Lay on Hands on Shift+Mouse4")
+    if not ok or type(report) ~= "string" or not report:find("slot " .. slot .. " (CTRL-Q): plain spell Lay on Hands, not macro FS_LOH", 1, true) then
+      fail("verify: no warning for the plain Lay on Hands on Ctrl+Q")
     end
     try("apply over plain Lay on Hands", ns.Layout.Execute, ns.Layout.BuildPlan())
     selfMacro("re-apply", "lay_on_hands", slot)
@@ -323,9 +325,13 @@ return function(ns, lang)
     local cleared, bars = {}, {}
     for _, c in ipairs(plan.clears) do cleared[c.slot] = true end
     for _, bar in ipairs(plan.bars) do bars[bar.id] = true end
-    for _, slot in ipairs({ 44, 45, 47, 48, 55, 56, 57 }) do
+    for _, slot in ipairs({ 44, 45, 47, 48, 57 }) do
       if not cleared[slot] then fail("layout 2: layout 1's spell on slot " .. slot .. " not cleared") end
     end
+    -- Layout 1's Action Bar 3 buttons 7-8 are the save block again since layout 4: replaced, not cleared.
+    local placed = {}
+    for _, pl in ipairs(plan.place) do placed[pl.slot] = true end
+    if not placed[55] or not placed[56] then fail("layout 2: Ctrl+E and Ctrl+R not replaced by the save block") end
     if cleared[38] then fail("layout 2: his own item on Action Bar 5 is planned to be cleared") end
     if not bars.bar6 then fail("layout 2: the preview does not show Action Bar 6") end
     for _, h in ipairs(plan.hide) do if h.id == "bar5" then fail("layout 2: Action Bar 5 is planned to be hidden") end end
@@ -384,7 +390,7 @@ return function(ns, lang)
     else
       confirm:Hide()
     end
-    if ns.char.layoutVersion ~= 3 then fail("layout 3: version not saved after the notice") end
+    if ns.char.layoutVersion ~= L.version then fail("layout 3: version not saved after the notice") end
     local nA, nB = snapshot()
     if not same(v2A, nA) or not same(v2B, nB) then fail("layout 3: the notice moved something by itself") end
     local plan = ns.Layout.BuildPlan()
@@ -408,8 +414,175 @@ return function(ns, lang)
     if not ok3 then fail("layout 3 undo: key bindings differ: " .. why3) end
   end
 
+  -- Update from layout 3 (0.7.1) to 4 (0.8.0, Oskar: "Having expensive/high risk spells on the mouse buttons are a bit
+  -- risky ... the non shift mouse button should be placed paired next to each other"): Lay on Hands, Blessing of
+  -- Protection and Sacrifice go to Ctrl+Q/E/R (Action Bar 3 buttons 6-8); Action Bar 6 buttons 1-6 are rebound in
+  -- pairs and hold Cleanse, Freedom and Voice of Truth on 1-3. One notice, nothing moves by itself; a full apply
+  -- changes only those buttons and the four mouse keys, and 元に戻す restores them.
+  do
+    STUB.actions, STUB.macros = {}, {}
+    try("layout 4 setup", ns.Layout.Execute, ns.Layout.BuildPlan())
+    local a = STUB.actions
+    local loh, bop, bos = L.bySpell.lay_on_hands.slot, L.bySpell.blessing_of_protection.slot, L.bySpell.blessing_of_sacrifice.slot
+    local cl, bof, vot = L.bySpell.cleanse.slot, L.bySpell.blessing_of_freedom.slot, L.bySpell.voice_of_truth.slot
+    if loh ~= 54 or bop ~= 55 or bos ~= 56 or cl ~= 145 or bof ~= 146 or vot ~= 147 then
+      fail("layout 4: save/free slots are " .. table.concat({ loh, bop, bos, cl, bof, vot }, ","))
+    end
+    -- Layout 3: Action Bar 6 column by column (Mouse4 BoP, Shift+Mouse4 LoH, Ctrl+Mouse4 BoS, Mouse5 Cleanse, ...).
+    a[145], a[146], a[147], a[148], a[149], a[150] = a[bop], a[loh], a[bos], a[cl], a[bof], a[vot]
+    a[54], a[55], a[56] = nil, nil, nil
+    for i, key in ipairs({ "BUTTON4", "SHIFT-BUTTON4", "CTRL-BUTTON4", "BUTTON5", "SHIFT-BUTTON5", "CTRL-BUTTON5" }) do
+      STUB.bindings[key] = "MULTIACTIONBAR5BUTTON" .. i
+    end
+    local v3A, v3B = snapshot()
+    ns.char.layoutVersion = 3
+    ns.ready = false
+    STUB.fire("PLAYER_LOGIN")
+    STUB.runTimers()
+    for _ = 1, 60 do ns.NewSkill.Next() end
+    if _G.ForeverSenseiCard then _G.ForeverSenseiCard:Hide() end
+    if _G.ForeverSenseiToast then _G.ForeverSenseiToast:Hide() end
+    local confirm = _G.ForeverSenseiConfirm
+    if not confirm or not confirm:IsShown() or confirm.text:GetText() ~= ns.T("ui.layout.changed") then
+      fail("layout 4: no notice for a player with layout 3")
+    else
+      fits("layout 4 notice", confirm)
+      confirm:Hide()
+    end
+    if ns.char.layoutVersion ~= 4 then fail("layout 4: version not saved after the notice") end
+    local nA, nB = snapshot()
+    if not same(v3A, nA) or not same(v3B, nB) then fail("layout 4: the notice moved something by itself") end
+    local plan = ns.Layout.BuildPlan()
+    local cleared = {}
+    for _, c in ipairs(plan.clears) do cleared[c.slot] = true end
+    for _, slot in ipairs({ 148, 149, 150 }) do
+      if not cleared[slot] then fail("layout 4: layout 3's spell on Action Bar 6 slot " .. slot .. " not cleared") end
+    end
+    try("layout 4 apply", ns.Layout.Execute, plan)
+    checkLayout("layout 4")
+    selfMacro("layout 4", "lay_on_hands", 54)
+    selfMacro("layout 4", "blessing_of_protection", 55)
+    selfMacro("layout 4", "cleanse", 145)
+    selfMacro("layout 4", "blessing_of_freedom", 146)
+    local bosM = macroAt(56)
+    if not bosM or bosM.name ~= "FS_BOS" or bosM.body:find("@player", 1, true) then fail("layout 4: Ctrl+R is not FS_BOS without @player") end
+    local aA, aB = snapshot()
+    local diff = {}
+    for k, v in pairs(aA) do if v3A[k] ~= v then diff[#diff + 1] = k end end
+    for k in pairs(v3A) do if aA[k] == nil then diff[#diff + 1] = k end end
+    table.sort(diff, function(x, y) return tostring(x) < tostring(y) end)
+    local slots, keys = {}, {}
+    for _, k in ipairs(diff) do
+      if type(k) == "number" then slots[#slots + 1] = k else keys[#keys + 1] = k end
+    end
+    table.sort(slots)
+    if table.concat(slots, ",") ~= "54,55,56,145,146,147,148,149,150" then
+      fail("layout 4: apply changed slots " .. table.concat(slots, ",") .. ", expected 54-56 and 145-150")
+    end
+    local bdiff = {}
+    for k, v in pairs(aB) do if v3B[k] ~= v then bdiff[#bdiff + 1] = k end end
+    for k in pairs(v3B) do if aB[k] == nil then bdiff[#bdiff + 1] = k end end
+    table.sort(bdiff, function(x, y) return tostring(x) < tostring(y) end)
+    local bl = {}
+    for _, k in ipairs(bdiff) do bl[#bl + 1] = tostring(k) end
+    if table.concat(bl, ",") ~= "BUTTON5,CTRL-BUTTON4,SHIFT-BUTTON4,SHIFT-BUTTON5" then
+      fail("layout 4: apply rebound " .. table.concat(bl, ",") .. ", expected the four mouse keys that moved")
+    end
+    if STUB.bindings["BUTTON5"] ~= "MULTIACTIONBAR5BUTTON2" or STUB.bindings["SHIFT-BUTTON4"] ~= "MULTIACTIONBAR5BUTTON3" then
+      fail("layout 4: Mouse5 or Shift+Mouse4 not on Action Bar 6 buttons 2 and 3")
+    end
+    try("layout 4 undo", ns.Layout.Undo)
+    local uA, uB = snapshot()
+    local ok4, why4 = same(v3A, uA)
+    if not ok4 then fail("layout 4 undo: action slots differ: " .. why4) end
+    ok4, why4 = same(v3B, uB)
+    if not ok4 then fail("layout 4 undo: key bindings differ: " .. why4) end
+  end
+
+  -- Mouse 4/5 over the unit frames (0.8.0, Oskar: "my mouse over purify doesn't seem to work on party portraits"):
+  -- the frames take those buttons as their own click, so they get click attributes that do what the bar button does.
+  do
+    local P1, P2 = PartyFrame.MemberFrame1, PartyFrame.MemberFrame2
+    local function clickIs(what, frame, button, mod, wantT, wantV)
+      local t, v = STUB.unitClick(frame, button, mod)
+      if t ~= wantT or v ~= wantV then
+        fail("unit frames " .. what .. ": " .. (mod and (mod .. "-") or "") .. button .. " on " .. tostring(frame:GetAttribute("unit")) ..
+          " is " .. tostring(t) .. " " .. tostring(v) .. ", expected " .. tostring(wantT) .. " " .. tostring(wantV))
+      end
+    end
+    local vot = ns.Spells.CurrentID(ns.Spells.Get("voice_of_truth"))
+    local cleanseId = ns.Spells.CurrentID(ns.Spells.Get("cleanse"))
+    local function planned(what, frame)
+      clickIs(what, frame, "Button4", nil, "macro", "FS_CLEANSE")
+      clickIs(what, frame, "Button5", nil, "macro", "FS_BOF")
+      clickIs(what, frame, "Button4", "shift", "spell", vot)
+      clickIs(what, frame, "Button5", "shift", nil, nil)
+      clickIs(what, frame, "Button4", "ctrl", nil, nil)
+      clickIs(what, frame, "Button5", "ctrl", nil, nil)
+      clickIs(what, frame, "LeftButton", nil, "target", nil)
+      clickIs(what, frame, "RightButton", nil, "menu", nil)
+    end
+    STUB.actions, STUB.macros = {}, {}
+    ns.settings.targeting = "mouseover"
+    try("unit frames apply", ns.Layout.Execute, ns.Layout.BuildPlan())
+    for _, f in ipairs({ P1, P2, PlayerFrame, TargetFrame }) do planned("apply", f) end
+    -- Frames made later (the compact party frames) get them through the SecureUnitButton_OnLoad hook; in combat
+    -- they wait for PLAYER_REGEN_ENABLED (setting them in combat would be blocked).
+    STUB.combat = true
+    local C1
+    try("unit frames combat frame", function() C1 = STUB.unitFrame("CompactPartyFrameMember1", "party1") end)
+    try("unit frames combat update", ns.UnitFrames.Update)
+    if C1 then clickIs("combat", C1, "Button4", nil, nil, nil) end
+    STUB.combat = false
+    STUB.fire("PLAYER_REGEN_ENABLED")
+    STUB.runTimers()
+    if C1 then planned("after combat", C1) end
+    -- An attribute something else set stays, and /sensei verify names the skip.
+    local C2 = STUB.unitFrame("CompactPartyFrameMember2", "party2")
+    C2:SetAttribute("type4", "focus")
+    STUB.runTimers()
+    clickIs("foreign", C2, "Button4", nil, "focus", nil)
+    clickIs("foreign", C2, "Button5", nil, "macro", "FS_BOF")
+    local report = table.concat(ns.UnitFrames.Report(), "\n")
+    if not report:find("skipped CompactPartyFrameMember2 BUTTON4", 1, true) then fail("unit frames: verify does not list the skipped frame:\n" .. report) end
+    if not report:find("keys: BUTTON4, BUTTON5, SHIFT-BUTTON4", 1, true) then fail("unit frames: verify keys:\n" .. report) end
+    -- Click mode: plain spells, cast on the frame's unit.
+    try("unit frames click mode", ns.Layout.SetTargeting, "click")
+    clickIs("click mode", P1, "Button4", nil, "spell", cleanseId)
+    try("unit frames mouseover mode", ns.Layout.SetTargeting, "mouseover")
+    planned("mouseover again", P1)
+    -- A key bound to something else gets nothing; GROUP_ROSTER_UPDATE puts it back once the key is back.
+    STUB.bindings["BUTTON5"] = "TOGGLEAUTORUN"
+    STUB.fire("UPDATE_BINDINGS")
+    STUB.runTimers()
+    clickIs("rebound", P1, "Button5", nil, nil, nil)
+    STUB.bindings["BUTTON5"] = "MULTIACTIONBAR5BUTTON2"
+    STUB.fire("GROUP_ROSTER_UPDATE")
+    STUB.runTimers()
+    clickIs("roster", P1, "Button5", nil, "macro", "FS_BOF")
+    -- The setting and Clique switch it off (ours are cleared); Blizzard's left and right clicks always stay.
+    ns.settings.unitFrameClicks = false
+    try("unit frames off", ns.UnitFrames.Update)
+    clickIs("setting off", P1, "Button4", nil, nil, nil)
+    clickIs("setting off", P1, "LeftButton", nil, "target", nil)
+    clickIs("setting off", C2, "Button4", nil, "focus", nil)
+    ns.settings.unitFrameClicks = true
+    STUB.loaded.Clique = true
+    try("unit frames clique", ns.UnitFrames.Update)
+    clickIs("clique", P1, "Button5", nil, nil, nil)
+    if not table.concat(ns.UnitFrames.Report(), "\n"):find("Clique", 1, true) then fail("unit frames: verify does not say Clique") end
+    STUB.loaded.Clique = nil
+    try("unit frames on", ns.UnitFrames.Update)
+    planned("on again", P1)
+    -- 元に戻す empties the bars again: the frames lose ours.
+    try("unit frames undo", ns.Layout.Undo)
+    clickIs("undo", P1, "Button4", nil, nil, nil)
+    clickIs("undo", C1, "Button4", "shift", nil, nil)
+    clickIs("undo", P1, "RightButton", nil, "menu", nil)
+  end
+
   -- Level 30: no Swift Judgement (talent at 37) → E empty but bound; no Cleanse (42) → Purify stands in on
-  -- Mouse5 with its macro; no Holy Shield (talent at 42) → 3 stays empty.
+  -- Mouse4 with its macro; no Holy Shield (talent at 42) → 3 stays empty.
   STUB.level = 30
   STUB.known = {}
   for id, lv in pairs(STUB.levels) do if lv <= 30 then STUB.known[id] = true end end
@@ -428,16 +601,16 @@ return function(ns, lang)
   auraKeys("level 30")
   if STUB.actions[L.byCombo.opener.slot] then fail("level 30: the opener was placed without Swift Judgement") end
   local m5 = macroAt(L.bySpell.cleanse.slot)
-  if not m5 or m5.name ~= "FS_PURIFY" or not m5.body:find("Purify", 1, true) then fail("level 30: Purify not standing in on Mouse5") end
+  if not m5 or m5.name ~= "FS_PURIFY" or not m5.body:find("Purify", 1, true) then fail("level 30: Purify not standing in on Mouse4") end
   local a3 = STUB.actions[L.bySpell.holy_shield.slot]
   if a3 then fail("level 30: 3 holds " .. a3[1] .. ":" .. tostring(a3[2]) .. " (" .. tostring(STUB.names[a3[2]]) .. ") before Holy Shield") end
-  -- Learn Cleanse at 42: it takes Mouse5.
+  -- Learn Cleanse at 42: it takes Mouse4.
   STUB.level = 42
   for id, lv in pairs(STUB.levels) do if lv <= 42 then STUB.known[id] = true end end
   forgetTalents()
   try("apply 42", ns.Layout.Execute, ns.Layout.BuildPlan())
   local c5 = macroAt(L.bySpell.cleanse.slot)
-  if not c5 or c5.name ~= "FS_CLEANSE" then fail("level 42: Cleanse did not take Mouse5") end
+  if not c5 or c5.name ~= "FS_CLEANSE" then fail("level 42: Cleanse did not take Mouse4") end
 
   -- A new skill while playing → its card, with the planned key.
   STUB.level = 20

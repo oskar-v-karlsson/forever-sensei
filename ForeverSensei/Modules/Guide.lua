@@ -389,6 +389,10 @@ renderers.settings = function(frame)
   toggle("ui.settings.cards", s.showCards, function() s.showCards = not s.showCards end)
   toggle("ui.settings.talents", s.showTalentHints, function() s.showTalentHints = not s.showTalentHints end)
   toggle("ui.settings.ranks", s.autoRanks, function() s.autoRanks = not s.autoRanks end)
+  toggle("ui.settings.unitframes", s.unitFrameClicks, function()
+    s.unitFrameClicks = not s.unitFrameClicks
+    if ns.UnitFrames then ns.UnitFrames.Refresh() end
+  end)
   toggle("ui.settings.minimap", s.minimap, function()
     s.minimap = not s.minimap
     if ns.Minimap then ns.Minimap.Update() end

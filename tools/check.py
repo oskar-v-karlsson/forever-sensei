@@ -968,7 +968,12 @@ def check_blocks(layout, label, grid, clicks, mouse_order, ooc):
             if len(members) > len(BLOCKS[block]):
                 problem(f"{label}: family {f['id']} is bigger than its block")
         elif block == "mouse":
-            want = [row + "BUTTON4", row + "BUTTON5"][:len(members)]
+            # The mouse pairs in Action Bar 6 order, from the family's row on: Mouse4, Mouse5, Shift+Mouse4, ...
+            pairs = [m + b for m in ("", "SHIFT-", "CTRL-") for b in ("BUTTON4", "BUTTON5")]
+            start = pairs.index(row + "BUTTON4") if row + "BUTTON4" in pairs else 0
+            want = pairs[start:start + len(members)]
+            if len(members) > len(pairs) - start:
+                problem(f"{label}: family {f['id']} is bigger than its mouse pairs")
         elif block in ("BUTTON4", "BUTTON5"):
             want = [m + block for m in ("", "SHIFT-", "CTRL-")][:len(members)]
         else:
@@ -1141,7 +1146,8 @@ def check_paladin(pack, sources):
     if spec.get("tabs") != ["role", "rotation", "seals", "auras", "cooldowns", "manners"]:
         problem(f"paladin: Protection tabs must be role, rotation, seals, auras, cooldowns, manners, are {spec.get('tabs')}")
 
-    # --- layout: the approved grid (research/keybind-layout-v4.md P4, layout 3: Justice on Shift+4 since 0.7.1) ----------------------------------
+    # --- layout: the approved grid (research/keybind-layout-v4.md P4, layout 4: Justice on Shift+4 since 0.7.1, the save
+    # block on Ctrl+Q/E/R and the mouse keys in pairs since 0.8.0) ------------------------------------------------
     slots = layout["slots"]
     grid = {
         "1": "holy_strike", "2": "consecration", "3": "holy_shield", "4": "flash_of_light", "5": "holy_light",
@@ -1153,9 +1159,9 @@ def check_paladin(pack, sources):
         "SHIFT-Z": "templars_bulwark", "SHIFT-X": "divine_shield", "SHIFT-C": "divine_protection",
         "CTRL-1": "retribution_aura", "CTRL-2": "devotion_aura", "CTRL-3": "concentration_aura",
         "CTRL-4": "shadow_resistance_aura", "CTRL-5": "frost_resistance_aura",
+        "CTRL-Q": "lay_on_hands", "CTRL-E": "blessing_of_protection", "CTRL-R": "blessing_of_sacrifice",
         "CTRL-Z": "blessing_of_kings", "CTRL-X": "blessing_of_might", "CTRL-C": "blessing_of_wisdom",
-        "BUTTON4": "blessing_of_protection", "SHIFT-BUTTON4": "lay_on_hands", "CTRL-BUTTON4": "blessing_of_sacrifice",
-        "BUTTON5": "cleanse", "SHIFT-BUTTON5": "blessing_of_freedom", "CTRL-BUTTON5": "voice_of_truth",
+        "BUTTON4": "cleanse", "BUTTON5": "blessing_of_freedom", "SHIFT-BUTTON4": "voice_of_truth",
     }
     clicks = {
         ("bar6", 7): "seal_of_light", ("bar6", 8): "fire_resistance_aura", ("bar6", 9): "divine_intervention",
@@ -1163,18 +1169,22 @@ def check_paladin(pack, sources):
         ("bar4", 4): "greater_blessing_of_wisdom",
     }
     ooc = {"redemption", "greater_blessing_of_kings", "greater_blessing_of_might", "greater_blessing_of_wisdom"}
-    mouse = ["BUTTON4", "SHIFT-BUTTON4", "CTRL-BUTTON4", "BUTTON5", "SHIFT-BUTTON5", "CTRL-BUTTON5"]
+    mouse = ["BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]
     check_blocks(layout, "paladin layout", grid, clicks, mouse, ooc)
     if [f["id"] for f in layout.get("families") or []] != [
-            "judgement", "seals", "conditional", "forbearance", "auras", "blessings", "save", "free"]:
-        problem("paladin layout: families must be judgement, seals, conditional, forbearance, auras, blessings, save, free")
+            "judgement", "seals", "conditional", "forbearance", "auras", "save", "blessings", "free"]:
+        problem("paladin layout: families must be judgement, seals, conditional, forbearance, auras, save, blessings, free")
+    # 0.8.0 (Oskar): long cooldowns that are dangerous when misclicked stay off the mouse buttons.
+    for k, v in grid.items():
+        if "BUTTON" in k and v in ("lay_on_hands", "blessing_of_protection", "blessing_of_sacrifice", "divine_intervention"):
+            problem(f"paladin layout: {v} must not be on a mouse button ({k})")
     seals = next((f for f in layout.get("families") or [] if f.get("id") == "seals"), {})
     if seals.get("members") != ["seal_of_fury", "seal_of_righteousness", "seal_of_the_crusader", "seal_of_justice",
                                 "seal_of_wisdom"] or seals.get("spill") != ["seal_of_light"]:
         problem("paladin layout: seals must be Fury, Righteousness, Crusader, Justice, Wisdom on Shift+1-5, Light spilled")
     spare_keys = {x["key"] for x in layout["spare"] if x.get("key")}
-    if spare_keys != {"CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F"}:
-        problem(f"paladin layout: spare keys must be Ctrl+Q, E, R and F, are {sorted(spare_keys)}")
+    if spare_keys != {"CTRL-F", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"}:
+        problem(f"paladin layout: spare keys must be Ctrl+F, Shift+Mouse5, Ctrl+Mouse4 and Ctrl+Mouse5, are {sorted(spare_keys)}")
     # Action Bar 5 (layout 1's Ctrl bar) stays as the player has it; L.old clears layout 1's spells there and on
     # Action Bar 3 buttons that are spare now, while they still hold exactly that spell.
     retired = [(r.get("id"), r.get("first"), r.get("binding"), r.get("setting"), bool(r.get("keepShown")),
@@ -1183,16 +1193,18 @@ def check_paladin(pack, sources):
         problem("paladin layout: retired must be Action Bar 5 only (keepShown, layout 1's buttons 6, 8, 9, 11, 12)")
     old = {int(k): v for k, v in (layout.get("old") or {}).items()}
     if old != {42: "!opener", 44: "turn_undead", 45: "seal_of_the_crusader", 47: "redemption",
-               48: "divine_protection", 55: "blessing_of_protection", 56: ["cleanse", "purify"], 57: "lay_on_hands"}:
-        problem(f"paladin layout: old must be layout 1's Action Bar 5 spells and its Action Bar 3 buttons 7-9, is {old}")
+               48: "divine_protection", 57: "lay_on_hands",
+               148: ["cleanse", "purify"], 149: "blessing_of_freedom", 150: "voice_of_truth"}:
+        problem(f"paladin layout: old must be layout 1's Action Bar 5 spells and Action Bar 3 button 9, and layout 3's "
+                f"Action Bar 6 buttons 4-6, is {old}")
     # Auras are normal spells on Action Bar 3 since layout 2; Purify stands in on Cleanse's button until 42.
     if any(v == "stancebar" for v in layout["noSlot"].values()):
         problem("paladin layout: no spell is left on the stance bar (layout 2 places the auras)")
     if layout["noSlot"] != {"purify": "spellbook", "summon_warhorse": "spellbook", "summon_charger": "spellbook"}:
         problem("paladin layout: noSlot must be Purify and the two mounts (spellbook)")
-    m5 = next((s for s in slots if s.get("key") == "BUTTON5"), {})
-    if m5.get("standIn") != "purify":
-        problem("paladin layout: Mouse5 must be Cleanse with Purify standing in until 42")
+    m4 = next((s for s in slots if s.get("key") == "BUTTON4"), {})
+    if m4.get("standIn") != "purify":
+        problem("paladin layout: Mouse4 must be Cleanse with Purify standing in until 42")
     # Macros: help with the self fallback (Blessing of Protection too, since 0.7.1), help_nofb (Sacrifice) without,
     # Hammer of Justice
     # stops the cast, the opener fires Judgement, Swift Judgement and Holy Strike once Swift Judgement is known.
@@ -1222,8 +1234,8 @@ def check_paladin(pack, sources):
     want_warn["CTRL-R"] = "ui.preview.warn.fps"
     if layout.get("defaultWarn") != want_warn:
         problem("paladin layout: defaultWarn must be Ctrl+1-5 (stance bar) and Ctrl+R (framerate)")
-    if layout.get("version") != 3:
-        problem(f"paladin layout: version must be 3 (Seal of Justice on Shift+4, 0.7.1), is {layout.get('version')}")
+    if layout.get("version") != 4:
+        problem(f"paladin layout: version must be 4 (the save block on Ctrl+Q/E/R, 0.8.0), is {layout.get('version')}")
 
     # --- talents: Wowhead 0/32/19, one point per level 10-60 ---------------------------------------------------
     tree_points = check_talents_points(talents)

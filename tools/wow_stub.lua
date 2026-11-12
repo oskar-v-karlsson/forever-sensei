@@ -191,6 +191,23 @@ function methods:IsOwned() return false end
 function methods:GetTexture() return self.__texture end
 function methods:SetTexture(t) self.__texture = t end
 function methods:SetColorTexture(r, g, b, a) self.__texture = "color" end
+-- Secure attributes. A protected frame (the Blizzard unit frames below) refuses them in combat, like the client.
+-- The 3-argument form looks up prefix..name..suffix with the client's wildcards ("*type1", "shift-type*").
+function methods:SetAttribute(n, v)
+  if self.__protected and STUB.combat and not STUB.secureCall then error("ADDON_ACTION_BLOCKED: SetAttribute on " .. tostring(self.__name) .. " in combat") end
+  self.__attrs = self.__attrs or {}
+  self.__attrs[n] = v
+end
+function methods:GetAttribute(a, b, c)
+  local t = self.__attrs or {}
+  if b == nil then return t[a] end
+  for _, k in ipairs({ a .. b .. c, "*" .. b .. c, a .. b .. "*", "*" .. b .. "*", b }) do
+    if t[k] ~= nil then return t[k] end
+  end
+end
+function methods:IsForbidden() return false end
+function methods:IsProtected() return self.__protected or false end
+function methods:RegisterForClicks(...) self.__clicks = { ... } end
 
 function CreateFrame(kind, name, parent, template)
   local o = new(kind, name, parent)
@@ -211,6 +228,40 @@ UISpecialFrames = {}
 GameFontNormal, GameFontHighlight, GameFontNormalLarge, GameFontHighlightSmall = CreateFont(), CreateFont(), CreateFont(), CreateFont()
 STANDARD_TEXT_FONT = "Fonts\\FRIZQT__.TTF"
 
+-- Blizzard unit frames (Forever: SecureTemplates.lua SecureUnitButton_OnLoad; PlayerFrame.lua, TargetFrame.lua,
+-- PartyMemberFrame.lua, CompactUnitFrame.lua call it without clickArgs, so the frame takes every mouse button).
+-- Blizzard's own (secure) call may set attributes in combat; an addon hook on it runs after, outside secureCall.
+function SecureUnitButton_OnLoad(self, unit, menufunc)
+  STUB.secureCall = true
+  self:RegisterForClicks("AnyUp")
+  self:SetAttribute("*type1", "target")
+  self:SetAttribute("*type2", "menu")
+  self:SetAttribute("unit", unit)
+  self:SetAttribute("menu-function", menufunc)
+  STUB.secureCall = false
+end
+-- A secure unit button, set up like the client does. parent + key: a pool frame without a name (PartyFrame.MemberFrame1).
+function STUB.unitFrame(name, unit, parent, key)
+  local f = CreateFrame("Button", name, parent or UIParent, "SecureUnitButtonTemplate")
+  f.__protected = true
+  if parent and key then parent[key] = f end
+  SecureUnitButton_OnLoad(f, unit, function() end)
+  return f
+end
+STUB.unitFrame("PlayerFrame", "player")
+STUB.unitFrame("TargetFrame", "target")
+PartyFrame = CreateFrame("Frame", "PartyFrame", UIParent)
+for i = 1, 4 do STUB.unitFrame(nil, "party" .. i, PartyFrame, "MemberFrame" .. i) end
+-- What a click with this mouse button (and "shift"/"ctrl") on the frame does, as SecureUnitButton_OnClick reads it.
+-- → type, value (the macro name or spell), unit
+function STUB.unitClick(frame, button, mod)
+  local prefix = mod and (mod .. "-") or ""
+  local suffix = ({ LeftButton = "1", RightButton = "2", MiddleButton = "3" })[button] or button:match("^Button(%d+)$")
+  local t = frame:GetAttribute(prefix, "type", suffix)
+  local value = (t == "macro" or t == "spell") and frame:GetAttribute(prefix, t, suffix) or nil
+  return t, value, frame:GetAttribute("unit")
+end
+
 function STUB.fire(event, ...)
   for _, f in ipairs(STUB.frames) do
     if f.__events[event] and f.__scripts.OnEvent then f.__scripts.OnEvent(f, event, ...) end
@@ -230,7 +281,18 @@ strsplit = function(sep, s)
   return unpack(out)
 end
 strlenutf8 = function(s) local _, n = s:gsub("[^\128-\191]", ""); return n end
-hooksecurefunc = function() end
+-- hooksecurefunc([table,] name, fn): fn runs after the original, with the same arguments.
+hooksecurefunc = function(a, b, c)
+  local tbl, name, fn = _G, a, b
+  if type(a) == "table" then tbl, name, fn = a, b, c end
+  local orig = tbl[name]
+  if type(orig) ~= "function" then error("hooksecurefunc: " .. tostring(name) .. " is not a function") end
+  tbl[name] = function(...)
+    local r = { orig(...) }
+    fn(...)
+    return unpack(r)
+  end
+end
 PlaySound = function() end
 SOUNDKIT = setmetatable({}, { __index = function() return 0 end })
 

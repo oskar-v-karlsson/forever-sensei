@@ -126,6 +126,9 @@ function Verify.Run()
     local ok, action = ns.Call("GetBindingAction", key)
     add(string.format("  key %s = %s", key, ok and tostring(action) or "?"))
   end
+  if ns.UnitFrames then
+    for _, line in ipairs(ns.UnitFrames.Report()) do add(line) end
+  end
   for _, bar in ipairs(layout.retired) do
     local ok, v = ns.Call("Settings.GetValue", bar.setting)
     add(string.format("  retired %s %s = %s", bar.id, bar.setting, ok and tostring(v) or ("error " .. tostring(v))))

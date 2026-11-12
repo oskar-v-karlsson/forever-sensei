@@ -196,6 +196,7 @@ L["ui.settings.show"] = "Show"
 L["ui.settings.cards"] = "New skill cards"
 L["ui.settings.talents"] = "Talent hints"
 L["ui.settings.ranks"] = "Put new ranks on the bars automatically"
+L["ui.settings.unitframes"] = "Mouse 4 and Mouse 5 also work over party and player frames"
 L["ui.settings.minimap"] = "Minimap button"
 L["ui.settings.more"] = "Open again:"
 

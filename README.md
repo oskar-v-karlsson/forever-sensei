@@ -105,6 +105,7 @@ The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (l
 - A key whose spell you learn later (e.g. Chain Heal and Riptide at 40) stays empty until then. Keys never move while levelling.
 - `Ctrl+4` and `Ctrl+5` have no skill. They are still bound to their (empty) button, so every row has all 12 keys. You can put your own things there; **すべて配置** only binds the key and leaves the button alone. No key is reserved any more: `5`, `Shift+5` and `Ctrl+5` are planned like the others, and anything you had there moves to a spare button.
 - **Mouse side buttons:** leave them as the default Button 4 and Button 5 in your mouse software (no "back/forward" or other remapping), so the game sees `BUTTON4` and `BUTTON5`.
+- **Mouse 4/5 over portraits (0.8.0):** the game's player, target and party frames take the mouse side buttons for themselves, so a `Mouse 4/5` key does nothing while the mouse is over a portrait. ForeverSensei gives those frames the same action as the Action Bar 6 button (e.g. Riptide on `Mouse 4` goes to the party member under the mouse). It only does this out of combat (frames that appear in combat follow after the fight), never replaces what another addon set there, stays off with Clique or with a mouse button bound in the game's Click Casting, and can be turned off in the settings. Left and right click keep targeting and the menu. The Paladin gets the same.
 
 The other buttons have no keys. They are for clicking:
 - Action Bar 6, buttons 7-8 (used in combat): Strength of Earth Totem (the Earth block is full) and the Healing Potion button (`FS_HEALPOT`). Buttons 9-12 are spare.
@@ -136,7 +137,7 @@ It heals the friend under the mouse, otherwise the friendly target, otherwise yo
 
 ### Key layout: Protection Paladin
 
-The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (layout 3: "family blocks" since 0.7.0, Seal of Justice on `Shift+4` since 0.7.1), which builds on [research/keybind-layout-paladin.md](research/keybind-layout-paladin.md) (pull walkthroughs at levels 20, 40 and 60, reach for normal hands, sources). It uses the same allowed keys and bars as the Shaman layout. *(n)* is the level the spell becomes available; MO = mouseover macro.
+The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (layout 4: "family blocks" since 0.7.0, Seal of Justice on `Shift+4` since 0.7.1, the save block on `Ctrl+Q/E/R` and paired mouse keys since 0.8.0), which builds on [research/keybind-layout-paladin.md](research/keybind-layout-paladin.md) (pull walkthroughs at levels 20, 40 and 60, reach for normal hands, sources). It uses the same allowed keys and bars as the Shaman layout. *(n)* is the level the spell becomes available; MO = mouseover macro.
 
 | Key | Plain (Action Bar 1) | Shift (Action Bar 2) | Ctrl (Action Bar 3) |
 |---|---|---|---|
@@ -145,24 +146,24 @@ The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (l
 | 3 | Holy Shield *(42, talent)* | Seal of the Crusader *(6)* | Concentration Aura *(22)* |
 | 4 | Flash of Light, MO + self *(20)* | Seal of Justice *(22)* | Shadow Resistance Aura *(28)* |
 | 5 | Holy Light, MO + self *(1)* | Seal of Wisdom *(38)* | Frost Resistance Aura *(32)* |
-| Q | Judgement *(4)* | Exorcism *(20)* | – |
-| E | Swift Judgement *(37, talent)* | Hammer of Wrath *(44)* | – |
-| R | Opener: Judgement + Swift Judgement + Holy Strike *(37)* | Holy Wrath *(50)* | – |
+| Q | Judgement *(4)* | Exorcism *(20)* | Lay on Hands, MO + self *(10)* |
+| E | Swift Judgement *(37, talent)* | Hammer of Wrath *(44)* | Blessing of Protection, MO + self *(10)* |
+| R | Opener: Judgement + Swift Judgement + Holy Strike *(37)* | Holy Wrath *(50)* | Blessing of Sacrifice, MO *(46)* |
 | F | Hammer of Justice, MO enemy *(8)* | Turn Undead *(24)* | – |
 | Z | Healthstone, else Healing Potion | Templar's Bulwark *(32, talent)* | Blessing of Kings *(20)* |
 | X | Mana Potion | Divine Shield *(34)* | Blessing of Might *(4)* |
 | C | Righteous Fury *(10)* | Divine Protection *(6)* | Blessing of Wisdom *(14)* |
-| Mouse 4 | Blessing of Protection, MO + self *(10)* | Lay on Hands, MO + self *(10)* | Blessing of Sacrifice, MO *(46)* |
-| Mouse 5 | Cleanse, MO + self *(42)*; Purify *(8)* until then | Blessing of Freedom, MO + self *(18)* | Voice of Truth *(20)* |
+| Mouse 4 | Cleanse, MO + self *(42)*; Purify *(8)* until then | Voice of Truth *(20)* | – |
+| Mouse 5 | Blessing of Freedom, MO + self *(18)* | – | – |
 
-- **Blocks:** plain `1-3` the core loop (Holy Strike, Consecration, Holy Shield), `4-5` the heals, `Q-R` the Judgement family, `F` Hammer of Justice, `Z-C` potions and Righteous Fury. Shift: seals on `1-5` (Fury, Righteousness, Crusader, Justice, Wisdom; Seal of Light, which a tank rarely needs, is clicked on Action Bar 6), the conditional attacks (undead, low health) on `Q-F`, the Forbearance cooldowns on `Z-C` (Bulwark, Divine Shield and Divine Protection share Forbearance). Ctrl: auras on `1-5`, blessings on `Z-C`; `Ctrl+Q/E/R/F` are spare. The mouse buttons are two columns: Mouse 4 saves a player, Mouse 5 frees or cleanses one.
-- **Bars:** as for the Shaman. Plain keys are Action Bar 1, Shift Action Bar 2, Ctrl Action Bar 3, the mouse keys Action Bar 6 buttons 1-6 (`Mouse 4`, `Shift+Mouse 4`, `Ctrl+Mouse 4`, `Mouse 5`, `Shift+Mouse 5`, `Ctrl+Mouse 5`). Move Action Bar 6 down in Edit Mode.
+- **Blocks:** plain `1-3` the core loop (Holy Strike, Consecration, Holy Shield), `4-5` the heals, `Q-R` the Judgement family, `F` Hammer of Justice, `Z-C` potions and Righteous Fury. Shift: seals on `1-5` (Fury, Righteousness, Crusader, Justice, Wisdom; Seal of Light, which a tank rarely needs, is clicked on Action Bar 6), the conditional attacks (undead, low health) on `Q-F`, the Forbearance cooldowns on `Z-C` (Bulwark, Divine Shield and Divine Protection share Forbearance). Ctrl: auras on `1-5`, the save block on `Q-R` (Lay on Hands, Blessing of Protection, Blessing of Sacrifice: long cooldowns, and harmful on the wrong player, so they are on keys and not on the easily pressed mouse buttons), blessings on `Z-C`. The mouse buttons hold only low-risk spells: Mouse 4 cleanses, Mouse 5 frees, Shift+Mouse 4 is Voice of Truth.
+- **Bars:** as for the Shaman. Plain keys are Action Bar 1, Shift Action Bar 2, Ctrl Action Bar 3, the mouse keys Action Bar 6 buttons 1-6 in pairs, as for the Shaman (`Mouse 4`, `Mouse 5`, `Shift+Mouse 4`, `Shift+Mouse 5`, `Ctrl+Mouse 4`, `Ctrl+Mouse 5`). Move Action Bar 6 down in Edit Mode.
 - **Auras:** the auras are on Action Bar 3 buttons 1-5 with `Ctrl+1-5`, next to the seals on `Shift+1-5`. `Ctrl+1-5` no longer press the stance bar (the preview says so); the stance bar still shows your auras. Fire Resistance Aura is clicked on Action Bar 6 (button 8). If an aura button on Action Bar 3 does not light up while the aura is on (checklist), the fallback is the stance bar's own `Ctrl+1-5`.
 - **Taunt:** the Paladin has no taunt button. Judgement (`Q`) while Seal of Fury is active taunts for 3 seconds. There is no interrupt either: `F` Hammer of Justice stuns (the macro stops your own cast first and stuns the enemy under the mouse, else your target).
 - **Help macros:** with **マウスオーバーで回復**, Flash of Light, Holy Light, Lay on Hands, Cleanse, Purify, Blessing of Freedom and (since 0.7.1) Blessing of Protection go to the friend under the mouse, else a friendly target, else you. On yourself Blessing of Protection stops your attacks for 6 seconds and gives Forbearance (no Templar's Bulwark, Divine Shield or Divine Protection for 1 minute). Blessing of Sacrifice never falls back to you (it moves the target's damage to the caster). If a help key casts only on a mouseover or target, run `/sensei verify`: a `plain spell ..., not macro FS_...` line means that button holds the plain spell; **すべて配置** puts the macro back. With **ターゲットを回復**, plain spells.
 - **Opener** (`R`, macro `FS_OPEN`, from level 37): `/startattack`, Judgement, Swift Judgement and Holy Strike in one press. Judgement and Swift Judgement are off the global cooldown. Its button stays empty until Swift Judgement is learned.
-- **Purify → Cleanse:** Purify stands in on `Mouse 5` until Cleanse at 42. Then Cleanse takes the button and Purify stays in the spellbook.
-- Spare keys, bound to empty buttons for your own use: `Ctrl+Q`, `Ctrl+E`, `Ctrl+R`, `Ctrl+F`. No key is reserved any more: `5`, `Shift+5` and `Ctrl+5` are planned, and anything you had there moves to a spare button.
+- **Purify → Cleanse:** Purify stands in on `Mouse 4` until Cleanse at 42. Then Cleanse takes the button and Purify stays in the spellbook.
+- Spare keys, bound to empty buttons for your own use: `Ctrl+F`, `Shift+Mouse 5`, `Ctrl+Mouse 4`, `Ctrl+Mouse 5`. No key is reserved any more: `5`, `Shift+5` and `Ctrl+5` are planned, and anything you had there moves to a spare button.
 - Clicked, no key: Action Bar 6 buttons 7-9 (in combat) hold Seal of Light, Fire Resistance Aura and Divine Intervention; Action Bar 4 (out of combat) holds Redemption and Greater Blessing of Kings, Might and Wisdom. Summon Warhorse and Summon Charger stay in the spellbook (mount journal). Action Bar 5 is no longer used; **すべて配置** clears what 0.6.x put there and leaves the bar as you have it.
 - Character macros: `FS_FOL`, `FS_HL`, `FS_LOH`, `FS_CLEANSE` (`FS_PURIFY` before 42), `FS_BOF`, `FS_BOP`, `FS_BOS` (mouseover mode only), `FS_HOJ` and `FS_OPEN` (always), `FS_HEALTH` and `FS_MANA`: at most 12 of 30.
 - The source of truth is `ForeverSensei_Paladin/Data/Protection/Layout.lua`.
@@ -209,9 +210,9 @@ These cannot be tested outside the game. Please go through them once, then paste
 33. [ ] **Preview warnings:** the preview warns about `Ctrl+1-5` (stance bar), `Ctrl+R` (framerate display), the mouse side buttons and moving Action Bar 6 in Edit Mode.
 34. [ ] **Taunt:** with Seal of Fury active, `Q` Judgement taunts. Note whether the taunt lasts 3 or 4 seconds, and whether Judgement keeps the seal.
 35. [ ] **Opener:** from 37, `R` (FS_OPEN) casts Judgement, Swift Judgement and Holy Strike from one press and starts auto attack.
-36. [ ] **Help macros:** with a hostile target and nothing under the mouse, `4`, `Shift+4`, `Shift+Mouse 4`, `Mouse 5` and `Shift+Mouse 5` cast on you. *(0.7.1: `Mouse 4`, Blessing of Protection, now does too, see item 49.)* `Ctrl+Mouse 4` (Blessing of Sacrifice) does not. Over a party frame, all of them go to that player.
+36. [ ] **Help macros:** with a hostile target and nothing under the mouse, `4`, `5`, `Ctrl+Q` (Lay on Hands), `Ctrl+E` (Blessing of Protection), `Mouse 4` (Cleanse or Purify) and `Mouse 5` (Blessing of Freedom) cast on you. `Ctrl+R` (Blessing of Sacrifice) does not. Over a party frame, all of them go to that player. *(Keys as of 0.8.0.)*
 37. [ ] **Hammer of Justice:** `F` during your own cast stops it and stuns the enemy under the mouse at once, else your target.
-38. [ ] **Purify → Cleanse:** before 42, `Mouse 5` holds Purify. After learning Cleanse and **配置する**, `Mouse 5` holds Cleanse and Purify is gone from the bars.
+38. [ ] **Purify → Cleanse:** before 42, `Mouse 4` holds Purify. After learning Cleanse and **配置する**, `Mouse 4` holds Cleanse and Purify is gone from the bars.
 39. [ ] **Ranks:** learning a new rank of Holy Strike, Seal of Fury or Holy Shield upgrades its button with a toast. `/sensei verify` has no `bad` lines (it checks every rank ID against the client, including Seal of Fury and Holy Light rank 1).
 40. [ ] **Talents:** from 10, the talent hint follows the Wowhead leveling path: Templar's Bulwark at 32, Swift Judgement at 37, Holy Shield at 42.
 41. [ ] **Trainer:** tell the repo owner whether Blessing of Salvation, Blessing of Sanctuary, Blessing of Light or Hammer of the Righteous are offered at the trainer. They are left out until confirmed.
@@ -231,8 +232,17 @@ These cannot be tested outside the game. Please go through them once, then paste
 
 **Paladin help macros and seals (0.7.1).** On the Paladin, after updating from 0.7.0 (layout 2):
 
-49. [ ] **Self fallback:** with **マウスオーバーで回復**, no friend under the mouse and a hostile or no target, `Shift+Mouse 4` (Lay on Hands), `Mouse 4` (Blessing of Protection), `4`, `5`, `Mouse 5` and `Shift+Mouse 5` cast on you. `Ctrl+Mouse 4` (Blessing of Sacrifice) does not. If one doesn't, run `/sensei verify` and send the `plain spell ..., not macro` and `character macros` lines; then **すべて配置** and try again.
+49. [ ] **Self fallback:** with **マウスオーバーで回復**, no friend under the mouse and a hostile or no target, `Ctrl+Q` (Lay on Hands), `Ctrl+E` (Blessing of Protection), `4`, `5`, `Mouse 4` and `Mouse 5` cast on you. `Ctrl+R` (Blessing of Sacrifice) does not. *(Keys as of 0.8.0; in 0.7.1 these were mouse buttons.)* If one doesn't, run `/sensei verify` and send the `plain spell ..., not macro` and `character macros` lines; then **すべて配置** and try again.
 50. [ ] **Seals:** the layout message shows once and nothing moves by itself. After **すべて配置** → **適用**, `Shift+1-5` are Seal of Fury, Righteousness, the Crusader, Justice and Wisdom, and Seal of Light is on Action Bar 6 button 7. **元に戻す** puts Wisdom, Light and Justice back where they were.
+
+**Save keys and Mouse 4/5 on unit frames (0.8.0).** On the Paladin after updating from 0.7.1 (layout 3), and on the Shaman:
+
+51. [ ] **Paladin save block:** the layout message shows once and nothing moves by itself. After **すべて配置** → **適用**, `Ctrl+Q` is Lay on Hands, `Ctrl+E` Blessing of Protection and `Ctrl+R` Blessing of Sacrifice (Action Bar 3 buttons 6-8; the preview still warns that `Ctrl+R` no longer toggles the framerate). Action Bar 6 buttons 1-3 are Cleanse (or Purify), Blessing of Freedom and Voice of Truth (`Mouse 4`, `Mouse 5`, `Shift+Mouse 4`), buttons 4-6 are empty, and buttons 7-9 Seal of Light, Fire Resistance Aura and Divine Intervention. **元に戻す** puts everything back.
+52. [ ] **Mouse 4/5 over a portrait:** hover a party member's portrait (the party frame, and the raid-style party frames if you use them) and press `Mouse 4`: on the Paladin, Cleanse (Purify before 42) goes to that member; `Mouse 5` casts Blessing of Freedom and `Shift+Mouse 4` Voice of Truth. Repeat over your own portrait and the target portrait.
+53. [ ] **Shaman portraits:** over a party portrait, `Mouse 4` casts Riptide on that member, `Mouse 5` the Nature's Swiftness + Healing Wave macro, `Shift+Mouse 4/5` Cure Poison and Cure Disease.
+54. [ ] **Clicks unchanged:** left click on a portrait still targets, right click still opens its menu. `Mouse 4/5` away from the portraits (over the world) still work as before.
+55. [ ] **Combat:** join a group or change the group while in combat: no `ADDON_ACTION_BLOCKED` or "interface action failed" message; the new portraits get `Mouse 4/5` after the fight. `/sensei verify` has a `unit frames (Mouse 4/5)` line under [Layout] that lists the frames covered and anything skipped (and why).
+56. [ ] **Setting and other addons:** turning off the setting about Mouse 4 and Mouse 5 over party and player frames makes the portraits ignore `Mouse 4/5` again (as before 0.8.0). With Clique installed the addon leaves the portraits alone, and so it does for a mouse button you bound in the game's own Click Casting.
 
 ## Translation reports
 

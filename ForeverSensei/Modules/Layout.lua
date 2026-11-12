@@ -597,6 +597,7 @@ function Layout.Execute(plan)
   if fallback.spell then ns.UI.Toast(ns.T("ui.layout.macrofail"), 12) end
   if fallback.item then ns.UI.Toast(ns.T("ui.items.macrofail"), 12) end
   if ns.NewSkill then ns.NewSkill.PrunePostponed() end
+  if ns.UnitFrames then ns.UnitFrames.Refresh() end
   return backup
 end
 
@@ -655,6 +656,7 @@ function Layout.Undo(record)
     else
       ns.UI.Toast(ns.T("ui.layout.undone"))
     end
+    if ns.UnitFrames then ns.UnitFrames.Refresh() end
     if ns.Guide and ns.Guide.Refresh then ns.Guide.Refresh() end
   end)
 end
@@ -986,6 +988,7 @@ function Layout.ApplyNewRanks(learned)
       if Spells.IsKnown(e) then Layout.CheckMacroRank(e) end
     end
     Layout.RefreshMacros()
+    if ns.UnitFrames then ns.UnitFrames.Refresh() end
     local lines = {}
     if learned and #learned > 0 then
       local names = {}
@@ -1023,6 +1026,7 @@ function Layout.SetTargeting(mode)
       end
     end
     Layout.RefreshMacros()
+    if ns.UnitFrames then ns.UnitFrames.Refresh() end
     ns.UI.Toast(ns.T(mode == "mouseover" and "ui.targeting.mouseover.done" or "ui.targeting.click.done", { n = n }), 10)
     if fallback then ns.UI.Toast(ns.T("ui.layout.macrofail"), 12) end
     if ns.Guide and ns.Guide.Refresh then ns.Guide.Refresh() end

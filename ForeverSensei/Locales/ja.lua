@@ -188,6 +188,7 @@ ns.Locales.ja = {
   ["ui.settings.cards"] = "新しいスキルのカード",
   ["ui.settings.talents"] = "タレントのヒント",
   ["ui.settings.ranks"] = "新しいランクを自動でバーに入れる",
+  ["ui.settings.unitframes"] = "パーティーや自分のフレームの上でもマウス4とマウス5を使えるようにする",
   ["ui.settings.minimap"] = "ミニマップボタン",
   ["ui.settings.more"] = "もう一度開く：",
 
