@@ -9,6 +9,7 @@ All entries were checked against client **1.60.1.70862**: the Shaman pack on **2
 | Key | Source | Used for |
 |---|---|---|
 | `simc` | [simc-forever SpellDataDump/shaman.txt](https://github.com/simulationcraft/simc-forever/blob/HEAD/SpellDataDump/shaman.txt), header "World of Warcraft 1.60.1.70862 Live". Parsed copy: `research/shaman_simc_1.60.1.70862.tsv` (made by `tools/research/parse_simc.py`) | 46 of the 53 spells: ID, English name, level, cooldown and cast-time facts; every talent (ID, row, column, max rank). `make check` cross-checks the data against the TSV. |
+| `simc_race` | [simc-forever SpellDataDump/nonclass.txt](https://github.com/simulationcraft/simc-forever/blob/1c895ad3/SpellDataDump/nonclass.txt) @ `1c895ad3` (client 1.60.1.70938), read 2026-11-13 | The two Skyborne racials (0.8.1). **Walk on Air** 1259416: Slow Fall aura, 10 s, 90 s cooldown, race mask `0x300000000` (race ids 33 and 34, both Skyborne races). **Skysight** 1259686: 0.5 s cast, 120 s cooldown, race mask `0x200000000` (race id 34); it triggers Elemental Blessing 1259688, +15% movement speed for 30 s, doubled while Charged. The race mask's bit n is race id n+1. |
 | `simc` ranks | Same dump, through `tools/research/gen_ranks.py` → `ForeverSensei_Shaman/Data/Ranks.lua` (2026-11-09) | Every rank's spell ID and trainer level, used for automatic rank upgrades. `make check` fails if the file is out of date or a rank does not match the dump (name and "Rank N"). |
 | `wh_spell` | `https://www.wowhead.com/forever/spell=<id>` | 7 spells missing from the simc dump (see below) |
 | `wh_item` | `https://www.wowhead.com/forever/item=<id>` and the Forever potion and elixir lists ([potions](https://www.wowhead.com/forever/items/consumables/potions), [elixirs](https://www.wowhead.com/forever/items/consumables/elixirs)) | Potion and elixir IDs, names, required levels and icons in `Data/Items.lua` (see below) |
@@ -112,6 +113,8 @@ Left out on purpose: Discolored Healing Potions (they heal, then return 75% as p
 | Totemic Call | Wowhead: 1 min cooldown, placed at a target location. simc and Mobalytics: 30 s cooldown, at the shaman's own location. | simc (client data) |
 | Riptide | Wowhead: an initial heal plus a heal over time, 6 s cooldown. simc and Mobalytics: heal over time only, 12 s cooldown. | simc. The texts say "heal over 15 seconds" and "12-second cooldown". |
 | Purge | Wowhead: removes 2 effects. simc: the number varies. | The text says "removes magic effects" with no count. |
+| Walk on Air ID | wow-forever.gg lists 1259416 (10 s, "High Order Skyborne and Windshaper Skyborne racial") and 1308663 (1 min, the ID the Icy Veins Skyborne guide links). 1308663 is not in the simc dump. | 1259416 (simc_race). `/sensei verify` prints whether the player knows it; checked in game. |
+| Skysight duration | Icy Veins: +15% speed for 15 s. simc: Elemental Blessing (1259688) lasts 30 s. | simc. The card says 30 seconds. |
 | Level-60 talent build | Wowhead: 0/17/34. Mobalytics: 0/5/46. | Mobalytics, as the user asked. It was cross-checked against simc rows, columns, max ranks and requirements. |
 
 ## Addon API research (Forever 12.x client)
@@ -138,6 +141,7 @@ These depend on the live Forever client. They are handled defensively in the cod
 9. Font: the bundled IPA UI Gothic shows on a **fresh game launch**, not only after `/reload`. Every character the addon uses is checked offline against the font's glyph table (`make check`).
 10. `math.atan2` is available for dragging the minimap button.
 11. The 7 Wowhead-only spell IDs above.
+12. *(0.8.1)* The Skyborne race id (`UnitRace` third value; expected 34 for a Windshaper, the Skysight race) and that the player knows Walk on Air 1259416. A known racial is planned even if the race id differs. `BUTTON3` has no default in `Bindings_Camelot.xml`; what it is bound to before the apply is checked with `GetBindingAction("BUTTON3")`.
 12. Combat: cards hide, and bar or key changes wait until combat ends.
 13. Potion macros (0.3.0): `/use item:<id>` in a character macro, `#showtooltip` picking up the item's icon, and the fixed icon (set by its file name, e.g. `INV_Potion_72`) when the bags have none. `C_Item.GetItemCount` and the required level from `C_Item.GetItemInfo`. `/sensei verify` prints each macro's body and the best item in the bags.
 14. Layout v3 macros (0.4.0): `/stopcasting` in `FS_ES` lets Earth Shock interrupt at once; `FS_NSHW` casts Nature's Swiftness and Healing Wave in one press; `FS_HEALTH` uses a Healthstone else a Healing Potion. Whether Healthstones and potions share a cooldown, and the mana cost of Call of the Elements with a full set.

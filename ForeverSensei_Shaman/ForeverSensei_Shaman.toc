@@ -3,7 +3,7 @@
 ## Notes: Restoration Shaman pack for ForeverSensei: skills, key layout, talents and guide.
 ## Notes-jaJP: ForeverSensei用のRestoration シャーマンのパック（スキル・キー配置・タレント・ガイド）。
 ## Author: oskar-v-karlsson
-## Version: 0.8.0
+## Version: 0.8.1
 ## Dependencies: ForeverSensei
 ## LoadOnDemand: 1
 ## X-ForeverSensei-API: 1

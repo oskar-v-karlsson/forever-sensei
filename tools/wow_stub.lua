@@ -23,6 +23,7 @@ STUB = {
   meta = {},       -- ForeverSensei's TOC metadata (C_AddOns.GetAddOnMetadata)
   addonMeta = {},  -- other addons' TOC metadata: name → field → value
   class = "SHAMAN",
+  race = { "Skyborne", "Skyborne", 34 }, -- UnitRace: name, file, id (34 = the Skyborne race with Skysight)
   loadAddOn = nil, -- set by tools/check.py: name → loaded, reason (loads a class pack's files)
   loaded = {},     -- addon name → true once loaded
 }
@@ -334,6 +335,10 @@ local CLASS_IDS = { WARRIOR = 1, PALADIN = 2, HUNTER = 3, ROGUE = 4, PRIEST = 5,
 function UnitClass()
   local c = STUB.class
   return c:sub(1, 1) .. c:sub(2):lower(), c, CLASS_IDS[c] or 0
+end
+function UnitRace()
+  local r = STUB.race
+  return r[1], r[2], r[3]
 end
 function UnitLevel() return STUB.level end
 function UnitCharacterPoints() return STUB.unspent or 0 end

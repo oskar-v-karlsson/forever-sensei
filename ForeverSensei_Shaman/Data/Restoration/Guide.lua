@@ -17,6 +17,7 @@ spec.guide = {
     { src = { "simc" } },
     { src = { "moba" } },
     { src = { "moba" } },
+    { src = { "simc_race" } },
   } },
   { id = "healing", verified = "2026-11-11", paragraphs = {
     { src = { "moba", "simc" } },

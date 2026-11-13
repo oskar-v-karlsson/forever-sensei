@@ -123,6 +123,10 @@ L["spell.riptide.what"] = "Talent. Instant heal over 15 seconds. Chain Heal cast
 L["spell.riptide.when"] = "Put it on a hurt player near other hurt players, then start Chain Heal on that player. Don't wait for it when someone needs a heal right now."
 L["spell.grace_of_air_totem.what"] = "A totem that increases the Agility of party members near it. Lasts 5 minutes."
 L["spell.grace_of_air_totem.when"] = "Place it for groups with melee fighters or a tank that uses Agility."
+L["spell.walk_on_air.what"] = "Skyborne racial. You glide down through the air for 10 seconds and can steer where you go. While you glide you take no fall damage. It ends when you land or mount. 90-second cooldown."
+L["spell.walk_on_air.when"] = "Press it while you are falling, for example after jumping off a cliff, and you take no fall damage."
+L["spell.skysight.what"] = "Skyborne racial. Your movement speed, also on a mount, is 15% higher for 30 seconds, and twice as much while Charged. 0.5-second cast, 2-minute cooldown."
+L["spell.skysight.when"] = "Use it for long runs, or to reach a good healing spot quickly."
 
 ---------------------------------------------------------------------------------------------------
 -- Talents: why this talent is in the plan.
@@ -154,6 +158,7 @@ L["guide.role.p2"] = "Your main heals: Healing Wave is a slow, big heal. Lesser 
 L["guide.role.p3"] = "Your heals reach 40 yards. Lightning Bolt reaches 30 yards and your shocks 20 yards. Stand where you can reach the tank, not right next to the enemies."
 L["guide.role.p4"] = "Restoration is good for leveling with a partner and for dungeons. Questing alone is slower than with a damage spec, but it works fine."
 L["guide.role.p5"] = "Skyborne racial: Wind Blessed gives 2% haste, so Healing Wave, Lesser Healing Wave and Chain Heal cast a little faster. Skysight gives 15% movement speed (30% while Charged), which helps you reach a good healing spot."
+L["guide.role.p6"] = "Skyborne racial Walk on Air is on the middle mouse button (press the mouse wheel). Press it while falling: you glide down for 10 seconds, can steer, and take no fall damage. Skysight is the button next to it on Action Bar 6; click it."
 L["guide.healing.p1"] = "Healing Wave is your main heal. It heals a lot but takes time to cast, so start it before the tank gets low and let it land just after the hit. If the target no longer needs it, stop the cast to save mana."
 L["guide.healing.p2"] = "Use Lesser Healing Wave when Healing Wave would land too late. When the target is safe again, go back to your more efficient heals."
 L["guide.healing.p3"] = "Heal the player who is most likely to die next, not always the lowest health bar. Think about who is taking hits right now and who is still in range."
@@ -189,10 +194,11 @@ L["guide.manners.p5"] = "If an enemy attacks you, move toward the tank instead o
 ---------------------------------------------------------------------------------------------------
 L["ui.where.totembar"] = "No bar slot: use it from the Totem Bar or the spellbook when needed."
 L["ui.preview.warn.stance"] = "By default these keys use the stance bar: {key}. A shaman's only stance-bar spell is Ghost Wolf, and it is on Ctrl+1 in this layout."
+L["ui.preview.warn.middle"] = "{key} (pressing the mouse wheel) gets Walk on Air. Whatever it did before stops; Undo brings it back."
 L["ui.layout.intro"] = "Your fixed layout keeps spells that do the same job together. Without a modifier (Action Bar 1) are the spells you press most: damage on 1 to 5, Earth Shock on Q, heals on E, R and F, a Mana Potion on Z, Water Shield on X and a Healthstone on C."
 L["ui.layout.intro2"] = "Shift (Action Bar 2) and Ctrl (Action Bar 3) are split into blocks: 1 to 5, Q to F, and Z to C. Shift: totem calls, Fire totems, Water totems. Ctrl: travel, Earth totems, Air totems. The mouse side buttons and the spells you click in combat are on Action Bar 6. Action Bar 4 is for clicking out of combat. Skills you haven't learned are grey, and their slot is kept free."
 L["ui.layout.items"] = "Potions, elixirs and Healthstones use macros that ForeverSensei keeps up to date: FS_MANA on Z, FS_HEALTH on C (a Healthstone, else a Healing Potion), FS_HEALPOT on Action Bar 6 and FS_ELIXIR on Action Bar 4. Each uses the best one in your bags for your level. If your bags change in combat, it is updated after combat."
-L["ui.layout.changed"] = "The key layout has changed: spells that do the same job now sit together in blocks (totem calls on Shift+1 to 5, one element per block of keys), and the mouse side buttons moved to Action Bar 6. Your bars have not been changed. Press Apply full layout to see what would change first. Your current bars are saved, so you can undo it."
+L["ui.layout.changed"] = "The key layout has changed: as a Skyborne you now have Walk on Air on the middle mouse button (press the mouse wheel), and Skysight next to it on Action Bar 6 (click it). Your bars have not been changed. Press Apply full layout to see what would change first. Your current bars are saved, so you can undo it."
 L["ui.layout.nobar"] = "No bar slot (use the Totem Bar or the spellbook): {names}"
 L["ui.layout.clean"] = "Empty the bars removes only the buttons this layout uses (and the ones older layouts put on Action Bars 5 and 7). Free buttons and buttons this layout doesn't use stay. Your bars are saved first, so Undo puts them back."
 L["ui.targeting.mouseover.help"] = "Point the mouse at a player (on the party frames or in the world) and press the key. Without a mouseover it heals your target, and without a friendly target it heals you. Cure Poison and Cure Disease work the same way. Earth Shock and Purge hit the enemy under the mouse, else your target."

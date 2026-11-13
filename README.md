@@ -79,7 +79,7 @@ The game's 12.x API hides health, cooldowns and auras from addons in combat, so 
 
 ### Key layout: Restoration Shaman
 
-The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (layout 7, "family blocks", 0.7.0), which builds on [research/keybind-layout.md](research/keybind-layout.md) (pull walkthroughs, reach for small hands, sources). *(n)* is the level the spell becomes available; MO = mouseover macro.
+The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (layout 8: "family blocks" since 0.7.0, Walk on Air on the middle mouse button since 0.8.1), which builds on [research/keybind-layout.md](research/keybind-layout.md) (pull walkthroughs, reach for small hands, sources). *(n)* is the level the spell becomes available; MO = mouseover macro.
 
 | Key | Plain (Action Bar 1) | Shift (Action Bar 2) | Ctrl (Action Bar 3) |
 |---|---|---|---|
@@ -97,6 +97,7 @@ The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (l
 | C | Healthstone, else Healing Potion | Healing Stream Totem *(20)* | Grace of Air Totem *(42)* |
 | Mouse 4 | Riptide, MO *(40)* | Cure Poison, MO *(16)* | Poison Cleansing Totem *(22)* |
 | Mouse 5 | Nature's Swiftness + Healing Wave *(30)* | Cure Disease, MO *(22)* | Disease Cleansing Totem *(38)* |
+| Mouse 3 (middle) | Walk on Air *(Skyborne racial)* | – | – |
 
 - **Blocks:** each row splits into `1-5`, `Q E R F` and `Z X C`, and one family fills one block. Plain: damage on `1-5`, the interrupt and heals on `Q-F`, potions and the shield on `Z-C`. Shift: the totem calls on `1-5`, Fire totems on `Q-F`, Water totems on `Z-C`. Ctrl: travel on `1-3`, Earth totems on `Q-F`, Air totems on `Z-C`. The mouse buttons are three pairs: heals, cures, cleansing totems.
 - **Bars:** plain keys are Action Bar 1, Shift Action Bar 2 and Ctrl Action Bar 3, all at the bottom of the screen. Button n of a bar is key n of its row (`1`, `2`, `3`, `4`, `5`, `Q`, `E`, `R`, `F`, `Z`, `X`, `C`), so a family also sits together on screen. Action Bar 6 buttons 1-6 are `Mouse 4`, `Mouse 5`, `Shift+Mouse 4/5`, `Ctrl+Mouse 4/5`. **すべて配置** turns on Action Bars 2, 3, 4 and 6, because a hidden bar may not react to its keys. Move Action Bar 6 down in Edit Mode (see First steps).
@@ -104,11 +105,12 @@ The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (l
 - Totem flow in a dungeon: `Shift+1` Totemic Call at every pull brings your totems along; `Shift+2` Call of the Elements when the 5-minute totems run out (about every few pulls) and after a wipe; `Shift+R` Searing at every pull (it lasts 30-55 s); `Shift+5` Totemic Recall when you leave. Before level 22 (no Totemic Call yet), put down Stoneskin (`Ctrl+R`) and Searing by hand.
 - A key whose spell you learn later (e.g. Chain Heal and Riptide at 40) stays empty until then. Keys never move while levelling.
 - `Ctrl+4` and `Ctrl+5` have no skill. They are still bound to their (empty) button, so every row has all 12 keys. You can put your own things there; **すべて配置** only binds the key and leaves the button alone. No key is reserved any more: `5`, `Shift+5` and `Ctrl+5` are planned like the others, and anything you had there moves to a spare button.
+- **Walk on Air (0.8.1, Erika's request):** the Skyborne racial is on the middle mouse button (`Mouse 3`, Action Bar 6 button 9), with no modifier. Press it while falling to take no fall damage; it glides you down for 10 s. `Shift` and `Ctrl+Mouse 3` stay unbound, and a middle click on a portrait keeps the game's own behaviour. The preview warns if the middle mouse button had another key before; **元に戻す** puts it back. Other races (Orc, Troll, Tauren) get no Walk on Air or Skysight: the buttons and the key stay empty.
 - **Mouse side buttons:** leave them as the default Button 4 and Button 5 in your mouse software (no "back/forward" or other remapping), so the game sees `BUTTON4` and `BUTTON5`.
 - **Mouse 4/5 over portraits (0.8.0):** the game's player, target and party frames take the mouse side buttons for themselves, so a `Mouse 4/5` key does nothing while the mouse is over a portrait. ForeverSensei gives those frames the same action as the Action Bar 6 button (e.g. Riptide on `Mouse 4` goes to the party member under the mouse). It only does this out of combat (frames that appear in combat follow after the fight), never replaces what another addon set there, stays off with Clique or with a mouse button bound in the game's Click Casting, and can be turned off in the settings. Left and right click keep targeting and the menu. The Paladin gets the same.
 
 The other buttons have no keys. They are for clicking:
-- Action Bar 6, buttons 7-8 (used in combat): Strength of Earth Totem (the Earth block is full) and the Healing Potion button (`FS_HEALPOT`). Buttons 9-12 are spare.
+- Action Bar 6, buttons 7-8 (used in combat): Strength of Earth Totem (the Earth block is full) and the Healing Potion button (`FS_HEALPOT`). Button 9 is Walk on Air (`Mouse 3`), button 10 Skysight (Skyborne racial, a 30 s speed boost, clicked), buttons 11-12 are spare.
 - Action Bar 4 (right edge, out of combat only): Ancestral Spirit, Astral Recall, Rockbiter, Flametongue, Frostbrand and Windfury Weapon, Lightning Shield (after Water Shield), the Arcane Elixir button (`FS_ELIXIR`). Buttons 9-12 are spare.
 - Only in the spellbook (no button, rarely needed): Far Sight and Sentry Totem (scouting).
 - Action Bar 5 is no longer used. **すべて配置** clears the spells 0.4.1-0.6.1 put there (only while a button still holds exactly that spell) and leaves the bar and anything else on it as you have it. Action Bar 7 (0.4.0) stays hidden.
@@ -244,6 +246,15 @@ These cannot be tested outside the game. Please go through them once, then paste
 55. [ ] **Combat:** join a group or change the group while in combat: no `ADDON_ACTION_BLOCKED` or "interface action failed" message; the new portraits get `Mouse 4/5` after the fight. `/sensei verify` has a `unit frames (Mouse 4/5)` line under [Layout] that lists the frames covered and anything skipped (and why).
 56. [ ] **Setting and other addons:** turning off the setting about Mouse 4 and Mouse 5 over party and player frames makes the portraits ignore `Mouse 4/5` again (as before 0.8.0). With Clique installed the addon leaves the portraits alone, and so it does for a mouse button you bound in the game's own Click Casting.
 
+**Walk on Air on the middle mouse button (0.8.1).** On Erika's Skyborne Shaman after updating from 0.8.0 (layout 7):
+
+57. [ ] **Before:** `/run print(GetBindingAction("BUTTON3"))` prints the middle mouse button's old key (write it down; empty is fine). The layout message shows once and nothing moves by itself.
+58. [ ] **Apply:** **すべて配置** → the preview mentions the middle mouse button; **適用** puts Walk on Air on Action Bar 6 button 9 and Skysight on button 10. `Mouse 3` casts Walk on Air; `Shift+Mouse 3` and `Ctrl+Mouse 3` do nothing new.
+59. [ ] **Fall damage:** jump from a height that normally hurts and press `Mouse 3` while falling: you glide down and take no fall damage. Skysight (clicked) gives the speed boost.
+60. [ ] **Spell ID:** `/sensei verify` shows the race line (expected race id 34) and `Walk on Air (1259416): known` with its slot. If it says not known, run `/run print(IsSpellKnown(1259416), IsSpellKnown(1308663))` and report both.
+61. [ ] **Portrait:** a middle click on a party portrait does what it did before (no spell is cast).
+62. [ ] **元に戻す:** puts buttons 9 and 10 and the old `BUTTON3` key back as they were before **適用**.
+
 ## Translation reports
 
 ### For the player (日本語)
@@ -295,7 +306,7 @@ When the user pastes a report block (starting `[ForeverSensei v`) or asks you to
   - **texts:** both languages of every locale file have every ID; each ID lives in one file; the core's texts are class-neutral; Japanese rules; font glyphs; placeholders; no raw IDs on screen;
   - **packs:** each pack registers exactly its class with the core's API version; TOC fields; a character without a pack (one note, idle) and a pack with another API version (refused, one note);
   - **data:** spell and talent IDs, names and levels against the Forever client dump in `research/`;
-  - **layout:** unique slots and keys, allowed keys only, the exact approved key grid of each pack, every key of the three rows and the mouse bound, each family in its block (`1-5`, `Q-F`, `Z-C` or a mouse pair) with spill-overs on Action Bar 6, Action Bar 4 out-of-combat only, bar fields (only Action Bar 6 in Edit Mode), old-layout leftovers, macro kinds and bodies, macro count, item slots;
+  - **layout:** unique slots and keys, allowed keys only, the exact approved key grid of each pack, every key of the three rows and the mouse bound, each family in its block (`1-5`, `Q-F`, `Z-C`, a mouse pair or the middle mouse button) with spill-overs on Action Bar 6, Action Bar 4 out-of-combat only, bar fields (only Action Bar 6 in Edit Mode), old-layout leftovers, macro kinds and bodies, macro count, item slots;
   - **items:** potion and elixir data (sources, ids, best-first order);
   - **talents:** one point per level, row requirements, max ranks, final 0/5/46 (Shaman) and 0/32/19 (Paladin);
   - **scenarios:** layout apply → undo round-trip, potion and Healthstone macros, the Lightning Shield stand-in, clearing old-layout leftovers, the update from layout 6 to 7 (notice, apply, undo with bar settings), the login card fix and the one-time layout notice;

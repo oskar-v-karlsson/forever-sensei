@@ -1,5 +1,5 @@
--- ForeverSensei_Shaman/Data/Restoration/Layout.lua: the fixed slot and key plan (layout version 7, since
--- ForeverSensei 0.7.0: "family blocks"). Spec: research/keybind-layout-v4.md (approved, commit 27b6754), which builds on
+-- ForeverSensei_Shaman/Data/Restoration/Layout.lua: the fixed slot and key plan (layout version 8, since
+-- ForeverSensei 0.8.1; "family blocks" since 0.7.0, layout 7). Spec: research/keybind-layout-v4.md (approved, commit 27b6754), which builds on
 -- research/keybind-layout.md (pull walkthroughs, reach tiers for small hands). The level-60 dungeon-healer layout
 -- comes first; lower levels use a subset of it, and a key never moves once its spell is learned (a reserved key stays
 -- empty until then).
@@ -17,14 +17,18 @@
 -- * Ctrl 1-3 travel (Ghost Wolf, Water Walking, Water Breathing; Ctrl+4 and Ctrl+5 spare); Ctrl Q/E/R/F Earth
 --   (Earthbind, Stoneclaw, Stoneskin, Tremor); Ctrl Z/X/C Air (Grounding, Windfury Totem, Grace of Air).
 -- * Mouse pairs: Mouse4/5 Riptide and NS + Healing Wave; Shift the cures; Ctrl the cleansing totems.
+-- * Layout 8 (0.8.1, Erika's request): the Skyborne racials. Walk on Air on the middle mouse button (BUTTON3, no
+--   modifier; Shift and Ctrl+BUTTON3 stay unbound), Skysight clicked next to it. Both are race-gated (Data/Spells.lua
+--   races): for other races their buttons are unbound spare buttons (ns.BuildLayout L.gated).
 -- * No key is the player's own any more (5, Shift+5 and Ctrl+5 are planned like every other key). Spare keys (Ctrl+4,
 --   Ctrl+5) are bound to their empty buttons, so every key of the three rows works the same way.
 -- Bars (Blizzard_ActionBar in the Forever UI code; slot = (page - 1) * 12 + button):
 --   plain = Action Bar 1 ACTIONBUTTON (1-12); Shift = Action Bar 2 MULTIACTIONBAR1BUTTON (61-72); Ctrl = Action Bar 3
 --   MULTIACTIONBAR2BUTTON (49-60). All three sit at the bottom of the screen by default.
 --   Action Bar 6 MULTIACTIONBAR5BUTTON (145-156, Bindings_Camelot.xml, MultiActionBars.xml) holds the six mouse keys
---   (buttons 1-6, pair by pair) and the clicked spells used in combat (Strength of Earth, the healing potion). It
---   starts in the middle of the screen; the guide tells the player to drag it down in Edit Mode.
+--   (buttons 1-6, pair by pair), the clicked spells used in combat (Strength of Earth, the healing potion) and the
+--   Skyborne racials (button 9 Walk on Air on the middle mouse button, button 10 Skysight). It starts in the middle
+--   of the screen; the guide tells the player to drag it down in Edit Mode.
 --   Action Bar 4 MULTIACTIONBAR3BUTTON (25-36, right edge) holds only out-of-combat clicks: resurrection, Astral
 --   Recall, weapon imbues, Lightning Shield, the elixir.
 --   Action Bar 5 (37-48) left the plan in layout 7. Its visibility is left as the player has it; a full apply only
@@ -54,7 +58,7 @@ L.bars = {
   -- editMode: the bar starts in the middle of the screen; the guide and the preview tell the player to move it.
   { id = "bar6", first = 145, binding = "MULTIACTIONBAR5BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_6", editMode = true,
     keys = { "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5",
-      false, false, false, false, false, false } },
+      false, false, "BUTTON3", false, false, false } },
   { id = "bar4", first = 25,  binding = "MULTIACTIONBAR3BUTTON%d", setting = "PROXY_SHOW_ACTIONBAR_4" },
 }
 
@@ -70,7 +74,7 @@ L.retired = {
 }
 
 -- Bumped when slots or keys change: players who had the older layout get a one-time notice (Modules/Layout.lua).
-L.version = 7
+L.version = 8
 
 -- Every key the plan binds: the planned buttons' keys and the spare keyed buttons' keys.
 L.allowedKeys = {
@@ -79,6 +83,7 @@ L.allowedKeys = {
   "SHIFT-X", "SHIFT-C",
   "CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-5", "CTRL-Q", "CTRL-E", "CTRL-R", "CTRL-F", "CTRL-Z", "CTRL-X", "CTRL-C",
   "BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5",
+  "BUTTON3",
 }
 
 -- One row per bar, button 1..12 left to right (button n = key n on the keyed bars).
@@ -100,7 +105,7 @@ L.plan = {
   },
   bar6 = {
     "riptide", "natures_swiftness", "cure_poison", "cure_disease", "poison_cleansing_totem", "disease_cleansing_totem",
-    "strength_of_earth_totem", "@healpot", "-", "-", "-", "-",
+    "strength_of_earth_totem", "@healpot", "walk_on_air", "skysight", "-", "-",
   },
   bar4 = {
     "ancestral_spirit", "astral_recall", "rockbiter_weapon", "flametongue_weapon", "frostbrand_weapon",
@@ -123,6 +128,7 @@ L.families = {
   { id = "cursorheals", block = "mouse", row = "", members = { "riptide", "natures_swiftness" } },
   { id = "cures", block = "mouse", row = "SHIFT-", members = { "cure_poison", "cure_disease" } },
   { id = "cleansing", block = "mouse", row = "CTRL-", members = { "poison_cleansing_totem", "disease_cleansing_totem" } },
+  { id = "racial", block = "BUTTON3", row = "", spill = { "skysight" }, members = { "walk_on_air" } },
 }
 
 -- Spells without a bar slot: resistance totems and Windwall are situational (Totem Bar or spellbook); Far Sight
@@ -184,7 +190,8 @@ L.macroVars = { heal = "healing_wave" }
 -- plan fills now are not listed: the plan replaces what is there.
 -- Action Bar 5 (37-48): layout 6 (0.6.1) Ctrl row, and layout 4 (0.4.1-0.4.2) on buttons that were spare in layouts
 -- 5-6 (2, 3, 4, 11) and on button 5 (Mana Tide Totem on Ctrl+5's button).
--- Action Bar 6 (145-156): layout 3 (0.4.0) buttons 9, 10 and 12, spare now (buttons 1-8 are planned again).
+-- Action Bar 6 (145-156): layout 3 (0.4.0) buttons 9, 10 and 12 (buttons 1-8 are planned again). Buttons 9 and 10
+-- hold the Skyborne racials since layout 8; for other races they are spare, so these entries still clear them there.
 -- Action Bar 4 buttons 9-12 and Action Bar 3 buttons 4-5: layout 6's clicked spells there (and layout 4's Sentry
 -- Totem).
 L.old = {
@@ -219,6 +226,9 @@ L.defaultWarn = {
   ["CTRL-4"] = "ui.preview.warn.stance",
   ["CTRL-5"] = "ui.preview.warn.stance",
   ["CTRL-R"] = "ui.preview.warn.fps",
+  -- The client files have no default keys; whatever the middle mouse button did is named in the key list and
+  -- restored by Undo.
+  BUTTON3 = "ui.preview.warn.middle",
 }
 
 -- Spare buttons in this bar order are the first choice for things moved out of a planned slot (clicked ones first).

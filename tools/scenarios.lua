@@ -147,7 +147,8 @@ return function(ns, lang)
       local text = table.concat(ns.Layout.Describe(ns.Layout.BuildPlan()), "\n")
       for _, want in ipairs({ ns.T("ui.preview.warn.stance", { key = "Ctrl+1, Ctrl+2, Ctrl+3, Ctrl+4, Ctrl+5" }),
         ns.T("ui.preview.warn.fps", { key = "Ctrl+R" }), ns.T("ui.preview.warn.mouse"),
-        ns.T("ui.preview.warn.editmode", { bar = ns.T("ui.bar.bar6") }) }) do
+        ns.T("ui.preview.warn.editmode", { bar = ns.T("ui.bar.bar6") }),
+        ns.T("ui.preview.warn.middle", { key = ns.KeyLabel("BUTTON3") }) }) do
         if not text:find(want, 1, true) then fail("preview: missing the note " .. want) end
       end
       try("apply", function() p.apply:Click() end)
@@ -159,9 +160,17 @@ return function(ns, lang)
       end
       for key, want in pairs({ ["CTRL-R"] = "MULTIACTIONBAR2BUTTON8", ["CTRL-4"] = "MULTIACTIONBAR2BUTTON4",
         ["CTRL-C"] = "MULTIACTIONBAR2BUTTON12", ["5"] = "ACTIONBUTTON5", ["SHIFT-5"] = "MULTIACTIONBAR1BUTTON5",
-        ["BUTTON4"] = "MULTIACTIONBAR5BUTTON1", ["CTRL-BUTTON5"] = "MULTIACTIONBAR5BUTTON6" }) do
+        ["BUTTON4"] = "MULTIACTIONBAR5BUTTON1", ["CTRL-BUTTON5"] = "MULTIACTIONBAR5BUTTON6",
+        ["BUTTON3"] = "MULTIACTIONBAR5BUTTON9" }) do
         if STUB.bindings[key] ~= want then fail("apply: " .. key .. " should be bound to " .. want) end
       end
+      -- Skyborne racials (layout 8): Walk on Air on the middle mouse button (Action Bar 6 button 9), Skysight clicked
+      -- next to it; Shift and Ctrl+BUTTON3 stay unbound.
+      for slot, key in pairs({ [153] = "walk_on_air", [154] = "skysight" }) do
+        local a = STUB.actions[slot]
+        if not a or a[1] ~= "spell" or a[2] ~= ns.Spells.Get(key).id then fail("apply: slot " .. slot .. " should hold " .. key) end
+      end
+      if STUB.bindings["SHIFT-BUTTON3"] or STUB.bindings["CTRL-BUTTON3"] then fail("apply: Shift or Ctrl+Mouse 3 got bound") end
       if not L.bySpell.lightning_shield or STUB.actions[L.bySpell.lightning_shield.slot] == nil then
         fail("apply: Lightning Shield not on its own button once Water Shield is known")
       end
@@ -189,6 +198,9 @@ return function(ns, lang)
   portrait("mouseover", "Button5", "ctrl", "spell", spellId("disease_cleansing_totem"))
   portrait("mouseover", "LeftButton", nil, "target", nil)
   portrait("mouseover", "RightButton", nil, "menu", nil)
+  -- Walk on Air (middle mouse button) is self-only: a middle click on a portrait keeps the frame's own behaviour.
+  portrait("mouseover", "MiddleButton", nil, nil, nil)
+  portrait("mouseover", "MiddleButton", "shift", nil, nil)
 
   try("targeting click", ns.Layout.SetTargeting, "click")
   checkLayout("click")
@@ -740,6 +752,53 @@ return function(ns, lang)
   STUB.bindings = savedBinds
   STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
   try("layout 7 items", ns.Items.Refresh)
+
+  -- Update from layout 7 (0.7.0-0.8.0) to 8 (0.8.1, Erika's request): Walk on Air on the middle mouse button (Action
+  -- Bar 6 button 9), Skysight clicked on button 10. One notice, nothing moves by itself; a full apply places both and
+  -- binds BUTTON3 (it was the player's own key), and 元に戻す puts back the buttons and the old BUTTON3 binding.
+  STUB.level = 60
+  for id in pairs(STUB.names) do STUB.known[id] = true end
+  STUB.actions = {}
+  STUB.bindings = {}
+  try("layout 7 bars", ns.Layout.Execute, ns.Layout.BuildPlan())
+  -- Layout 7 left Action Bar 6 buttons 9 and 10 empty; the player put a Hearthstone on button 9 and had a key on the
+  -- middle mouse button.
+  STUB.actions[153], STUB.actions[154] = { "item", 6948 }, nil
+  STUB.bindings["BUTTON3"] = "TOGGLEAUTORUN"
+  local v7A, v7B = snapshot()
+  ns.char.layoutVersion = 7
+  relogin()
+  confirm = _G.ForeverSenseiConfirm
+  if not confirm or not confirm:IsShown() or confirm.text:GetText() ~= ns.T("ui.layout.changed") then
+    fail("layout 8: no notice for a player with layout 7")
+  else
+    confirm:Hide()
+  end
+  if ns.char.layoutVersion ~= 8 then fail("layout 8: version not saved after the notice") end
+  nA, nB = snapshot()
+  if not same(v7A, nA) or not same(v7B, nB) then fail("layout 8: the notice moved something by itself") end
+  local v8Plan = ns.Layout.BuildPlan()
+  local v8Text = table.concat(ns.Layout.Describe(v8Plan), "\n")
+  if not v8Text:find(ns.T("ui.preview.warn.middle", { key = ns.KeyLabel("BUTTON3") }), 1, true) then
+    fail("layout 8: the preview does not explain the middle mouse button")
+  end
+  try("layout 8 apply", ns.Layout.Execute, v8Plan)
+  checkLayout(ns.settings.targeting) -- (layout 8)
+  if STUB.bindings["BUTTON3"] ~= "MULTIACTIONBAR5BUTTON9" then fail("layout 8: BUTTON3 not bound to Action Bar 6 button 9") end
+  local moved
+  for _, sp in ipairs(L.spare) do
+    if STUB.actions[sp.slot] and STUB.actions[sp.slot][2] == 6948 then moved = true end
+  end
+  if not moved then fail("layout 8: the Hearthstone from Action Bar 6 button 9 did not move to a spare button") end
+  try("layout 8 undo", ns.Layout.Undo)
+  uA, uB = snapshot()
+  ok, why = same(v7A, uA)
+  if not ok then fail("layout 8 undo: action slots differ: " .. why) end
+  ok, why = same(v7B, uB)
+  if not ok then fail("layout 8 undo: key bindings differ: " .. why) end
+  STUB.bindings = savedBinds
+  STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
+  try("layout 8 items", ns.Items.Refresh)
 
   -- Translation reports: save two, send, format.
   ns.db.reports = {}

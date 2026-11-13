@@ -48,8 +48,11 @@ end
 -- key/binding for keyed bars). A bar's keys entry false leaves that button unbound.
 -- L.retired: bars the plan no longer uses ({ id, first, binding, setting, assigned = { buttons }, keepShown }).
 -- L.old[slot] = a plan key (or a list of them) an earlier layout put in a button the plan no longer fills.
+-- L.gated = spell keys this character cannot have (another race's racial, set by applyRaces below): their buttons
+-- become unbound spare buttons (L.gatedSlots[slot] = true), so they leave no empty slot and bind no key.
 function ns.BuildLayout(L)
-  L.slots, L.bySpell, L.byItem, L.byCombo, L.spare = {}, {}, {}, {}, {}
+  L.slots, L.bySpell, L.byItem, L.byCombo, L.spare, L.gatedSlots = {}, {}, {}, {}, {}, {}
+  local gated = L.gated or {}
   L.noSlot = L.noSlot or {}
   L.macros = L.macros or {}
   L.macroKind = L.macroKind or {}
@@ -68,7 +71,11 @@ function ns.BuildLayout(L)
       local slotNo = bar.first + i - 1
       local key = bar.keys and bar.keys[i] or nil
       local binding = key and string.format(bar.binding, i) or nil
-      if what == "x" then -- nothing: the addon leaves this button alone
+      local isGated = gated[type(what) == "table" and what[1] or what]
+      if isGated then
+        L.gatedSlots[slotNo] = true
+        table.insert(spareByBar[bar.id], { bar = bar.id, button = i, slot = slotNo })
+      elseif what == "x" then -- nothing: the addon leaves this button alone
       elseif what == "-" then
         table.insert(spareByBar[bar.id], { bar = bar.id, button = i, slot = slotNo, key = key, binding = binding })
       else
@@ -164,8 +171,35 @@ local function loadAddOn(name)
   return loaded and true or false, reason
 end
 
+-- Racial spells (entry.races = the race ids of the client's race mask): a character of another race gets no card,
+-- skill-list line, slot or key for them. A spell the character knows always counts, in case the race id differs.
+local function applyRaces(pack)
+  pack.allSpells = pack.allSpells or pack.spells
+  local ok, _, _, raceID = pcall(UnitRace, "player")
+  if not ok then raceID = nil end
+  local list, gated = {}, {}
+  for _, s in ipairs(pack.allSpells) do
+    local allowed = not s.races
+    for _, r in ipairs(s.races or {}) do
+      if r == raceID then allowed = true end
+    end
+    if not allowed and ns.Spells and ns.Spells.IsKnown(s) then allowed = true end
+    if allowed then table.insert(list, s) else gated[s.key] = true end
+  end
+  pack.spells = list
+  if next(gated) then
+    for _, spec in pairs(pack.specs) do
+      if spec.layout then
+        spec.layout.gated = gated
+        ns.BuildLayout(spec.layout)
+      end
+    end
+  end
+end
+
 local function activate(pack)
   ns.class = pack
+  applyRaces(pack)
   ns.specId = pack.defaultSpec or next(pack.specs)
   ns.spec = pack.specs[ns.specId]
   for k, v in pairs(pack.sources) do

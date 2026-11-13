@@ -1,7 +1,8 @@
 -- ForeverSensei_Shaman/Data/Spells.lua: every Shaman spell a Restoration Shaman learns from level 1 to 60 in WoW: Forever.
 -- Fields: key (text id stem), name (English client name, also used to resolve the highest rank), id (rank 1 spell id),
 -- level (first available), role (heal | damage | support), use (group | solo | both), talent (learned through the
--- talent tree; level = when the Mobalytics leveling path takes it), passive, src (a key in P.sources or the core's
+-- talent tree; level = when the Mobalytics leveling path takes it), passive, races (a racial: the race ids of its race
+-- mask in the client dump; other races never see it, ns.BuildLayout L.gated), src (a key in P.sources or the core's
 -- sources: wh_spell, wh_item, ui), verified.
 -- What/when texts live in this pack's Locales as spell.<key>.what / spell.<key>.when.
 local _, P = ...
@@ -13,6 +14,7 @@ P.sources = {
   wh_overview = "https://www.wowhead.com/forever/guide/classes/shaman/restoration/overview-pve-healer",
   wh_talents = "https://www.wowhead.com/forever/guide/classes/shaman/restoration/talent-builds-pve-healer",
   moba = "https://mobalytics.gg/wow-forever/classes/restoration-shaman-guide",
+  simc_race = "simc-forever SpellDataDump, client 1.60.1.70938 (github.com/simulationcraft/simc-forever @1c895ad3, SpellDataDump/nonclass.txt: racials)",
 }
 
 local V = "2026-11-09"
@@ -78,3 +80,9 @@ add { key = "call_of_the_spirits",     name = "Call of the Spirits",     id = 66
 add { key = "chain_heal",              name = "Chain Heal",              id = 1064,   level = 40, role = "heal",    use = "group", src = "simc" }
 add { key = "riptide",                 name = "Riptide",                 id = 408521, level = 40, role = "heal",    use = "both",  src = "simc", talent = true }
 add { key = "grace_of_air_totem",      name = "Grace of Air Totem",      id = 8835,   level = 42, role = "support", use = "group", src = "simc" }
+
+-- Skyborne racials (simc_race, nonclass.txt): the race mask's bit n is race id n + 1 (Human 0x1, Dwarf 0x4). Walk on
+-- Air 0x300000000 = race ids 33 and 34 (both Skyborne races), Skysight 0x200000000 = race id 34 (the other Skyborne
+-- race gets Read Leyline, 0x100000000). Known from level 1, not from the trainer.
+add { key = "walk_on_air",             name = "Walk on Air",             id = 1259416, level = 1, role = "support", use = "both", src = "simc_race", races = { 33, 34 }, verified = "2026-11-13" }
+add { key = "skysight",                name = "Skysight",                id = 1259686, level = 1, role = "support", use = "both", src = "simc_race", races = { 34 }, verified = "2026-11-13" }

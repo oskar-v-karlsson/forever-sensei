@@ -209,7 +209,7 @@ renderers.layout = function(frame)
     end
     for i = 1, 12 do
       local s = byButton[i]
-      local key = s and s.key or (bar.keys and bar.keys[i]) or nil
+      local key = s and s.key or (not layout.gatedSlots[bar.first + i - 1] and bar.keys and bar.keys[i]) or nil
       if s or key then
         n = n + 1
         local second = twoRows and i > 6

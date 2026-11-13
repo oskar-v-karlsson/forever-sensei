@@ -205,11 +205,11 @@ function NewSkill.Scan(atLogin)
   if #newRanks > 0 or atLogin then ns.Layout.ApplyNewRanks(newRanks) end
 end
 
--- Skills the player can learn at their level but does not know yet (talents excluded).
+-- Skills the player can learn at their level but does not know yet (talents and racials excluded).
 function NewSkill.Trainable(level)
   local list = {}
   for _, e in ipairs(Spells.List()) do
-    if not e.talent and e.level <= level and not Spells.IsKnown(e) then table.insert(list, e) end
+    if not e.talent and not e.races and e.level <= level and not Spells.IsKnown(e) then table.insert(list, e) end
   end
   table.sort(list, function(a, b)
     if a.level ~= b.level then return a.level < b.level end

@@ -30,6 +30,17 @@ function Verify.Run()
     tostring(toc), tostring(WOW_PROJECT_ID)))
   add(string.format("player: level %d %s  targeting=%s  font=%s", ns.Spells.PlayerLevel(), select(2, UnitClass("player")) or "?",
     ns.settings.targeting, ns.Font.PATH))
+  local okR, _, raceFile, raceID = pcall(UnitRace, "player")
+  add(string.format("race: %s id %s", okR and tostring(raceFile) or "?", okR and tostring(raceID) or "?"))
+  for _, e in ipairs(ns.class.allSpells or {}) do
+    if e.races then
+      local ids = {}
+      for _, r in ipairs(e.races) do table.insert(ids, tostring(r)) end
+      local okK, known = ns.Call("C_SpellBook.IsSpellKnown", e.id)
+      add(string.format("  racial %s (%d, races %s): IsSpellKnown=%s  %s", e.name, e.id, table.concat(ids, " "),
+        okK and tostring(known) or "error", ns.spec.layout.bySpell[e.key] and "slot" or "no slot"))
+    end
+  end
 
   add("")
   add("[API]")
@@ -120,9 +131,9 @@ function Verify.Run()
     end
   end
   -- Keys whose game default the layout may replace (the stance bar on Ctrl+1-5, the framerate on Ctrl+R) and the
-  -- mouse keys on Action Bar 6 (research/keybind-layout-v4.md, "Verify in game").
+  -- mouse keys on Action Bar 6 (research/keybind-layout-v4.md, "Verify in game"; BUTTON3 since 0.8.1).
   for _, key in ipairs({ "CTRL-1", "CTRL-2", "CTRL-3", "CTRL-4", "CTRL-5", "CTRL-R", "BUTTON4", "SHIFT-BUTTON4",
-    "CTRL-BUTTON4" }) do
+    "CTRL-BUTTON4", "BUTTON3" }) do
     local ok, action = ns.Call("GetBindingAction", key)
     add(string.format("  key %s = %s", key, ok and tostring(action) or "?"))
   end

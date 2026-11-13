@@ -42,6 +42,7 @@ shaman side as well"
      Recall, long buffs, travel.
 4. Habit keys may move. Oskar: "Everything is okay to move no need to worry about habits."
 5. Allowed keys and modifiers are unchanged: 1-5, Q, E, R, F, Z, X, C and Mouse4/5; plain, Shift or Ctrl.
+   *(0.8.1, Shaman only: plus the middle mouse button `BUTTON3`, no modifier, for Walk on Air; see "Changed in 0.8.1".)*
 
 Shared by both grids (my own choices, within the rules):
 - The mouse block counts as three pairs (plain, Shift, Ctrl), the same way the keyboard rows do. A pair holds one
@@ -119,6 +120,7 @@ tier 5 Shift+5, Ctrl+X, Ctrl+1-5.
 | **Cursor heals** (mouse) | Riptide *(40)*, Nature's Swiftness + Healing Wave *(30)* | 2 |
 | **Cures** (mouse) | Cure Poison *(16)*, Cure Disease *(22)* | 2 |
 | **Cleansing totems** (mouse) | Poison Cleansing Totem *(22)*, Disease Cleansing Totem *(38)* | 2 |
+| **Skyborne racials** (middle mouse, 0.8.1) | Walk on Air *(racial)*; Skysight *(racial, clicked)* | 1 + 1 |
 
 Totems are grouped **by element**: the Totem Bar, Call of the Elements and the "one totem per element" rule (`wh_tt`
 "Tools:" line, shaman doc Q2) all think in elements, so "which element?" is the question Erika already asks. Two
@@ -149,7 +151,7 @@ Runner-up (close): **Earth on Shift Q/E/R/F and Fire on Ctrl Q/E/R/F.** Tremor w
 Stoneskin Shift+E, but Searing (every pull) would go to Ctrl+R (tier 3) and Fire Nova to Ctrl+F (tier 4). Fire is
 pressed more often, and the rule is "frequency picks the block", so Fire wins Shift.
 
-## S3. Grid (Restoration layout 7)
+## S3. Grid (Restoration layout 8 since 0.8.1; layout 7 in 0.7.0-0.8.0)
 
 **MO** = mouseover macro, *(lvl)* = learned at, "–" = spare (bound, empty). Bar n button k = key k of that row.
 
@@ -169,8 +171,9 @@ pressed more often, and the rule is "frequency picks the block", so Fire wins Sh
 | C | Healthstone, else Healing Potion (`FS_HEALTH`) | Healing Stream Totem *(20)* | Grace of Air Totem *(42)* |
 | Mouse4 | Riptide, MO *(40)* | Cure Poison, MO *(16)* | Poison Cleansing Totem *(22)* |
 | Mouse5 | NS + Healing Wave, MO *(30)* | Cure Disease, MO *(22)* | Disease Cleansing Totem *(38)* |
+| Mouse3 (middle) | Walk on Air *(Skyborne racial, 0.8.1)* | – (unbound) | – (unbound) |
 
-Spare keys: Ctrl+4, Ctrl+5. 40 of 42 keys hold a spell at 60.
+Spare keys: Ctrl+4, Ctrl+5. 40 of 42 keys hold a spell at 60, plus `BUTTON3` for a Skyborne.
 
 ## S4. Action Bar 6 (mouse block + in-combat clicks)
 
@@ -186,7 +189,9 @@ Button order keeps each mouse pair together (the families are the pairs):
 | 6 | Ctrl+Mouse5 | Disease Cleansing Totem |
 | 7 | – | Strength of Earth Totem (Earth spill-over; Ctrl+Q/E/R/F is full) |
 | 8 | – | Healing Potion (`@healpot`, for when the Healthstone is on cooldown) |
-| 9-12 | – | spare |
+| 9 | Mouse3 | Walk on Air (Skyborne only, 0.8.1) |
+| 10 | – | Skysight (Skyborne only, clicked, 0.8.1) |
+| 11-12 | – | spare |
 
 ## S5. Action Bars 4 and 5 (out of combat, clicked)
 
@@ -243,6 +248,27 @@ Spring Shift+Z, Earthbind Ctrl+Q, Stoneclaw Ctrl+E, all six mouse spells.
 4. **Frost Shock: Shift+Q → plain 5 (tier 2 → 4).** Rare (a runner).
 5. Her old own keys: whatever Erika put on 5 or Shift+5 is moved to a spare button by a full apply (the existing
    "non-plan things go to spare buttons" rule), and the preview lists it. Nothing moves without すべて配置.
+
+### Changed in 0.8.1 (layout 8), at Erika's request
+
+Erika, relayed by Oskar: "Erika wants the skyborne slow fall abilty on one of her mouse buttons." Then: "No no
+modifier on the walk on air." Mouse4/5 keep Riptide and NS + Healing Wave, so Walk on Air takes the middle mouse
+button, a new key outside the old allowed list (rule 5 gets this one exception).
+
+- **Walk on Air** (`simc_race` 1259416: Slow Fall aura, 10 s, 1.5 min cooldown, race mask = the two Skyborne races)
+  → `BUTTON3`, Action Bar 6 button 9. It is self-only: press it while falling to take no fall damage. `SHIFT-BUTTON3`
+  and `CTRL-BUTTON3` stay unbound. The other ID on wow-forever.gg (1308663, 1 min) is not in the client dump, so the
+  pack uses 1259416; `/sensei verify` prints whether the player knows it.
+- **Skysight** (1259686, race mask = one Skyborne race; it triggers Elemental Blessing 1259688, +15 % speed for 30 s,
+  doubled while Charged; 2 min cooldown) → clicked, Action Bar 6 button 10. Icy Veins says 15 s; the dump says 30 s.
+- Strength of Earth and `@healpot` keep buttons 7 and 8; buttons 11-12 stay spare.
+- **Race gate:** both entries carry their simc race ids. A shaman of another race (Orc, Troll, Tauren) gets no card,
+  no slot and no `BUTTON3` binding (the two buttons stay empty spares). A known racial always counts, in case the race
+  id in game differs.
+- **Portraits:** the unit-frame click-cast only covers Mouse4/5, so a middle click on a portrait keeps the frame's own
+  behaviour (Walk on Air has no target anyway).
+- `BUTTON3` has no default in `Bindings_Camelot.xml` (`ui`), but the player may have bound it; the preview warns, and
+  元に戻す restores the old binding. Layout 7 → 8 shows the one-time すべて配置 notice and moves nothing by itself.
 
 ---
 
@@ -517,6 +543,8 @@ Nature's Swiftness + Healing Wave and cures over portraits too.
 5. 元に戻す after the apply restores bar 6's old visibility, bar 5's spells and the old keys.
 6. *(0.8.0)* Mouse4/5 over a party, player or target portrait cast that button's spell on that unit; left and right
    click still target and open the menu; no blocked-action error when the group changes in combat.
+7. *(0.8.1)* Middle mouse casts Walk on Air for a Skyborne and stops fall damage; `/sensei verify` shows race id 34
+   and that 1259416 is known; a middle click on a portrait does what it did before.
 
 ## Open questions for Oskar
 
@@ -538,4 +566,5 @@ Nature's Swiftness + Healing Wave and cures over portraits too.
 - **Ctrl+Z・X・C＝風のトーテム。** Z Grounding、X Windfury Totem、C Grace of Air。
 - **Ctrl+1〜3＝移動。** 1 Ghost Wolf、2 Water Walking、3 Water Breathing。
 - 1〜5 はダメージの呪文：1 Flame Shock、2 Lightning Bolt、3 Chain Lightning、4 Purge、5 Frost Shock。5 も使うようになった。
+- *(0.8.1)* マウスの真ん中のボタン＝Walk on Air（落ちている時に押すと落下ダメージを受けない）。Skysight は Action Bar 6 のボタン10をクリック。
 - マウスのボタンは今まで通り。ただしバーは画面の真ん中に出る Action Bar 6 になるので、編集モードで下のバーの近くに動かそう。

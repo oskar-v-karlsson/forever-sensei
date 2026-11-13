@@ -178,7 +178,10 @@ def login(lua, ns, level=20):
     data = PACKS.get(stub["class"])
     if data:
         ranks = rank_levels(data["folder"])
+        race_id = stub.race[3]
         for e in data["spells"]:
+            if e.get("races") and race_id not in e["races"]:
+                continue  # another race's racial: not in this character's spellbook
             for r, (rid, lv) in enumerate(ranks.get(e["key"], [(e["id"], e["level"])]), 1):
                 stub.names[rid] = e["name"]
                 stub.levels[rid] = lv
@@ -251,8 +254,49 @@ def check_runtime():
         # A Paladin with only the Shaman pack installed: the same note, idle.
         check_idle(lang, "PALADIN", skip=("ForeverSensei_Paladin",))
         check_api_mismatch(lang)
+        check_races(lang)
     check_language()
     return reports
+
+
+def check_races(lang):
+    """The Skyborne racials (layout 8) are race-gated: an Orc shaman gets no card, slot or BUTTON3 key for them, the
+    Skyborne race without Skysight gets only Walk on Air, and a known racial always counts."""
+    for label, race, known, want in (("Orc", ("Orc", "Orc", 2), (), set()),
+                                     ("High Order", ("Skyborne", "Skyborne", 33), (), {"walk_on_air"}),
+                                     ("unknown id", ("Skyborne", "Skyborne", 99), (1259416,), {"walk_on_air"})):
+        label = f"runtime races {label} [{lang}]"
+        lua, ns = new_runtime(db="{ settings = { language = %r } }" % lang)
+        stub = lua.globals().STUB
+        stub.race = lua.table_from(list(race))
+        for sid in known:
+            stub.known[sid] = True
+        login(lua, ns, 60)
+        listed = {e["key"] for e in (py(ns.Spells.List()) or [])}
+        L = ns.spec.layout
+        got = {k for k in ("walk_on_air", "skysight") if k in listed}
+        if got != want:
+            problem(f"{label}: racials {sorted(got)} in the skill list, expected {sorted(want)}")
+        slots = {k for k in ("walk_on_air", "skysight") if L.bySpell[k] is not None}
+        if slots != want:
+            problem(f"{label}: racials {sorted(slots)} have a slot, expected {sorted(want)}")
+        gated = {int(k) for k in (py(L.gatedSlots) or {})}
+        want_gated = {n for k, n in (("walk_on_air", 153), ("skysight", 154)) if k not in want}
+        if gated != want_gated:
+            problem(f"{label}: gated slots {sorted(gated)}, expected {sorted(want_gated)}")
+        ns.Layout.Execute(ns.Layout.BuildPlan())
+        stub.runTimers()
+        acts = py(stub.actions) or {}
+        if ("walk_on_air" in want) != (stub.bindings["BUTTON3"] == "MULTIACTIONBAR5BUTTON9"):
+            problem(f"{label}: BUTTON3 is {stub.bindings['BUTTON3']}")
+        for slot in want_gated:
+            if slot in acts:
+                problem(f"{label}: gated slot {slot} was filled with {acts[slot]}")
+        for tab in ("role", "skills", "layout"):
+            ns.Guide.Open(tab)
+        stub.runTimers()
+        for e in unexpected_errors(ns):
+            problem(f"{label}: ns.errors: {e}")
 
 
 WINDOWS = ("ForeverSenseiCard", "ForeverSenseiTrainer", "ForeverSenseiTalentHint", "ForeverSenseiPreview",
@@ -674,6 +718,12 @@ def check_spells(pack, sources):
             problem(f"spell {s['key']}: verified date must be YYYY-MM-DD")
         if not 1 <= int(s.get("level") or 0) <= 60:
             problem(f"spell {s['key']}: level out of range")
+        if "races" in s:
+            races = s["races"]
+            if not isinstance(races, list) or not races or not all(isinstance(r, int) and r > 0 for r in races):
+                problem(f"spell {s['key']}: races must be a list of race ids")
+            if s.get("talent") or s.get("level") != 1:
+                problem(f"spell {s['key']}: a racial is known from level 1 and is no talent")
 
 
 def check_layout(pack, layout):
@@ -899,15 +949,18 @@ def slot_what(s):
     return s.get("spell") or ("!" + s["combo"] if s.get("combo") else "@" + str(s.get("item")))
 
 
-def check_blocks(layout, label, grid, clicks, mouse_order, ooc):
-    """The exact grid (key → entry), the clicked buttons ((bar, button) → entry), the bars and the block rule."""
+def check_blocks(layout, label, grid, clicks, mouse_order, ooc, bar6_more=(), raced=()):
+    """The exact grid (key → entry), the clicked buttons ((bar, button) → entry), the bars and the block rule.
+    bar6_more = Action Bar 6's keys after the six mouse pairs (buttons 7-12, the shaman's BUTTON3); raced = race-gated
+    entries (spare for other races, so an L.old leftover may sit on their button)."""
     slots = layout["slots"]
+    bar6_more = list(bar6_more) + [None] * (6 - len(bar6_more))
     bars = {b["id"]: b for b in layout["bars"]}
     want_bars = [
         ("main", 1, "ACTIONBUTTON%d", None, ROW_KEYS),
         ("bar2", 61, "MULTIACTIONBAR1BUTTON%d", "PROXY_SHOW_ACTIONBAR_2", ["SHIFT-" + k for k in ROW_KEYS]),
         ("bar3", 49, "MULTIACTIONBAR2BUTTON%d", "PROXY_SHOW_ACTIONBAR_3", ["CTRL-" + k for k in ROW_KEYS]),
-        ("bar6", 145, "MULTIACTIONBAR5BUTTON%d", "PROXY_SHOW_ACTIONBAR_6", mouse_order + [None] * 6),
+        ("bar6", 145, "MULTIACTIONBAR5BUTTON%d", "PROXY_SHOW_ACTIONBAR_6", mouse_order + bar6_more),
         ("bar4", 25, "MULTIACTIONBAR3BUTTON%d", "PROXY_SHOW_ACTIONBAR_4", [None] * 12),
     ]
     if [b["id"] for b in layout["bars"]] != [w[0] for w in want_bars]:
@@ -952,7 +1005,7 @@ def check_blocks(layout, label, grid, clicks, mouse_order, ooc):
     allowed = set(layout["allowedKeys"])
     if allowed != set(grid) | spare_keys:
         problem(f"{label}: allowedKeys must be the grid's and spare keys (diff {sorted(allowed ^ (set(grid) | spare_keys))})")
-    all_keys = {m + k for m in ("", "SHIFT-", "CTRL-") for k in ROW_KEYS} | MOUSE_KEYS
+    all_keys = {m + k for m in ("", "SHIFT-", "CTRL-") for k in ROW_KEYS} | MOUSE_KEYS | {k for k in bar6_more if k}
     if allowed != all_keys:
         problem(f"{label}: every allowed key must be bound (no own keys since layout v4): missing {sorted(all_keys - allowed)}")
     for k in ("ownKeys", "own", "oldOwn", "keepDefault", "keyNotes"):
@@ -974,7 +1027,7 @@ def check_blocks(layout, label, grid, clicks, mouse_order, ooc):
             want = pairs[start:start + len(members)]
             if len(members) > len(pairs) - start:
                 problem(f"{label}: family {f['id']} is bigger than its mouse pairs")
-        elif block in ("BUTTON4", "BUTTON5"):
+        elif block in ("BUTTON4", "BUTTON5", "BUTTON3"):
             want = [m + block for m in ("", "SHIFT-", "CTRL-")][:len(members)]
         else:
             problem(f"{label}: family {f.get('id')} has an unknown block {block}")
@@ -987,12 +1040,12 @@ def check_blocks(layout, label, grid, clicks, mouse_order, ooc):
             if s.get("bar") != "bar6" or s.get("key"):
                 problem(f"{label}: {f['id']} spill-over {m} must be clicked on Action Bar 6")
     # Retired bars and leftovers: L.old slots are off the plan (spare or on a retired bar).
-    planned = {s["slot"] for s in slots}
+    planned = {s["slot"] for s in slots if slot_what(s) not in raced}
     ranges = [(b["first"], b["first"] + 11) for b in layout["bars"] + (layout.get("retired") or [])]
     for slot_, key in (layout.get("old") or {}).items():
         slot_ = int(slot_)
         if slot_ in planned or not any(a <= slot_ <= z for a, z in ranges):
-            problem(f"{label}: old slot {slot_} ({key}) must be off the plan, on a planned or retired bar")
+            problem(f"{label}: old slot {slot_} ({key}) must be off the plan (or on a race-gated button), on a planned or retired bar")
     for r in layout.get("retired") or []:
         if r["first"] in (1, 61, 49, 145, 25):
             problem(f"{label}: retired bar {r['id']} is a planned bar")
@@ -1027,9 +1080,10 @@ def check_shaman(pack, sources):
         "BUTTON4": "riptide", "BUTTON5": "natures_swiftness",
         "SHIFT-BUTTON4": "cure_poison", "SHIFT-BUTTON5": "cure_disease",
         "CTRL-BUTTON4": "poison_cleansing_totem", "CTRL-BUTTON5": "disease_cleansing_totem",
+        "BUTTON3": "walk_on_air",
     }
     clicks = {
-        ("bar6", 7): "strength_of_earth_totem", ("bar6", 8): "@healpot",
+        ("bar6", 7): "strength_of_earth_totem", ("bar6", 8): "@healpot", ("bar6", 10): "skysight",
         ("bar4", 1): "ancestral_spirit", ("bar4", 2): "astral_recall", ("bar4", 3): "rockbiter_weapon",
         ("bar4", 4): "flametongue_weapon", ("bar4", 5): "frostbrand_weapon", ("bar4", 6): "windfury_weapon",
         ("bar4", 7): "lightning_shield", ("bar4", 8): "@elixir",
@@ -1037,10 +1091,16 @@ def check_shaman(pack, sources):
     ooc = {"ancestral_spirit", "astral_recall", "rockbiter_weapon", "flametongue_weapon", "frostbrand_weapon",
            "windfury_weapon", "lightning_shield", "@elixir"}
     mouse = ["BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]
-    check_blocks(layout, "layout", grid, clicks, mouse, ooc)
+    raced = {s["key"] for s in spells if s.get("races")}
+    check_blocks(layout, "layout", grid, clicks, mouse, ooc, bar6_more=[None, None, "BUTTON3"], raced=raced)
     if [f["id"] for f in layout.get("families") or []] != [
-            "damage", "calls", "fire", "water", "travel", "earth", "air", "cursorheals", "cures", "cleansing"]:
-        problem("layout: families must be damage, calls, fire, water, travel, earth, air and the three mouse pairs")
+            "damage", "calls", "fire", "water", "travel", "earth", "air", "cursorheals", "cures", "cleansing", "racial"]:
+        problem("layout: families must be damage, calls, fire, water, travel, earth, air, the three mouse pairs and "
+                "the racials (Walk on Air on the middle mouse button, Skysight clicked)")
+    # Layout 8 (0.8.1, Erika's request): the Skyborne racials, gated on race (simc-forever nonclass.txt race masks).
+    racials = {s["key"]: (s.get("id"), s.get("races"), s.get("src")) for s in spells if s.get("races")}
+    if racials != {"walk_on_air": (1259416, [33, 34], "simc_race"), "skysight": (1259686, [34], "simc_race")}:
+        problem(f"shaman: racials must be Walk on Air 1259416 (races 33, 34) and Skysight 1259686 (race 34), are {racials}")
     if sorted(pack_items) != ["elixir", "healpot", "health", "mana"]:
         problem(f"shaman: items must be mana, health, healpot and elixir, are {sorted(pack_items)}")
     if layout.get("noSlotLines") != [{"kind": "totembar", "text": "ui.layout.nobar"},
@@ -1091,11 +1151,12 @@ def check_shaman(pack, sources):
     kinds_used = {layout["macroKind"].get(k, "help") for k in layout["macros"]}
     if {"interrupt", "harm", "nshw", "help"} - kinds_used:
         problem("layout: earth_shock interrupt, purge harm and the NS + Healing Wave macro are required")
-    # Layout 7 (0.7.0, family blocks) is the plan: characters with layout 6 get the one-time "apply all" notice. A
-    # full apply clears layout 6's Action Bar 5 spells, layout 4's Mana Tide on Ctrl+5, layout 3's bar 6 spares and
-    # layout 5's bar 4 Fire spells while they still hold exactly that spell.
-    if layout.get("version") != 7:
-        problem(f"layout: version must be 7 (family blocks, 0.7.0), is {layout.get('version')}")
+    # Layout 8 (0.8.1) is the plan: characters with layout 7 or older get the one-time "apply all" notice. A full
+    # apply clears layout 6's Action Bar 5 spells, layout 4's Mana Tide on Ctrl+5, layout 3's bar 6 spares (buttons 9
+    # and 10 only while they are spare: another race's racial) and layout 5's bar 4 Fire spells while they still hold
+    # exactly that spell.
+    if layout.get("version") != 8:
+        problem(f"layout: version must be 8 (Skyborne racials, 0.8.1), is {layout.get('version')}")
     old = {int(k): v for k, v in (layout.get("old") or {}).items()}
     for slot_, key in ((37, "totemic_recall"), (41, "mana_tide_totem"), (44, "fire_nova"), (48, "ghost_wolf"),
                        (153, "grounding_totem"), (154, "mana_tide_totem"), (156, "ghost_wolf")):
@@ -1107,8 +1168,9 @@ def check_shaman(pack, sources):
                 problem(f"layout: old entry {k} is not a spell")
     want_warn = {"CTRL-%d" % i: "ui.preview.warn.stance" for i in range(1, 6)}
     want_warn["CTRL-R"] = "ui.preview.warn.fps"
+    want_warn["BUTTON3"] = "ui.preview.warn.middle"
     if layout.get("defaultWarn") != want_warn:
-        problem("layout: defaultWarn must be Ctrl+1-5 (stance bar) and Ctrl+R (framerate)")
+        problem("layout: defaultWarn must be Ctrl+1-5 (stance bar), Ctrl+R (framerate) and the middle mouse button")
 
     # --- talents ----------------------------------------------------------------------------------------------
     tree_points = check_talents_points(talents)

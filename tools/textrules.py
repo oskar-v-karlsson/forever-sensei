@@ -8,7 +8,7 @@ import re
 
 # Names that are not spells or talents but still stay in English letters when the English text has them.
 EXTRA_NAMES = [
-    "ForeverSensei", "Skyborne", "Windshaper", "Wind Blessed", "Skysight", "Charged", "Mobalytics", "Wowhead",
+    "ForeverSensei", "Skyborne", "Windshaper", "Wind Blessed", "Skysight", "Walk on Air", "Charged", "Mobalytics", "Wowhead",
     "Hearthstone", "Restoration", "Enhancement", "Elemental", "Dual Specialization", "Talented Legacy",
     "Improved Ghost Wolf", "Call of Earth", "Call of Fire", "Call of Water", "Call of Air", "Forever",
     "Ctrl+C", "Shift", "/sensei",

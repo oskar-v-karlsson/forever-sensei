@@ -679,7 +679,7 @@ function Layout.Warnings(plan)
       if b.old == "TOGGLEFPS" then id = "ui.preview.warn.fps" end
     end
     if id then add(id, b.key) end
-    if b.key:match("BUTTON%d$") then add("ui.preview.warn.mouse") end
+    if b.key:match("BUTTON[45]$") then add("ui.preview.warn.mouse") end
   end
   local out = {}
   for _, id in ipairs(order) do table.insert(out, ns.T(id, { key = table.concat(keys[id], ", ") })) end
