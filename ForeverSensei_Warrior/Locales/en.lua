@@ -1,0 +1,168 @@
+-- ForeverSensei_Warrior/Locales/en.lua: English text of the Warrior pack (skills, talents, guide and the class-specific
+-- interface lines the core shows). The pack is English only (## X-FS-Languages: en): with Japanese chosen, the core
+-- shows these texts in English (ns.Raw falls back to the pack's English).
+-- Facts come from WoW: Forever sources only (see SOURCES.md and the src fields in Data/*.lua).
+-- Placeholders are {name}. The core looks these up before its own texts.
+local _, P = ...
+
+P.locales = P.locales or {}
+P.localeOrder = {}
+local data = {}
+P.locales.en = data
+-- Proxy that records the order of ids (the review tab walks them in this order, before the core's ids).
+local L = setmetatable({}, { __newindex = function(_, k, v)
+  if data[k] == nil then table.insert(P.localeOrder, k) end
+  data[k] = v
+end })
+
+---------------------------------------------------------------------------------------------------
+-- Skills: what = what it does (facts), when = when to use it (advice).
+---------------------------------------------------------------------------------------------------
+L["spell.battle_stance.what"] = "A balanced combat stance. Most Arms attacks work in it. Changing stance has a 1-second cooldown."
+L["spell.battle_stance.when"] = "Arms lives in Battle Stance. Stay in it unless a button changes stance for you."
+L["spell.heroic_strike.what"] = "Your next swing hits harder and causes a lot of threat. It replaces your next normal attack, so it doesn't trigger the global cooldown."
+L["spell.heroic_strike.when"] = "Use it when your rage is very high (90 or more) and nothing better is ready."
+L["spell.battle_shout.what"] = "Raises the melee attack power of your party members near you for 3 minutes."
+L["spell.battle_shout.when"] = "Shout before every pull and keep it up."
+L["spell.charge.what"] = "Rush to an enemy 8 to 25 yards away, gain rage and stun it briefly. Battle Stance only, and only out of combat. 15-second cooldown."
+L["spell.charge.when"] = "Your opener: point the mouse at the enemy and press it. In a dungeon, wait until the tank has the enemies."
+L["spell.rend.what"] = "The enemy bleeds for 9 seconds. Battle or Defensive Stance."
+L["spell.rend.when"] = "Put it on enemies that live longer than 9 seconds, and renew it when it has less than 3 seconds left."
+L["spell.thunder_clap.what"] = "Damages up to 4 enemies within 8 yards and makes them attack more slowly for 10 seconds. Battle or Defensive Stance. 6-second cooldown."
+L["spell.thunder_clap.when"] = "Use it on groups of enemies when the group asks for it, to soften their hits on the tank."
+L["spell.hamstring.what"] = "Damages the enemy and slows its movement for 15 seconds. Battle or Berserker Stance."
+L["spell.hamstring.when"] = "Stop a fleeing enemy. With a shaman's Windfury Totem it is also a cheap attack for extra hits."
+L["spell.defensive_stance.what"] = "A defensive stance: you take 10% less damage, deal 10% less damage and cause much more threat."
+L["spell.defensive_stance.when"] = "Only when you must tank. The threat and shield buttons change to it for you."
+L["spell.bloodrage.what"] = "Gives rage at once and more over a few seconds, at the cost of some health. 1-minute cooldown."
+L["spell.bloodrage.when"] = "Use it as often as you can, but keep one ready for a boss below 20% health (for Execute)."
+L["spell.sunder_armor.what"] = "Lowers the enemy's armor and causes a lot of threat. Stacks up to 5 times and lasts 30 seconds."
+L["spell.sunder_armor.when"] = "Stack it to 5 on bosses: the whole group's physical damage goes up."
+L["spell.taunt.what"] = "Makes the enemy attack you for 3 seconds. Defensive Stance. 8-second cooldown."
+L["spell.taunt.when"] = "An emergency tool to save the healer: when an enemy attacks the healer and the tank can't take it back. Then let the tank take it again."
+L["spell.overpower.what"] = "A strike that can't be blocked, dodged or parried. Usable only after the enemy dodges. Battle Stance. 5-second cooldown."
+L["spell.overpower.when"] = "Press it whenever it lights up. Bloodthrill (talent) can also light it up when you hit an enemy with your Rend."
+L["spell.shield_bash.what"] = "Needs a shield. Hits with your shield and interrupts a spell cast. Battle or Defensive Stance. 12-second cooldown."
+L["spell.shield_bash.when"] = "Only with a shield equipped, which Arms rarely has. Interrupt with Pummel or War Stomp instead."
+L["spell.demoralizing_shout.what"] = "Lowers the melee attack power of enemies near you for 45 seconds."
+L["spell.demoralizing_shout.when"] = "Use it on groups when the tank or the group asks for it."
+L["spell.revenge.what"] = "A counterattack with a lot of threat. Usable after you block, dodge or parry. Defensive Stance. 5-second cooldown."
+L["spell.revenge.when"] = "An emergency tool to save the healer, for when you have to tank. Arms doesn't use it otherwise."
+L["spell.shield_block.what"] = "Needs a shield. Raises your chance to block for 7 seconds. Defensive Stance. 5-second cooldown."
+L["spell.shield_block.when"] = "Only with a shield equipped, which Arms rarely has, when you have to tank."
+L["spell.mocking_blow.what"] = "Hits the enemy and makes it attack you for 6 seconds. Battle Stance. 2-minute cooldown."
+L["spell.mocking_blow.when"] = "An emergency tool to save the healer: pull an enemy off the healer until the tank takes it back."
+L["spell.disarm.what"] = "Takes the enemy's weapon away for 10 seconds. Defensive Stance. 1-minute cooldown."
+L["spell.disarm.when"] = "Use it on a hard-hitting enemy with a weapon, mostly when you fight alone."
+L["spell.cleave.what"] = "Your next swing also hits a second enemy near your target. It replaces your next normal attack."
+L["spell.cleave.when"] = "Against two or more enemies, when your rage is high (75 or more)."
+L["spell.retaliation.what"] = "For 15 seconds you hit back every enemy that hits you in melee from the front. Battle Stance. 15-minute cooldown."
+L["spell.retaliation.when"] = "Save it for a boss or for many enemies at once."
+L["spell.slam.what"] = "Hits the enemy with weapon damage plus extra damage. 1.5-second cast, 15-second cooldown (shorter with Improved Slam)."
+L["spell.slam.when"] = "Use it in your rotation after Mortal Strike. If a caster needs an interrupt while you cast Slam, Pummel cancels the Slam for you."
+L["spell.intimidating_shout.what"] = "Your target cowers and up to 5 enemies near you flee in fear for 8 seconds. 3-minute cooldown."
+L["spell.intimidating_shout.when"] = "When you are alone and in trouble. In a dungeon, fleeing enemies pull more enemies, so don't use it there."
+L["spell.execute.what"] = "A finishing strike for enemies at 20% health or less. Extra rage adds damage. Battle or Berserker Stance."
+L["spell.execute.when"] = "Once the enemy is at 20% health or less, press it before anything else."
+L["spell.challenging_shout.what"] = "All enemies near you attack you for 6 seconds. 10-minute cooldown."
+L["spell.challenging_shout.when"] = "An emergency tool: when many enemies run to the healer at once."
+L["spell.shield_wall.what"] = "Needs a shield. You take much less damage for 12 seconds. Defensive Stance. 15-minute cooldown."
+L["spell.shield_wall.when"] = "Only with a shield equipped, which Arms rarely has: when you tank and are about to die."
+L["spell.spearing_strike.what"] = "A strike for 75% weapon damage, more against Giants, Dragonkin and mounted enemies (and it dismounts them). Battle Stance. 20-second cooldown."
+L["spell.spearing_strike.when"] = "Use it in your rotation, early against Dragonkin and Giants. Not during Sweeping Strikes."
+L["spell.sweeping_strikes.what"] = "Your next melee attacks also hit a second enemy nearby. Battle Stance. 30-second cooldown."
+L["spell.sweeping_strikes.when"] = "First press against two or more enemies. Cleave and Whirlwind then hit even more."
+L["spell.berserker_stance.what"] = "An aggressive stance: 3% more critical strike chance, but you take 10% more damage."
+L["spell.berserker_stance.when"] = "Arms only needs it for Whirlwind, Pummel and Intercept. Their buttons change to it for you."
+L["spell.berserker_rage.what"] = "For 10 seconds you can't be feared or incapacitated, and you gain extra rage when you take damage. Berserker Stance. 30-second cooldown."
+L["spell.berserker_rage.when"] = "Against enemies that fear you. Arms seldom needs it otherwise."
+L["spell.intercept.what"] = "Rush to an enemy 8 to 25 yards away, damage it and stun it briefly. Usable in combat. Berserker Stance. 30-second cooldown."
+L["spell.intercept.when"] = "To reach an enemy that runs away or attacks a party member far from you."
+L["spell.whirlwind.what"] = "Attacks up to 4 enemies near you with your weapon. Berserker Stance. 10-second cooldown."
+L["spell.whirlwind.when"] = "Against groups of enemies, after Sweeping Strikes. Its button changes to Berserker Stance first."
+L["spell.pummel.what"] = "Hits the enemy and interrupts its spell cast. Berserker Stance. 10-second cooldown."
+L["spell.pummel.when"] = "Point at the caster and press it. The first press changes to Berserker Stance, the second interrupts."
+L["spell.mortal_strike.what"] = "A strong strike that also makes healing on the enemy less effective for 10 seconds. 6-second cooldown."
+L["spell.mortal_strike.when"] = "Your main attack: use it whenever it is ready."
+L["spell.recklessness.what"] = "For 15 seconds you get much more critical strike chance and can't be feared, but you take more damage. Berserker Stance. 30-minute cooldown."
+L["spell.recklessness.when"] = "Your one big damage cooldown: save it for a boss."
+L["spell.reckless_swings.what"] = "Costs 25% of your health: your next melee attacks give extra rage for 8 seconds. 15-second cooldown."
+L["spell.reckless_swings.when"] = "Use it on cooldown when your health is safe."
+L["spell.war_stomp.what"] = "Tauren only. Stuns up to 5 enemies within 8 yards for 2 seconds. 0.5-second cast, 90-second cooldown."
+L["spell.war_stomp.when"] = "An interrupt you always have: use it on a caster next to you, or when Pummel is on cooldown."
+L["spell.cultivation.what"] = "Tauren only. Grows a copy of a nearby herb that anyone can pick. 15-minute cooldown."
+L["spell.cultivation.when"] = "When you or a friend gather herbs. Click it on Action Bar 4."
+
+---------------------------------------------------------------------------------------------------
+-- Talents: why this talent is in the plan.
+---------------------------------------------------------------------------------------------------
+L["talent.improved_rend.why"] = "Rend deals more damage. Rend is the first button of your rotation."
+L["talent.improved_heroic_strike.why"] = "Heroic Strike costs less rage."
+L["talent.improved_overpower.why"] = "Overpower gets more critical strike chance."
+L["talent.improved_tactical_mastery.why"] = "You keep more rage when you change stance: 25 at 3 points. Your stance buttons lose less rage."
+L["talent.deep_wounds.why"] = "Your critical strikes make the enemy bleed."
+L["talent.impale.why"] = "Your critical strikes with abilities deal more damage."
+L["talent.two_handed_specialization.why"] = "More damage with two-handed weapons."
+L["talent.spearing_strike.why"] = "A new attack button for your rotation, strong against Dragonkin and Giants."
+L["talent.sweeping_strikes.why"] = "Your attacks also hit a second enemy: your best button against groups."
+L["talent.bloodthrill.why"] = "Hitting an enemy with your Rend can let you use Overpower."
+L["talent.weaponmaster.why"] = "A bonus for your weapon type: an extra attack (swords), armor ignored (maces and staves) or critical strike chance (axes and polearms)."
+L["talent.improved_slam.why"] = "Slam has a shorter cooldown and a shorter cast."
+L["talent.mortal_strike.why"] = "Your strongest attack. The guide takes it at level 39."
+L["talent.anger_management.why"] = "You slowly gain rage in combat."
+L["talent.cruelty.why"] = "More critical strike chance."
+L["talent.unbridled_wrath.why"] = "Your melee hits may give extra rage."
+L["talent.enrage.why"] = "When you are hit, you may deal more physical damage for a short time. The guide says it is much better than Lingering Rage outdoors and in dungeons."
+L["talent.reckless_swings.why"] = "A rage button for your rotation (Z X C block)."
+L["talent.improved_bloodrage.why"] = "Bloodrage gives more rage."
+L["talent.improved_execute.why"] = "Execute costs less rage."
+L["talent.note.order"] = "This addon follows the leveling order of the Mobalytics Arms Warrior guide exactly as written (32/18/1 at level 60). You get one point per level from level 10."
+L["talent.note.enrage"] = "The guide takes Enrage, not Lingering Rage: Enrage is much better outdoors and in dungeons."
+
+---------------------------------------------------------------------------------------------------
+-- Guide sections (Data/Arms/Guide.lua has the sources per paragraph).
+---------------------------------------------------------------------------------------------------
+L["guide.role.p1"] = "As an Arms Warrior you deal melee damage. You are strong against two enemies at once and gain a lot from a shaman's Windfury Totem."
+L["guide.role.p2"] = "You live in Battle Stance and use rage. Arms has one big damage cooldown, Recklessness (30 minutes)."
+L["guide.role.p3"] = "Tauren: War Stomp stuns enemies around you, a strong interrupt you always have. Endurance gives 5% more health, and Plainsrunning makes you run faster until your mount at level 40."
+L["guide.rotation.p1"] = "Before the pull: Battle Shout (Shift+1). Then Charge (Ctrl+Mouse4) when the tank has the enemies."
+L["guide.rotation.p2"] = "One enemy: Reckless Swings on cooldown (X), Bloodrage often (Z), Sunder Armor to 5 on bosses (E), Rend if it is missing and the enemy lives 9 seconds (1)."
+L["guide.rotation.p3"] = "Then Overpower when it lights up (2), Spearing Strike against Dragonkin and Giants (R), Mortal Strike (4), Slam (3) and Execute (5). Renew Rend when it has less than 3 seconds left. Use Heroic Strike (Q) only at 90 rage or more."
+L["guide.rotation.p4"] = "Execute phase: when the enemy is at 20% health or less, press Execute (5) before anything else."
+L["guide.rotation.p5"] = "Several enemies: Sweeping Strikes (Shift+Q), Rend on the main target, Overpower, Whirlwind (Shift+E), Rend on the others, then Mortal Strike, Slam and Execute. Cleave (Shift+R) at 75 rage or more. No Hamstring or Spearing Strike during Sweeping Strikes."
+L["guide.stances.p1"] = "Arms stays in Battle Stance. Berserker Stance (level 30) is only for Whirlwind, Pummel and Intercept. Defensive Stance is only for when you must tank."
+L["guide.stances.p2"] = "Action Bar 1 is the same in every stance: the addon writes your buttons to the Battle, Defensive and Berserker pages of the bar."
+L["guide.stances.p3"] = "A button that your stance can't use changes stance first. Press it twice: the first press changes stance, the second uses the spell. The stances are on Ctrl+1, 2 and 3."
+L["guide.rage.p1"] = "You keep up to 10 rage when you change stance, and 25 with Improved Tactical Mastery (3 points, talent). The rest is lost."
+L["guide.rage.p2"] = "Before you change stance, spend rage down to about 25. Change back to Battle Stance at about 25 rage."
+L["guide.rage.p3"] = "Before a boss, save up some rage. Bloodrage and Reckless Swings give rage when you need it."
+L["guide.cooldowns.p1"] = "Recklessness (30 minutes, Shift+X) and Retaliation (15 minutes, Shift+Z) are for bosses."
+L["guide.cooldowns.p2"] = "Reckless Swings (X) every 15 seconds and Bloodrage (Z) every minute. Keep one Bloodrage for a boss below 20% health."
+L["guide.cooldowns.p3"] = "Survive: a Healthstone or Healing Potion on Shift+Mouse4, a bandage on yourself on Shift+Mouse5 (out of combat, it needs First Aid)."
+L["guide.manners.p1"] = "Let the tank pull and get the enemies first, then Charge."
+L["guide.manners.p2"] = "The group may ask for Demoralizing Shout and Thunder Clap. On a boss, stack Sunder Armor to 5: it raises the whole group's physical damage a lot."
+L["guide.manners.p3"] = "Sweeping Strikes and Whirlwind reach from your own character. Cleave also triggers Sweeping Strikes. Jump to reach further with Whirlwind."
+L["guide.manners.p4"] = "Interrupt casters with Pummel (Mouse4) or War Stomp (Mouse5). Taunt, Mocking Blow and Revenge (Ctrl+Q, E, R) are emergency tools to save the healer."
+
+---------------------------------------------------------------------------------------------------
+-- Interface text that belongs to this class (the core's windows show it).
+---------------------------------------------------------------------------------------------------
+L["ui.where.totembar"] = "No bar slot: use it from the spellbook when needed."
+L["ui.preview.warn.stance"] = "By default these keys use the stance bar: {key}. In this layout they change stance from Action Bar 3. The stance bar still shows your stances."
+L["ui.layout.intro"] = "Without a modifier (Action Bar 1, the same in every stance) are your attacks: 1 to 5 the strikes (Rend, Overpower, Slam, Mortal Strike, Execute), Q to F the other strikes (Heroic Strike, Sunder Armor, Spearing Strike, Hamstring), Z to C the rage buttons (Bloodrage, Reckless Swings, Berserker Rage)."
+L["ui.layout.intro2"] = "Shift (Action Bar 2) and Ctrl (Action Bar 3) are split into blocks: 1 to 5, Q to F, and Z to C. Shift: shouts, attacks for groups, cooldowns. Ctrl: stances, emergency threat tools and shield tools. The mouse side buttons (in pairs) are on Action Bar 6: Pummel and War Stomp, then potion and bandage with Shift, then Charge and Intercept with Ctrl. Action Bar 4 is for clicking out of combat."
+L["ui.layout.items"] = "Potions and bandages use macros that ForeverSensei keeps up to date: FS_HEALTH on Shift+Mouse4 (a Healthstone, else a Healing Potion) and FS_BANDAGE on Shift+Mouse5 (a bandage on yourself). Each uses the best one in your bags. If your bags change in combat, it is updated after combat."
+L["ui.layout.changed"] = "The warrior key layout has changed. Your bars have not been changed. Press Apply full layout to see what would change first. Your current bars are saved, so you can undo it."
+L["ui.layout.clean"] = "Empty the bars removes only the buttons this layout uses, on every stance page of Action Bar 1. Free buttons and buttons this layout doesn't use stay. Your bars are saved first, so Undo puts them back."
+L["ui.targeting.mouseover.help"] = "Pummel, Charge and Intercept hit the enemy under the mouse, else your target. The other buttons use your target."
+L["ui.targeting.click.help"] = "Click an enemy first to target it, then press the key. The stance buttons stay macros, so they still change stance for you."
+L["ui.trainer.title"] = "At the Warrior trainer"
+L["ui.trainer.intro"] = "Skills you can learn now from a Warrior trainer."
+L["ui.talents.intro"] = "Talent order from the Mobalytics Arms Warrior guide. You get one point per level from level 10."
+L["ui.role.tank"] = "Tanking"
+L["ui.tab.role"] = "Role"
+L["ui.tab.rotation"] = "Rotation"
+L["ui.tab.stances"] = "Stances"
+L["ui.tab.rage"] = "Rage"
+L["ui.tab.cooldowns"] = "Cooldowns"
+L["ui.tab.manners"] = "Dungeon manners"

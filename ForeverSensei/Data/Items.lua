@@ -1,5 +1,5 @@
--- Data/Items.lua: potions, elixirs and Healthstones the layout's item macros use (FS_MANA, FS_HEALPOT, FS_ELIXIR,
--- FS_HEALTH).
+-- Data/Items.lua: potions, elixirs, Healthstones and bandages the layout's item macros use (FS_MANA, FS_HEALPOT,
+-- FS_ELIXIR, FS_HEALTH, FS_BANDAGE).
 -- Every item was checked on Wowhead Forever (https://www.wowhead.com/forever/item=<id>, tooltip data from
 -- nether.wowhead.com/forever/tooltip/item/<id>) on the verified date. List order is best first; the macro uses the
 -- first one in the bags that the player's level allows. level = required level from the Forever tooltip (nil: none).
@@ -84,6 +84,28 @@ ns.ItemData = {
         { id = 9155,   name = "Arcane Elixir",         level = 37 }, -- +20, 30 minutes
         { id = 250342, name = "Lesser Arcane Elixir",  level = 25 }, -- +15, 30 minutes (new in Forever)
         { id = 247754, name = "Minor Arcane Elixir" },               -- +5, 30 minutes (new in Forever)
+      },
+    },
+    -- Bandages (0.9.0, the warrior's FS_BANDAGE): no required level, but each needs a First Aid skill (firstAid, from
+    -- the Forever tooltip; heals = total healing over 8 seconds). self: the macro uses it on yourself. The macro uses
+    -- the best one in the bags the client says you can use (C_Item.IsUsableItem: enough First Aid skill).
+    bandage = {
+      macro = "FS_BANDAGE",
+      label = "Bandage",
+      icon = "INV_Misc_Bandage_15",
+      self = true,
+      verified = "2026-11-14",
+      list = {
+        { id = 14530, name = "Heavy Runecloth Bandage",  firstAid = 225 }, -- 2000
+        { id = 14529, name = "Runecloth Bandage",        firstAid = 200 }, -- 1360
+        { id = 8545,  name = "Heavy Mageweave Bandage",  firstAid = 175 }, -- 1104
+        { id = 8544,  name = "Mageweave Bandage",        firstAid = 150 }, -- 800
+        { id = 6451,  name = "Heavy Silk Bandage",       firstAid = 125 }, -- 640
+        { id = 6450,  name = "Silk Bandage",             firstAid = 100 }, -- 400
+        { id = 3531,  name = "Heavy Wool Bandage",       firstAid = 75 },  -- 301
+        { id = 3530,  name = "Wool Bandage",             firstAid = 50 },  -- 161
+        { id = 2581,  name = "Heavy Linen Bandage",      firstAid = 20 },  -- 114
+        { id = 1251,  name = "Linen Bandage",            firstAid = 1 },   -- 66
       },
     },
   },

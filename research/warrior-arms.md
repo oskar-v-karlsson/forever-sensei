@@ -1,8 +1,9 @@
 # Warrior (Arms) research: spells, stance pages, grid proposal
 
-Status: **research and proposal, for Oskar's approval**. No code is changed. Once Oskar approves the grid (part 4) and
-answers the open questions (part 6), a build task turns this into a third class pack, `ForeverSensei_Warrior`
-(Arms, layout 1), plus the core changes in part 2.
+Status: **approved as proposed** (commit `b01744e`; approved for Oskar while he was away), with the answers to the
+open questions in part 6. Built in **0.9.0** as the third class pack, `ForeverSensei_Warrior` (Arms, layout 1), plus
+the core changes in part 2 (`L.stancePages`) and the `FS_BANDAGE` item macro. The source of truth for the grid is now
+`ForeverSensei_Warrior/Data/Arms/Layout.lua`; the README has the grid and the in-game checklist.
 
 The player (Oskar's friend): a **Tauren warrior, level 23**, levelling and running dungeons as **melee DPS**, following
 the Mobalytics Arms guide. Confirmed by Oskar:
@@ -476,6 +477,22 @@ texts show in English. Proposal for the build:
 ---
 
 # Part 6. Open questions for Oskar
+
+**Answered (approval of `b01744e`, built in 0.9.0):**
+1. Charge stays on **Ctrl+Mouse4** (mouseover stance macro); plain F keeps Hamstring.
+2. **Pummel and War Stomp** stay on Mouse4/5.
+3. Stances on **Action Bar 3, Ctrl+1-3**, like the paladin's auras, with the stance-bar preview warning.
+4. **Keep the shield family**; its cards say it needs a shield equipped, which Arms rarely has.
+5. **Keep the threat tools** (Taunt, Mocking Blow, Revenge); their cards call them emergency tools to save the healer.
+6. **Victory Rush stays out** (and Commanding Shout); the README checklist asks whether it is in his spellbook.
+7. **No Hearthstone.**
+8. **Yes to `FS_BANDAGE`.**
+9. Follow the guide's **talent order exactly as written** (`T.noRowGate`: the path takes Deep Wounds, row 3, at
+   level 18 with 8 points spent, so Forever's point gates are not 5 per row and `tools/check.py` skips that rule for
+   this path; the game's real gates are an in-game check).
+10. Language: **English only**, `## X-FS-Languages: en` with the `ns.Raw` fallback of 5.2.
+
+The questions as asked:
 
 1. **Charge**: Ctrl+Mouse4 (proposed, misclick-safe) or plain F (one press, tier 1; Hamstring would move to the
    spare Ctrl+F or Shift+5)?

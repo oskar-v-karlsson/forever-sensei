@@ -1,6 +1,7 @@
 -- Core/Locale.lua: text lookup. Every text has a stable id; Locales/en.lua is the source, Locales/ja.lua the
 -- translation. A class pack has its own Locales/en.lua and ja.lua with the ids it owns (every id lives in one
--- file). Placeholders are {name} and are filled from the vars table.
+-- file); an English-only pack (## X-FS-Languages: en) has only en.lua, so its texts show in English in Japanese too.
+-- Placeholders are {name} and are filled from the vars table.
 local _, ns = ...
 
 local function lang()
@@ -53,13 +54,14 @@ function ns.HasText(id)
 end
 
 -- Ids of every text in source order, for the review tab: the class pack's (skills, guide, talents) first, then the
--- core's.
+-- core's. An English-only pack (no ja texts) has nothing to check.
 local ids
 function ns.TextIds()
   if not ids then
     ids = {}
     local pack = ns.class
-    for _, id in ipairs(pack and pack.localeOrder or {}) do table.insert(ids, id) end
+    local packIds = pack and pack.locales and pack.locales.ja and pack.localeOrder or {}
+    for _, id in ipairs(packIds) do table.insert(ids, id) end
     for _, id in ipairs(ns.LocaleOrder) do table.insert(ids, id) end
   end
   return ids

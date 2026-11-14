@@ -205,7 +205,7 @@ renderers.layout = function(frame)
     local twoRows = bar.editMode
     local byButton = {}
     for _, s in ipairs(layout.slots) do
-      if s.bar == bar.id then byButton[s.button] = s end
+      if s.bar == bar.id and not s.mirror then byButton[s.button] = s end
     end
     for i = 1, 12 do
       local s = byButton[i]

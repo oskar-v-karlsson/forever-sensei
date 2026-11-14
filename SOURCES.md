@@ -2,7 +2,7 @@
 
 Every fact in ForeverSensei comes from a **World of Warcraft: Forever** source: the Forever client data, Forever guides, or the Forever UI code. Classic and Retail pages were never used, because Forever changed many spells and talents.
 
-All entries were checked against client **1.60.1.70862**: the Shaman pack on **2026-11-09**, the Paladin pack on **2026-11-11**. Each data entry in `ForeverSensei_<Class>/Data/**/*.lua` (the class packs) and `ForeverSensei/Data/Items.lua` has a `src` key, which points into the pack's `P.sources` in `ForeverSensei_<Class>/Data/Spells.lua` or the core's `ns.Sources` in `ForeverSensei/Core/Class.lua`, and a `verified` date. `make check` fails if any entry is missing them.
+All entries were checked against client **1.60.1.70862**: the Shaman pack on **2026-11-09**, the Paladin pack on **2026-11-11**, the Warrior pack on **2026-11-14**. Each data entry in `ForeverSensei_<Class>/Data/**/*.lua` (the class packs) and `ForeverSensei/Data/Items.lua` has a `src` key, which points into the pack's `P.sources` in `ForeverSensei_<Class>/Data/Spells.lua` or the core's `ns.Sources` in `ForeverSensei/Core/Class.lua`, and a `verified` date. `make check` fails if any entry is missing them.
 
 ## Game data and guides (Shaman pack)
 
@@ -58,6 +58,29 @@ All checked on **2026-11-11**. The research behind the key layout, the pull walk
 | `moba` opener macro | `/start attack` (a typo), and its Holy Shield and Exorcism macros cast Consecration. | Our `FS_OPEN` uses `/startattack` and casts Judgement, Swift Judgement and Holy Strike. |
 | Level-60 build | `wh_guide`: 0/32/19. `moba`: 0/35/16. | `wh_guide`, as Oskar asked. |
 
+## Game data and guides (Warrior pack, Arms)
+
+All checked on **2026-11-14**. The research behind the spells, the stance pages, the stance macros and the key layout is in [research/warrior-arms.md](research/warrior-arms.md) (approved for 0.9.0; its "Sources" section and part 1 cite each fact by dump line).
+
+| Key | Source | Used for |
+|---|---|---|
+| `simc` | [simc-forever SpellDataDump/warrior.txt](https://github.com/simulationcraft/simc-forever/blob/HEAD/SpellDataDump/warrior.txt) (commit `3c1d319e`), header "SimulationCraft 160-01 for World of Warcraft 1.60.1.70862 Live". Parsed copy: `research/warrior_simc_1.60.1.70862.tsv` (`tools/research/parse_simc.py`). The 70938 dump (`1c895ad3`) differs only in its header. | Every spell and talent: ID, English name, level, rage, cooldown, the stances each spell needs, talent rows, columns and max ranks. Forever-only spells and talents: Spearing Strike, Bloodthrill, Weaponmaster, Reckless Swings, Improved Slam, Improved Tactical Mastery. `make check` cross-checks the data against the TSV. |
+| `simc` ranks | Same dump, through `tools/research/gen_ranks.py --class warrior` → `ForeverSensei_Warrior/Data/Ranks.lua` | Every rank's spell ID and trainer level |
+| `simc_race` | The same commit's `SpellDataDump/nonclass.txt` | The Tauren racials War Stomp (20549) and Cultivation (20552), race mask 0x20 (Tauren only) |
+| `moba` | [Mobalytics: WoW Forever Arms Warrior guide](https://mobalytics.gg/wow-forever/classes/arms-warrior-guide), Ahlaundoh, updated 2026-11-12. The site returns 403 to scripts; read in the in-app browser. | **The talent path**: 32/18/1, level by level, in the guide's order (Enrage over Lingering Rage). Gameplay: role, single- and multi-target rotation, stance use, rage, cooldowns, dungeon tips, the Tauren notes. |
+| `ui` | [reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode) @ `7245053`, folder `Forever` | Stance paging of Action Bar 1 (`GetBonusBarOffset`: Battle slots 73-84, Defensive 85-96, Berserker 97-108), the stance bar and its default `Ctrl+1-3` bindings, binding names, the macro limit |
+
+### Warrior: where sources disagree, or can't be verified
+
+| Topic | Disagreement | Used |
+|---|---|---|
+| Mortal Strike | `moba`: the talent at level 39. `simc`: spell level 40. | Level 39 (the talent tier gives the button). Verify in game. |
+| Talent order | `moba` takes Improved Heroic Strike at 13, 14 and 58, and Deep Wounds (row 3) at 18 with 8 points spent; the dump lists no point requirement. | The guide's order exactly as written (`noRowGate`). The game's real point gates are an in-game check. |
+| Charge | Two spell sets: 100/6178/11578 (Battle Stance, out of combat) and 1240287-1240289 (usable in combat, from the Protection talent Vanguard). | 100/6178/11578: Arms doesn't take Vanguard. |
+| Victory Rush, Commanding Shout | In the dump (402927, 403215), but only through Season of Discovery runes. | Left out (`tools/check.py` `WARRIOR_EXCLUDED`). Checklist: is either in the spellbook? |
+| Slam | Classic: level 30, no cooldown. Forever (`simc`): level 20, 15 s cooldown. | Forever. |
+| Talent trees | `moba` shows three trees; the client has one tree with 12 columns. | The advisor names the talent, not a tree. |
+
 ## Potions and elixirs
 
 Checked on **2026-11-10** on Wowhead Forever item pages and tooltips. Listed best first, as in `ForeverSensei/Data/Items.lua`; "none" means the tooltip shows no required level. `/sensei verify` checks the names in the live client.
@@ -104,6 +127,21 @@ Healthstones for `FS_HEALTH` (key C: a Healthstone first, else the best Healing 
 | | Minor Healthstone | [5512](https://www.wowhead.com/forever/item=5512), [19005](https://www.wowhead.com/forever/item=19005) | 120 | none |
 | | Minor Healthstone | [19004](https://www.wowhead.com/forever/item=19004) | 110 | none |
 
+Bandages for `FS_BANDAGE` (the Warrior's Shift+Mouse 5, used on yourself) were checked on **2026-11-14** on Wowhead Forever item tooltips (`https://nether.wowhead.com/forever/tooltip/item/<id>`). None has a required level; each needs First Aid skill, so the macro takes the best one the client says you can use (`C_Item.IsUsableItem`). Heals = total over 8 seconds.
+
+| Kind (macro) | Item | ID | First Aid | Heals |
+|---|---|---|---|---|
+| Bandage (`FS_BANDAGE`) | Heavy Runecloth Bandage | [14530](https://www.wowhead.com/forever/item=14530) | 225 | 2000 |
+| | Runecloth Bandage | [14529](https://www.wowhead.com/forever/item=14529) | 200 | 1360 |
+| | Heavy Mageweave Bandage | [8545](https://www.wowhead.com/forever/item=8545) | 175 | 1104 |
+| | Mageweave Bandage | [8544](https://www.wowhead.com/forever/item=8544) | 150 | 800 |
+| | Heavy Silk Bandage | [6451](https://www.wowhead.com/forever/item=6451) | 125 | 640 |
+| | Silk Bandage | [6450](https://www.wowhead.com/forever/item=6450) | 100 | 400 |
+| | Heavy Wool Bandage | [3531](https://www.wowhead.com/forever/item=3531) | 75 | 301 |
+| | Wool Bandage | [3530](https://www.wowhead.com/forever/item=3530) | 50 | 161 |
+| | Heavy Linen Bandage | [2581](https://www.wowhead.com/forever/item=2581) | 20 | 114 |
+| | Linen Bandage | [1251](https://www.wowhead.com/forever/item=1251) | 1 | 66 |
+
 Left out on purpose: Discolored Healing Potions (they heal, then return 75% as poison or disease damage), the PvP Combat potions (18839, 18841, need a PvP rank), the Restored potions (282011, 282013) and draughts.
 
 ## Where sources disagree (Shaman pack)
@@ -123,7 +161,7 @@ Forever runs the modern 12.x UI ("Camelot", `## Interface: 16001`, `WOW_PROJECT_
 
 - [warcraft.wiki.gg](https://warcraft.wiki.gg/): the API reference, including how secret values work in combat in 12.x.
 - [realworldbuilder/wowwrapped docs/addon-api.md](https://github.com/realworldbuilder/wowwrapped/blob/main/docs/addon-api.md): notes on the Forever addon API.
-- [reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode), `Forever`: the function and event lists, `Bindings.xml` (`MULTIACTIONBAR2BUTTON` for Action Bar 3, which holds the Ctrl keys since layout v4 (0.7.0), `MULTIACTIONBAR5/6/7BUTTON` for Action Bars 6-8 (slots 145-156, 157-168, 169-180), Action Bar 6 holding the mouse keys, and `MULTIACTIONBAR4BUTTON` for Action Bar 5, the old Ctrl bar), the Edit Mode default positions (`Blizzard_EditMode/Mainline/EditModePresetLayouts.lua`: bars 6-8 start in the middle of the screen), the MultiBar layout and pages, the `BUTTON4`/`BUTTON5` key names (`Blizzard_FrameXML/BindingUtil`), the talent tree code, and the macro icon picker. The macro limit, `MAX_CHARACTER_MACROS = 30` (and `MAX_ACCOUNT_MACROS = 120`), is in `Blizzard_APIDocumentationGenerated/MacroConstantsDocumentation.lua`; the addon uses at most 13 character macros for the Restoration Shaman and 12 for the Protection Paladin (character macros are per character). Details and verification dates for the keys are in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (current, family blocks) and [research/keybind-layout.md](research/keybind-layout.md) (layout v3, pull walkthroughs).
+- [reckhou/WoWBlzCode](https://github.com/reckhou/WoWBlzCode), `Forever`: the function and event lists, `Bindings.xml` (`MULTIACTIONBAR2BUTTON` for Action Bar 3, which holds the Ctrl keys since layout v4 (0.7.0), `MULTIACTIONBAR5/6/7BUTTON` for Action Bars 6-8 (slots 145-156, 157-168, 169-180), Action Bar 6 holding the mouse keys, and `MULTIACTIONBAR4BUTTON` for Action Bar 5, the old Ctrl bar), the Edit Mode default positions (`Blizzard_EditMode/Mainline/EditModePresetLayouts.lua`: bars 6-8 start in the middle of the screen), the MultiBar layout and pages, the `BUTTON4`/`BUTTON5` key names (`Blizzard_FrameXML/BindingUtil`), the talent tree code, and the macro icon picker. The macro limit, `MAX_CHARACTER_MACROS = 30` (and `MAX_ACCOUNT_MACROS = 120`), is in `Blizzard_APIDocumentationGenerated/MacroConstantsDocumentation.lua`; the addon uses at most 13 character macros for the Restoration Shaman, 12 for the Protection Paladin and 23 for the Arms Warrior (character macros are per character). Details and verification dates for the keys are in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (current, family blocks) and [research/keybind-layout.md](research/keybind-layout.md) (layout v3, pull walkthroughs).
 - [zyaga/wow-forever-japanese](https://github.com/zyaga/wow-forever-japanese) (WFJ, GPLv2): the Japanese style guide and glossary (name policy, katakana terms), the bundled IPA font, the font-refusal fix (`docs/lessons/2026-09-14-bundled-font-refused-on-fresh-launch.md`), and the AddOns install path.
 
 ## Not verifiable offline: test in the game
@@ -150,3 +188,4 @@ These depend on the live Forever client. They are handled defensively in the cod
 17. Layout v4 (0.7.0): the "Verify in game" list in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) and README checklist items 43-48. Above all: Action Bar 6 shows and its mouse bindings fire (`PROXY_SHOW_ACTIONBAR_6`), Edit Mode keeps its position, Paladin auras cast from Action Bar 3 light up their button, the `CTRL-5` default, and **元に戻す** restoring Action Bar 6's visibility.
 18. Paladin help macros and seals (0.7.1): README checklist items 49-50. Blessing of Protection now falls back to yourself (`simc` 1022: no attacks for its duration, Forbearance 25771 blocks Templar's Bulwark, Divine Shield and Divine Protection for 1 min). Seal of Justice is on Shift+4 (its Judgement stops fleeing for 10 s, `simc`/`wh_tt`); Seal of Light is clicked on Action Bar 6 (`moba`: "isn't usually necessary" for a tank). The client reports a macro button as `("macro", spellID, "spell")` (`Blizzard_ActionBar/Shared/ActionButton.lua`); the addon names it with `GetActionText`.
 19. Save keys and Mouse 4/5 on unit frames (0.8.0): README checklist items 51-56. Lay on Hands, Blessing of Protection and Blessing of Sacrifice are on `Ctrl+Q/E/R`. The unit-frame fix rests on the Forever UI code (`reckhou/WoWBlzCode` @7245053): `PartyMemberFrame.lua`, `CompactUnitFrame.lua`, `PlayerFrame.lua` and `TargetFrame.lua` call `SecureUnitButton_OnLoad` without click arguments, so `SecureTemplates.lua` runs `RegisterForClicks("AnyUp")` and the frame takes Button4/5; `SecureUnitButton_OnClick` reads `SecureButton_GetModifiedAttribute(self, "type", button)` (suffix `4`/`5`, prefixes `shift-`/`ctrl-`), and `SECURE_ACTIONS.macro`/`spell` run the macro (with the hovered frame as `@mouseover`) or cast the spell on the frame's `unit`. Game Click Casting bindings come first (`C_ClickBindings`). To check in game: the portrait casts, left and right click unchanged, no blocked action in combat.
+20. Arms Warrior (0.9.0): README checklist items 63-72 and [research/warrior-arms.md](research/warrior-arms.md) "In-game checks". Above all: `GetBonusBarOffset()` 1/2/3 in the three stances, with Action Bar 1 the same on every page after **すべて配置**; a stance macro from the wrong stance changes stance on the first press and casts on the second; `Ctrl+1-3` change stance from Action Bar 3; `FS_BANDAGE` picks a bandage you can use; Mortal Strike at 39; whether Victory Rush is in the spellbook; and **元に戻す** restoring every page.

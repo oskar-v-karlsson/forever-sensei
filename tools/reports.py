@@ -9,7 +9,8 @@ For every report:
   (今) is written into the ja.lua that owns the id: ForeverSensei/Locales/ja.lua for the core's texts, or
   ForeverSensei_<Class>/Locales/ja.lua for a class pack's (skills, talents, guide). An id lives in one file per
   addon, but packs can share ids (guide.role.p1): the report line names the pack, and a report without one whose
-  id is in several packs stays open.
+  id is in several packs stays open. An English-only pack (## X-FS-Languages: en, no ja.lua) has nothing to write:
+  its reports stay open with the English text.
 - Everything else (no suggestion, a suggestion that breaks a rule, text changed since, unknown id) goes to
   reports/open.md with the English source and current Japanese, for a person or agent to handle.
 - Every report is appended to reports/log.md.
@@ -106,6 +107,8 @@ def read_locales():
                 m = EN_LINE.match(line.rstrip("\n"))
                 if m:
                     en[path][m.group(1)] = lua_unescape(m.group(2))
+        if not os.path.isfile(path):
+            continue  # an English-only pack (## X-FS-Languages: en): owns no Japanese texts
         with open(path, encoding="utf-8") as fh:
             for line in fh:
                 m = JA_LINE.match(line.rstrip("\n"))
@@ -122,6 +125,9 @@ def owner_of(report, owners):
         want = os.path.join(ROOT, report["pack"], "Locales", "ja.lua")
         if want in paths:
             return want, None
+        if not os.path.isfile(want) and os.path.isdir(os.path.dirname(want)):
+            return None, (f"{report['pack']} is English only: change its English text by hand "
+                          f"({report['pack']}/Locales/en.lua) if the report is right")
         core = os.path.join(ROOT, "ForeverSensei", "Locales", "ja.lua")
         if paths == [core]:
             return core, None
@@ -134,10 +140,12 @@ def owner_of(report, owners):
         os.path.relpath(p, ROOT) for p in paths)
 
 
-def names():
-    """Spell and talent names from every pack's data (they stay in English letters in the Japanese)."""
+def names(folder=None):
+    """Spell and talent names from one pack's data, or from every pack's (they stay in English letters in the
+    Japanese). One pack's text is checked against its own names only: another class's spell name can be a plain word
+    there (the paladin's "Taunt them back" is not the warrior's Taunt)."""
     out = []
-    for folder in addon_folders()[1:]:
+    for folder in [folder] if folder else addon_folders()[1:]:
         for dirpath, _, files in os.walk(os.path.join(folder, "Data")):
             for fn in sorted(files):
                 if fn.endswith(".lua"):
@@ -211,19 +219,23 @@ def process(text, dry_run=False):
         print(f"warning: header says {parsed['count']} reports, found {len(parsed['reports'])} (paste cut off?)")
     en, ja, owners = read_locales()
     all_names = names()
+    core_ja = os.path.join(addon_folders()[0], "Locales", "ja.lua")
     changes, open_items, log = {}, [], []
     for r in parsed["reports"]:
         rid = r["id"]
         status, why = "open", []
         path, err = owner_of(r, owners)
         en_text = en[path].get(rid) if path else None
+        if not path and r.get("pack"):
+            en_text = en.get(os.path.join(ROOT, r["pack"], "Locales", "ja.lua"), {}).get(rid)
         ja_text = ja[path].get(rid) if path else None
         if err or en_text is None:
             why.append(err or "unknown id (renamed or removed?)")
         elif r["suggestion"]:
             if r["current"] and r["current"] != ja_text:
                 why.append("the Japanese changed since it was reported; compare by hand")
-            probs = textrules.ja_problems(rid, r["suggestion"], en_text, all_names)
+            pack_names = all_names if path == core_ja else names(os.path.dirname(os.path.dirname(path)))
+            probs = textrules.ja_problems(rid, r["suggestion"], en_text, pack_names)
             if probs:
                 why.append("suggestion breaks rules: " + "; ".join(probs))
             if r["suggestion"] == ja_text:

@@ -6,7 +6,9 @@
    - Shaman flow: drives every window and action in Japanese and English (tools/scenarios.lua): skill cards,
      trainer list, guide tabs, talent hints, full layout apply + undo, targeting switch, place-one, combat queue,
      reports, /sensei commands.
-   - No pack for the class (a Warrior): one quiet note per character, the addon stays idle, /sensei still opens.
+   - Protection Paladin and Arms Warrior flows (tools/scenarios_paladin.lua, tools/scenarios_warrior.lua; the warrior
+     pack is English only and fills Action Bar 1's stance pages too).
+   - No pack for the class (a Priest): one quiet note per character, the addon stays idle, /sensei still opens.
    - Pack for another API version: not loaded, one note.
 2. Static checks: English and Japanese text for every id in every locale file (core and packs), Japanese style rules
    (tools/textrules.py), which file owns which text, pack TOCs, layout (unique slots, allowed keys only, every spell
@@ -66,6 +68,11 @@ def pack_folders():
     """Every class pack: a ForeverSensei_<Class>/ folder with its TOC."""
     return sorted(d for d in os.listdir(ROOT)
                   if d.startswith(CORE + "_") and os.path.isfile(os.path.join(ROOT, d, d + ".toc")))
+
+
+def english_only(folder):
+    """A pack whose TOC says ## X-FS-Languages: en ships no Japanese (the core shows its English texts)."""
+    return toc(folder)[0].get("X-FS-Languages") == "en"
 
 
 def pack_class(folder):
@@ -250,11 +257,27 @@ def check_runtime():
             problem("runtime " + e)
         check_shown(lua, "paladin " + lang)
     for lang in ("ja", "en"):
+        # Arms Warrior (English only): the warrior pack loads; with Japanese chosen its texts show in English.
+        lua, ns = new_runtime(cls="WARRIOR", db="{ settings = { language = %r } }" % lang)
+        stub = lua.globals().STUB
+        stub.race = lua.table_from(["Tauren", "Tauren", 6])
+        login(lua, ns, 23)
+        if stub.loadCalls != 1 or not stub.loaded["ForeverSensei_Warrior"] or stub.loaded["ForeverSensei_Shaman"]:
+            problem(f"runtime warrior [{lang}] ForeverSensei_Warrior was not the one pack loaded at login")
+        if ns.packNote is not None:
+            problem(f"runtime warrior [{lang}] a Warrior with the pack got a pack note")
+        run = lua.execute(read(os.path.join(ROOT, "tools", "scenarios_warrior.lua")))
+        out = py(run(ns, lang))
+        for e in out.get("errors") or []:
+            problem("runtime " + e)
+        check_shown(lua, "warrior " + lang)
+    for lang in ("ja", "en"):
         check_idle(lang)
         # A Paladin with only the Shaman pack installed: the same note, idle.
         check_idle(lang, "PALADIN", skip=("ForeverSensei_Paladin",))
         check_api_mismatch(lang)
         check_races(lang)
+        check_warrior_races(lang)
     check_language()
     return reports
 
@@ -292,6 +315,46 @@ def check_races(lang):
         for slot in want_gated:
             if slot in acts:
                 problem(f"{label}: gated slot {slot} was filled with {acts[slot]}")
+        for tab in ("role", "skills", "layout"):
+            ns.Guide.Open(tab)
+        stub.runTimers()
+        for e in unexpected_errors(ns):
+            problem(f"{label}: ns.errors: {e}")
+
+
+def check_warrior_races(lang):
+    """War Stomp and Cultivation are Tauren racials (simc-forever nonclass.txt race mask 0x20): an Orc warrior gets no
+    card, slot or Mouse5 binding for them; a Tauren gets both."""
+    for label, race, want in (("Tauren", ("Tauren", "Tauren", 6), {"war_stomp", "cultivation"}),
+                              ("Orc", ("Orc", "Orc", 2), set())):
+        label = f"runtime warrior races {label} [{lang}]"
+        lua, ns = new_runtime(cls="WARRIOR", db="{ settings = { language = %r } }" % lang)
+        stub = lua.globals().STUB
+        stub.race = lua.table_from(list(race))
+        login(lua, ns, 60)
+        listed = {e["key"] for e in (py(ns.Spells.List()) or [])}
+        L = ns.spec.layout
+        got = {k for k in ("war_stomp", "cultivation") if k in listed}
+        if got != want:
+            problem(f"{label}: racials {sorted(got)} in the skill list, expected {sorted(want)}")
+        slots = {k for k in ("war_stomp", "cultivation") if L.bySpell[k] is not None}
+        if slots != want:
+            problem(f"{label}: racials {sorted(slots)} have a slot, expected {sorted(want)}")
+        ns.Layout.Execute(ns.Layout.BuildPlan())
+        stub.runTimers()
+        acts = py(stub.actions) or {}
+        stomp = acts.get(146)
+        if bool(stomp) != ("war_stomp" in want) or (stomp and stomp[1] != 20549):
+            problem(f"{label}: Action Bar 6 button 2 (Mouse5) holds {stomp}")
+        cult = acts.get(25)
+        if bool(cult) != ("cultivation" in want):
+            problem(f"{label}: Action Bar 4 button 1 holds {cult}")
+        gated = {int(k) for k in (py(L.gatedSlots) or {})}
+        want_gated = {n for k, n in (("war_stomp", 146), ("cultivation", 25)) if k not in want}
+        if gated != want_gated:
+            problem(f"{label}: gated slots {sorted(gated)}, expected {sorted(want_gated)}")
+        if ("war_stomp" in want) != (stub.bindings["BUTTON5"] == "MULTIACTIONBAR5BUTTON2"):
+            problem(f"{label}: Mouse5 is {stub.bindings['BUTTON5']}")
         for tab in ("role", "skills", "layout"):
             ns.Guide.Open(tab)
         stub.runTimers()
@@ -361,7 +424,7 @@ def check_language():
         problem(f"{label}: the English choice was not kept after a reload")
 
     # Fresh install of a class without a pack: the pack note waits for the choice, then shows once.
-    lua, ns = new_runtime(cls="WARRIOR")
+    lua, ns = new_runtime(cls="PRIEST")
     login(lua, ns)
     if note_count(lua, ns) != 0:
         problem(f"{label}: the pack note was shown before a choice")
@@ -415,8 +478,8 @@ def unexpected_errors(ns):
             if not re.search(r"\d (LoadAddOn ForeverSensei_\w+: MISSING|cannot register )", e)]
 
 
-def check_idle(lang, cls="WARRIOR", skip=()):
-    """A class without an installed pack (a Warrior; a Paladin without ForeverSensei_Paladin). One note per character,
+def check_idle(lang, cls="PRIEST", skip=()):
+    """A class without an installed pack (a Priest; a Paladin without ForeverSensei_Paladin). One note per character,
     then idle; /sensei still opens."""
     label = f"runtime idle {cls} [{lang}]"
     folder = "ForeverSensei_" + cls.capitalize()
@@ -425,7 +488,7 @@ def check_idle(lang, cls="WARRIOR", skip=()):
     lua.execute("ForeverSenseiDB = { settings = { language = %r } }" % lang)
     login(lua, ns)
     if ns["class"] is not None:
-        problem(f"{label}: a class pack is active for a Warrior")
+        problem(f"{label}: a class pack is active for a {cls} without one")
     if ns.Active():
         problem(f"{label}: ns.Active() is true without a pack")
     if not ns.packNote or ns.packNote.id != "ui.pack.missing" or ns.packFolder != folder:
@@ -548,6 +611,7 @@ def check_static():
     pack_texts = py(ns.PackTexts)
     for kind in items["kinds"].values():
         NAMES.extend([kind["label"], kind["macro"]] + [i["name"] for i in kind["list"]])
+    item_names = list(NAMES)
 
     # --- class packs ------------------------------------------------------------------------------------------
     packs = {}
@@ -569,8 +633,8 @@ def check_static():
         packs[cls] = pack
         PACKS[cls] = {"folder": folder, "spells": pack["spells"],
                       "talents": [t for spec in pack["specs"].values() for t in (spec.get("talents") or {}).get("list", [])]}
-        NAMES.extend(s["name"] for s in pack["spells"])
-        NAMES.extend(t["name"] for t in PACKS[cls]["talents"])
+        PACKS[cls]["names"] = [s["name"] for s in pack["spells"]] + [t["name"] for t in PACKS[cls]["talents"]]
+        NAMES.extend(PACKS[cls]["names"])
         if pack.get("defaultSpec") not in pack["specs"]:
             problem(f"{folder}: defaultSpec {pack.get('defaultSpec')} is not one of its specs")
         if pack.get("name") != folder:
@@ -582,7 +646,7 @@ def check_static():
         problem("ForeverSensei_Shaman did not load")
         return
 
-    check_texts(ns, core_en, core_ja, pack_texts, packs)
+    check_texts(ns, core_en, core_ja, pack_texts, packs, item_names)
     check_items(items, core_sources)
     for cls, pack in packs.items():
         sources = dict(core_sources, **pack["sources"])
@@ -600,19 +664,25 @@ def check_static():
 
 
 # --- texts ----------------------------------------------------------------------------------------------------
-def check_texts(ns, core_en, core_ja, pack_texts, packs):
-    files = [(CORE, core_en, core_ja)] + [(p["folder"], p["locales"].get("en") or {}, p["locales"].get("ja") or {})
-                                          for p in packs.values()]
-    for folder, en, ja in files:
+def check_texts(ns, core_en, core_ja, pack_texts, packs, item_names):
+    # A pack's Japanese keeps its own class's names and the item names in English letters; another class's spell
+    # name can be a plain word there (the paladin's "Taunt them back" is not the warrior's Taunt).
+    files = [(CORE, core_en, core_ja, NAMES)] + [
+        (p["folder"], p["locales"].get("en") or {}, p["locales"].get("ja") or {}, item_names + PACKS[c]["names"])
+        for c, p in packs.items()]
+    for folder, en, ja, names in files:
+        en_only = folder != CORE and english_only(folder)
+        if en_only and ja:
+            problem(f"{folder}: English only (## X-FS-Languages: en) but has Japanese texts")
         for k in en:
-            if k not in ja:
+            if k not in ja and not en_only:
                 problem(f"text {k}: no Japanese ({folder}/Locales/ja.lua)")
         for k in ja:
             if k not in en:
                 problem(f"text {k}: Japanese without English source ({folder}/Locales/en.lua)")
         for k, v in en.items():
             if k in ja:
-                for p in textrules.ja_problems(k, ja[k], v, NAMES):
+                for p in textrules.ja_problems(k, ja[k], v, names):
                     problem(f"ja {k}: {p}")
             if re.search(r"\.\.\.|  ", v):
                 problem(f"en {k}: '...' or double space")
@@ -631,13 +701,13 @@ def check_texts(ns, core_en, core_ja, pack_texts, packs):
             problem(f"text {k}: a class text (ns.PackTexts) must live in the packs, not in {CORE}")
     # The core is class-neutral.
     for k, v in list(core_en.items()) + list(core_ja.items()):
-        if re.search(r"Shaman|シャーマン|[Tt]otem|トーテム|Paladin|パラディン", v):
+        if re.search(r"Shaman|シャーマン|[Tt]otem|トーテム|Paladin|パラディン|Warrior|ウォリアー", v):
             problem(f"text {k}: class words in a core text (move it to the class pack)")
 
     # Every character of every text (and the UI symbols) must be in the bundled font.
     have = font_chars(os.path.join(ADDON, "Fonts", "ipagui.ttf"))
     code = "".join(read(p) for p in lua_files(CORE, locales=False))
-    alltext = "".join("".join(en.values()) + "".join(ja.values()) for _, en, ja in files)
+    alltext = "".join("".join(en.values()) + "".join(ja.values()) for _, en, ja, _ in files)
     used = set(alltext) | {c for c in code if ord(c) > 0x7F}
     missing = sorted(c for c in used if ord(c) >= 0x20 and ord(c) not in have)
     if missing:
@@ -730,7 +800,8 @@ def check_layout(pack, layout):
     keys = [s["key"] for s in pack["spells"]]
     pack_items = pack["items"]
     # --- layout -----------------------------------------------------------------------------------------------
-    slots = layout["slots"]
+    slots = [s for s in layout["slots"] if not s.get("mirror")]
+    check_stance_pages(layout, slots)
     seen_slot, seen_key, seen_spell = {}, {}, {}
     allowed = set(layout["allowedKeys"])
 
@@ -806,12 +877,41 @@ def check_layout(pack, layout):
             problem(f"layout: combo {cid} needs unknown spell {c['needs']}")
         if len(c.get("body", "")) > 255:
             problem(f"layout: combo {cid} body longer than 255 characters")
-    # Character macros: Forever allows 30 (MAX_CHARACTER_MACROS); leave most of them to the player.
+    # Character macros: Forever allows 30 (MAX_CHARACTER_MACROS); leave most of them to the player (15, or the
+    # layout's macroBudget: the warrior's stance macros need 23).
     n_macros = len(layout["macros"]) + len(pack_items) + len(combos)
-    if n_macros > 15:
-        problem(f"layout: {n_macros} addon macros (keep it at 15 or fewer of the 30 character macros)")
+    budget = layout.get("macroBudget") or 15
+    if n_macros > budget or budget > 25:
+        problem(f"layout: {n_macros} addon macros (keep it at {budget} or fewer of the 30 character macros, budget at most 25)")
     if not isinstance(layout.get("version"), (int, float)) or layout["version"] < 1:
         problem("layout: version missing (bump it when slots or keys change)")
+
+def check_stance_pages(layout, slots):
+    """L.stancePages (a warrior): Action Bar 1's stance pages (bonus bars 7-9, slots 73-108) get a mirror of every
+    planned Action Bar 1 slot, with no key of their own; nothing else is planned there."""
+    pages = layout.get("stancePages") or []
+    mirrors = [s for s in layout["slots"] if s.get("mirror")]
+    main = {s["button"]: s for s in slots if s["bar"] == "main"}
+    if not pages:
+        if mirrors:
+            problem("layout: mirror slots without L.stancePages")
+        return
+    if [p["first"] for p in pages] != [73, 85, 97][:len(pages)]:
+        problem(f"layout: stancePages must start at 73, 85, 97 (bonus bars 7-9), are {[p['first'] for p in pages]}")
+    want = {(p["first"] + b - 1, b, n) for n, p in enumerate(pages, 1) for b in main}
+    got = {(s["slot"], s["button"], s["page"]) for s in mirrors}
+    if got != want:
+        problem(f"layout: stance page mirrors {sorted(got ^ want)} do not match Action Bar 1's planned buttons")
+    for s in mirrors:
+        m = main.get(s["button"]) or {}
+        if s.get("key") or s.get("binding") or s["bar"] != "main" or \
+                any(s.get(f) != m.get(f) for f in ("spell", "item", "combo", "standIn", "after")):
+            problem(f"layout: mirror slot {s['slot']} must copy Action Bar 1 button {s['button']} with no key")
+    spare = {x["slot"] for x in layout["spare"]}
+    lo, hi = 73, 73 + 12 * len(pages) - 1
+    if any(lo <= s["slot"] <= hi for s in slots) or any(lo <= x <= hi for x in spare):
+        problem("layout: a planned or spare slot sits on a stance page")
+
 
 def check_talents(talents):
     # --- talents (generic) ----------------------------------------------------------------------------------------------
@@ -827,7 +927,7 @@ def check_talents(talents):
         if not t:
             problem(f"talents: unknown talent {o['key']}")
             continue
-        if total < 5 * (t["row"] - 1):
+        if not talents.get("noRowGate") and total < 5 * (t["row"] - 1):
             problem(f"talents: {o['key']} (row {t['row']}) at level {o['level']} needs {5 * (t['row'] - 1)} points, has {total}")
         if t.get("requires") and spent.get(t["requires"], 0) < by[t["requires"]]["max"]:
             problem(f"talents: {o['key']} needs {t['requires']} maxed first")
@@ -879,6 +979,10 @@ def check_items(items, sources):
             if lv > last:
                 problem(f"items {kind}: {i['name']} ({i['id']}) is listed after a lower-level item (best first)")
             last = lv if lv else last
+        # Bandages: no level, but a First Aid skill; best (highest skill) first, so the macro picks the best usable.
+        aid = [i.get("firstAid") for i in d["list"]]
+        if any(aid) and (not all(aid) or aid != sorted(aid, reverse=True)):
+            problem(f"items {kind}: every entry needs firstAid, best (highest) first")
         if d["list"] and d["list"][-1].get("level"):
             problem(f"items {kind}: the last item should need no level (macro fallback for low levels)")
 
@@ -952,8 +1056,9 @@ def slot_what(s):
 def check_blocks(layout, label, grid, clicks, mouse_order, ooc, bar6_more=(), raced=()):
     """The exact grid (key → entry), the clicked buttons ((bar, button) → entry), the bars and the block rule.
     bar6_more = Action Bar 6's keys after the six mouse pairs (buttons 7-12, the shaman's BUTTON3); raced = race-gated
-    entries (spare for other races, so an L.old leftover may sit on their button)."""
-    slots = layout["slots"]
+    entries (spare for other races, so an L.old leftover may sit on their button). Stance page mirrors (a warrior's
+    Action Bar 1 copies) are checked by check_stance_pages."""
+    slots = [s for s in layout["slots"] if not s.get("mirror")]
     bar6_more = list(bar6_more) + [None] * (6 - len(bar6_more))
     bars = {b["id"]: b for b in layout["bars"]}
     want_bars = [
@@ -1318,7 +1423,169 @@ def check_paladin(pack, sources):
                         problem(f"paladin: unverified {name} appears in {os.path.relpath(os.path.join(dirpath, fn), ROOT)}")
 
 
-PACK_CHECKS = {"SHAMAN": check_shaman, "PALADIN": check_paladin}
+# --- Warrior --------------------------------------------------------------------------------------------------
+# Left out on purpose (research/warrior-arms.md 1.5 and Oskar's answers): Victory Rush and Commanding Shout (in the
+# dump only from a Season of Discovery rune; Victory Rush in the spellbook is an in-game check), Hearthstone (answer
+# 7). Comments may name them; no data or text may.
+WARRIOR_EXCLUDED = ("Victory Rush", "Commanding Shout", "Hearthstone")
+
+
+def check_warrior(pack, sources):
+    spells = pack["spells"]
+    spec = (pack["specs"] or {}).get("ARMS") or {}
+    layout = spec.get("layout") or {}
+    talents = spec.get("talents") or {}
+    if pack.get("defaultSpec") != "ARMS" or set(pack["specs"]) != {"ARMS"}:
+        problem("warrior: the pack must have the Arms spec, the default")
+        return
+    if not english_only(pack["folder"]) or pack["locales"].get("ja"):
+        problem("warrior: the pack is English only (## X-FS-Languages: en, no ja.lua)")
+    check_client_dump(pack, "warrior", talents)
+    if sorted(pack["items"]) != ["bandage", "health"]:
+        problem(f"warrior: items must be health and bandage, are {sorted(pack['items'])}")
+    if spec.get("tabs") != ["role", "rotation", "stances", "rage", "cooldowns", "manners"]:
+        problem(f"warrior: Arms tabs must be role, rotation, stances, rage, cooldowns, manners, are {spec.get('tabs')}")
+    racials = {s["key"]: (s.get("id"), s.get("races"), s.get("src")) for s in spells if s.get("races")}
+    if racials != {"war_stomp": (20549, [6], "simc_race"), "cultivation": (20552, [6], "simc_race")}:
+        problem(f"warrior: racials must be War Stomp 20549 and Cultivation 20552 (Tauren, race 6), are {racials}")
+
+    # --- layout: the approved grid (research/warrior-arms.md 4.4, layout 1) ---------------------------------------
+    grid = {
+        "1": "rend", "2": "overpower", "3": "slam", "4": "mortal_strike", "5": "execute",
+        "Q": "heroic_strike", "E": "sunder_armor", "R": "spearing_strike", "F": "hamstring",
+        "Z": "bloodrage", "X": "reckless_swings", "C": "berserker_rage",
+        "SHIFT-1": "battle_shout", "SHIFT-2": "demoralizing_shout", "SHIFT-3": "intimidating_shout",
+        "SHIFT-4": "challenging_shout",
+        "SHIFT-Q": "sweeping_strikes", "SHIFT-E": "whirlwind", "SHIFT-R": "cleave", "SHIFT-F": "thunder_clap",
+        "SHIFT-Z": "retaliation", "SHIFT-X": "recklessness", "SHIFT-C": "disarm",
+        "CTRL-1": "battle_stance", "CTRL-2": "defensive_stance", "CTRL-3": "berserker_stance",
+        "CTRL-Q": "taunt", "CTRL-E": "mocking_blow", "CTRL-R": "revenge",
+        "CTRL-Z": "shield_bash", "CTRL-X": "shield_block", "CTRL-C": "shield_wall",
+        "BUTTON4": "pummel", "BUTTON5": "war_stomp", "SHIFT-BUTTON4": "@health", "SHIFT-BUTTON5": "@bandage",
+        "CTRL-BUTTON4": "charge", "CTRL-BUTTON5": "intercept",
+    }
+    clicks = {("bar4", 1): "cultivation"}
+    mouse = ["BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"]
+    raced = {s["key"] for s in spells if s.get("races")}
+    check_blocks(layout, "warrior layout", grid, clicks, mouse, {"cultivation"}, raced=raced)
+    if [f["id"] for f in layout.get("families") or []] != [
+            "strikes", "other", "rage", "shouts", "aoe", "cooldowns", "stances", "threat", "shield",
+            "stop", "consumables", "gapclosers"]:
+        problem("warrior layout: families must be strikes, other, rage, shouts, aoe, cooldowns, stances, threat, shield "
+                "and the mouse pairs stop, consumables, gapclosers")
+    spare_keys = {x["key"] for x in layout["spare"] if x.get("key")}
+    if spare_keys != {"SHIFT-5", "CTRL-4", "CTRL-5", "CTRL-F"}:
+        problem(f"warrior layout: spare keys must be Shift+5, Ctrl+4, Ctrl+5 and Ctrl+F, are {sorted(spare_keys)}")
+    if layout.get("retired") or layout.get("old") or layout.get("noSlot") or layout.get("combos"):
+        problem("warrior layout: layout 1 has no retired bars, old slots, unplaced spells or combos")
+    if layout.get("version") != 1:
+        problem(f"warrior layout: version must be 1, is {layout.get('version')}")
+    # Every stance shows the same Action Bar 1 (bonus bar pages 7-9).
+    pages = [(p.get("first"), p.get("spell")) for p in layout.get("stancePages") or []]
+    if pages != [(73, "battle_stance"), (85, "defensive_stance"), (97, "berserker_stance")]:
+        problem(f"warrior layout: stancePages must be Battle 73, Defensive 85, Berserker 97, are {pages}")
+    # Self-test: check_stance_pages must catch a broken page (a missing mirror, a keyed mirror, a wrong copy, a spare
+    # button on a page).
+    main_slots = [s for s in layout.get("slots") or [] if not s.get("mirror")]
+
+    def drop_mirror(lay):
+        lay["slots"] = [s for s in lay["slots"] if s.get("slot") != 76]
+
+    def key_mirror(lay):
+        next(s for s in lay["slots"] if s.get("mirror"))["key"] = "1"
+
+    def wrong_copy(lay):
+        next(s for s in lay["slots"] if s.get("mirror") and s.get("spell") == "overpower")["spell"] = "rend"
+
+    def spare_on_page(lay):
+        lay["spare"] = lay["spare"] + [{"slot": 108}]
+
+    for mutate in (drop_mirror, key_mirror, wrong_copy, spare_on_page):
+        bad = {"stancePages": layout.get("stancePages"), "slots": [dict(x) for x in layout.get("slots") or []],
+               "spare": [dict(x) for x in layout.get("spare") or []]}
+        mutate(bad)
+        before = len(problems)
+        check_stance_pages(bad, main_slots)
+        caught = len(problems) > before
+        del problems[before:]
+        if not caught:
+            problem(f"check.py self-test: check_stance_pages misses {mutate.__name__}")
+    # Stance macros: one press changes to a stance that allows the spell, the next casts it (stance bar order
+    # 1 Battle, 2 Defensive, 3 Berserker; the stances per spell from the simc dump, research 1.1 and part 3).
+    home = {
+        "b": ["overpower", "mocking_blow", "retaliation", "spearing_strike", "sweeping_strikes", "charge"],
+        "d": ["taunt", "revenge", "shield_block", "disarm", "shield_wall"],
+        "z": ["berserker_rage", "whirlwind", "recklessness", "intercept", "pummel"],
+        "bd": ["rend", "thunder_clap", "shield_bash"],
+        "bz": ["hamstring", "execute"],
+    }
+    want_kind = {k: "stance_" + h for h, ks in home.items() for k in ks}
+    want_kind.update({"charge": "harm_b", "intercept": "harm_z", "pummel": "kick_z"})
+    if layout["macroKind"] != want_kind:
+        diff = sorted(k for k in set(want_kind) | set(layout["macroKind"])
+                      if want_kind.get(k) != layout["macroKind"].get(k))
+        problem(f"warrior layout: macroKind differs from the stances in the dump: {diff}")
+    if set(layout["macros"]) != set(want_kind) or set(layout.get("macroAlways") or {}) != set(want_kind):
+        problem("warrior layout: every stance-bound spell is an always-on macro (both targeting modes)")
+    if len(set(layout["macros"].values())) != len(layout["macros"]) or \
+            any(not re.fullmatch(r"FS_[A-Z]{2,7}", v) for v in layout["macros"].values()):
+        problem("warrior layout: macro names must be unique FS_ names")
+    if layout.get("macroVars") != {"battle": "battle_stance", "defensive": "defensive_stance",
+                                   "berserker": "berserker_stance"}:
+        problem("warrior layout: macroVars must name the three stances")
+    bodies = layout["macroBodies"]
+    want_bodies = {
+        "stance_b": "/cast [nostance:1] {battle}; {spell}",
+        "stance_d": "/cast [nostance:2] {defensive}; {spell}",
+        "stance_z": "/cast [nostance:3] {berserker}; {spell}",
+        "stance_bd": "/cast [stance:3] {battle}; {spell}",
+        "stance_bz": "/cast [stance:2] {battle}; {spell}",
+        "harm_b": "/cast [nostance:1] {battle}; [@mouseover,harm,nodead][] {spell}",
+        "harm_b_click": "/cast [nostance:1] {battle}; {spell}",
+        "harm_z": "/cast [nostance:3] {berserker}; [@mouseover,harm,nodead][] {spell}",
+        "harm_z_click": "/cast [nostance:3] {berserker}; {spell}",
+        "kick_z": "/stopcasting\n/cast [nostance:3] {berserker}; [@mouseover,harm,nodead][] {spell}",
+        "kick_z_click": "/stopcasting\n/cast [nostance:3] {berserker}; {spell}",
+    }
+    if bodies != {k: "#showtooltip {spell}\n" + v for k, v in want_bodies.items()}:
+        problem("warrior layout: macro bodies differ from research/warrior-arms.md part 3")
+    names = set(layout["macros"].values()) | {"FS_HEALTH", "FS_BANDAGE"}
+    if len(names) != 23 or layout.get("macroBudget") != 25:
+        problem(f"warrior layout: {len(names)} macros (21 stance macros + FS_HEALTH + FS_BANDAGE), budget 25")
+    want_warn = {"CTRL-%d" % i: "ui.preview.warn.stance" for i in range(1, 4)}
+    want_warn["CTRL-R"] = "ui.preview.warn.fps"
+    if layout.get("defaultWarn") != want_warn:
+        problem("warrior layout: defaultWarn must be Ctrl+1-3 (stance bar) and Ctrl+R (framerate)")
+
+    # --- talents: Mobalytics 32/18/1, one point per level 10-60, in the guide's order ----------------------------
+    tree_points = check_talents_points(talents)
+    if tree_points != {"Arms": 32, "Fury": 18, "Protection": 1}:
+        problem(f"warrior talents: final build should be 32/18/1 (Mobalytics), is {tree_points}")
+    levels = [lv for _, a, b in talents["path"] for lv in range(a, b + 1)]
+    if levels != list(range(10, 61)):
+        problem("warrior talents: the path must give one point per level from 10 to 60")
+    if "lingering_rage" in {t["key"] for t in talents["list"]} or "enrage" not in {t["key"] for t in talents["list"]}:
+        problem("warrior talents: Enrage, not Lingering Rage (the guide)")
+    by = {t["key"]: t for t in talents["list"]}
+    taken = set()
+    for o in talents["order"]:
+        req = by[o["key"]].get("requires")
+        if req and req not in taken:
+            problem(f"warrior talents: {o['key']} at level {o['level']} before its prerequisite {req}")
+        taken.add(o["key"])
+
+    # --- left-out spells stay out ---------------------------------------------------------------------------------
+    folder = os.path.join(ROOT, pack["folder"])
+    for dirpath, _, files in os.walk(folder):
+        for fn in files:
+            if fn.endswith((".lua", ".toc")):
+                text = re.sub(r"--[^\n]*", "", read(os.path.join(dirpath, fn)))
+                for name in WARRIOR_EXCLUDED:
+                    if name in text:
+                        problem(f"warrior: {name} appears in {os.path.relpath(os.path.join(dirpath, fn), ROOT)}")
+
+
+PACK_CHECKS = {"SHAMAN": check_shaman, "PALADIN": check_paladin, "WARRIOR": check_warrior}
 
 
 # --- TOCs -----------------------------------------------------------------------------------------------------
@@ -1379,7 +1646,9 @@ def check_reports(texts):
         if not parsed.get("version"):
             problem("reports: version not parsed")
     en, ja, owners = reports.read_locales()
-    if any(set(en[p]) != set(ja[p]) for p in en) or {i for p in ja for i in ja[p]} != set(owners):
+    # An English-only pack (no ja.lua) has English ids and no Japanese ones.
+    if any(set(en[p]) != set(ja[p]) for p in en if os.path.isfile(p)) or {i for p in ja for i in ja[p]} != set(owners) \
+            or any(ja[p] or not en[p] for p in en if not os.path.isfile(p)):
         problem("reports.py: read_locales does not see the same ids in en and ja")
     # Packs share ids (guide.role.p1): a report names its pack; an old one without a pack must not guess.
     old = reports.parse("[ForeverSensei v0.5.1 報告 1件]\n#1 spell.chain_heal.when | 不自然\n今: x")["reports"][0]
@@ -1408,7 +1677,7 @@ def check_zip(reports):
     """make zip: every addon folder at the top level of the zip (unzip straight into AddOns), each with its TOC."""
     import tempfile
     import zipfile
-    want = {"ForeverSensei", "ForeverSensei_Paladin", "ForeverSensei_Shaman"}
+    want = {"ForeverSensei", "ForeverSensei_Paladin", "ForeverSensei_Shaman", "ForeverSensei_Warrior"}
     with tempfile.TemporaryDirectory() as tmp:
         with zipfile.ZipFile(reports.build_zip(tmp)) as z:
             names = z.namelist()

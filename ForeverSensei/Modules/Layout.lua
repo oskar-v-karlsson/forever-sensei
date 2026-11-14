@@ -319,6 +319,11 @@ end
 Layout.BindingName = bindingName
 
 local function slotWhere(s)
+  -- A stance page of Action Bar 1 (L.stancePages): "Action Bar 1 (Defensive Stance) button 3".
+  if s.page then
+    local e = s.pageSpell and Spells.Get(s.pageSpell)
+    return ns.T("ui.where.page", { bar = ns.T("ui.bar." .. s.bar), page = e and e.name or s.page, button = s.button })
+  end
   return ns.T("ui.where.short", { bar = ns.T("ui.bar." .. s.bar), button = s.button })
 end
 Layout.SlotWhere = slotWhere
@@ -390,23 +395,28 @@ function Layout.BuildPlan(onlyKey)
   for _, barId in ipairs(layout.spareOrder or { "bar4", "bar3" }) do
     for i = #layout.slots, 1, -1 do
       local s = layout.slots[i]
-      if s.bar == barId and not targets[s.slot] and reservedUnknown(s) and Layout.Current(s.slot) == nil then
+      if s.bar == barId and not s.mirror and not targets[s.slot] and reservedUnknown(s) and Layout.Current(s.slot) == nil then
         table.insert(free, s)
       end
     end
   end
 
   local barsNeeded = {}
+  -- Stance pages: the same action of the player's often sits on several pages. Only its first copy moves to a free
+  -- button; the others are replaced (the preview lists them, and the backup puts them back on undo).
+  local movedSame = {}
+  local function same(cur) return tostring(cur.type) .. ":" .. tostring(cur.id) .. ":" .. tostring(cur.macroName) end
   for _, s in ipairs(layout.slots) do
     local d = targets[s.slot]
     if d then
       local cur = Layout.Current(s.slot)
       if not Layout.Matches(cur, d, s.slot) then
-        if cur and not cur.planKey then
+        if cur and not cur.planKey and not (s.mirror and movedSame[same(cur)]) then
           local dest = table.remove(free, 1)
           if dest then
             table.insert(plan.moves, { from = s.slot, to = dest.slot, fromSlot = s, toSlot = dest, label = Layout.Label(cur) })
             barsNeeded[dest.bar] = true
+            if layout.stancePages then movedSame[same(cur)] = true end
           else
             table.insert(plan.lost, { slot = s.slot, where = s, label = Layout.Label(cur) })
           end
@@ -942,10 +952,13 @@ function Layout.UpgradeRanks()
   return #list, backup
 end
 
--- Does the macro cast this rank? → true, false, or nil when the client cannot tell (GetMacroSpell missing/empty)
-local function macroCasts(idx, id)
+-- Does the macro cast this rank? → true, false, or nil when the client cannot tell (GetMacroSpell missing/empty, or,
+-- with stance pages, the macro casts another spell now: a stance macro shows the stance it switches to while in the
+-- wrong stance)
+local function macroCasts(idx, id, entry)
   local ok, spell = call(API.macroSpell, idx)
   if not ok or not spell then return nil end
+  if entry and L().stancePages and spell ~= id and not Spells.RankOf(entry, spell) then return nil end
   return spell == id
 end
 
@@ -959,7 +972,7 @@ function Layout.CheckMacroRank(entry)
   if not ok or type(idx) ~= "number" or idx == 0 then return nil end
   local _, best = Spells.KnownRank(entry)
   if not best then return nil end
-  local casts = macroCasts(idx, best)
+  local casts = macroCasts(idx, best, entry)
   if casts == nil then return "unknown" end
   if casts then return ns.char.macroRank[entry.key] and "ranked" or "ok" end
   -- Candidates: the plain name (if the macro names a rank now), then the highest rank by name.

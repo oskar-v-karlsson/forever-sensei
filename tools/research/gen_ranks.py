@@ -9,7 +9,7 @@ Per class (CLASSES): spells whose rows lack the label (Turn Undead), ranks the d
 tooltip instead (Holy Light rank 1), and duplicate rows of one rank (the dump has two Seal of Righteousness rank 1
 rows, 20154 and 21084, both level 1): the rank keeps the Spells.lua id for rank 1, else the lowest id.
 
-Usage: python3 tools/research/gen_ranks.py [--class shaman|paladin] [--check]
+Usage: python3 tools/research/gen_ranks.py [--class shaman|paladin|warrior] [--check]
   --class  the class pack (default shaman).
   --check  exit 1 when the committed Ranks.lua differs from what the dump gives (used by tools/check.py).
 """
@@ -32,6 +32,7 @@ CLASSES = {
                  "Fire Resistance Aura", "Lay on Hands"),
         "extra": {"holy_light": [(1, 635, "1")]},
     },
+    "warrior": {"label": "Warrior Spells", "verified": "2026-11-14", "unlabelled": (), "free": (), "extra": {}},
 }
 
 

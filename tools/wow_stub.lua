@@ -18,6 +18,8 @@ STUB = {
   macros = {},
   bags = {},       -- item id → count
   itemLevels = {}, -- item id → required level the client reports (C_Item.GetItemInfo)
+  unusable = {},   -- item id → true: C_Item.IsUsableItem says no (a bandage above the First Aid skill)
+  bonusBar = 0,    -- GetBonusBarOffset (a warrior's stance: 1 Battle, 2 Defensive, 3 Berserker)
   settings = { PROXY_SHOW_ACTIONBAR_2 = false, PROXY_SHOW_ACTIONBAR_3 = false, PROXY_SHOW_ACTIONBAR_4 = false,
     PROXY_SHOW_ACTIONBAR_5 = false, PROXY_SHOW_ACTIONBAR_6 = false, PROXY_SHOW_ACTIONBAR_7 = false },
   meta = {},       -- ForeverSensei's TOC metadata (C_AddOns.GetAddOnMetadata)
@@ -341,6 +343,7 @@ function UnitRace()
   return r[1], r[2], r[3]
 end
 function UnitLevel() return STUB.level end
+function GetBonusBarOffset() return STUB.bonusBar end
 function UnitCharacterPoints() return STUB.unspent or 0 end
 function InCombatLockdown() return STUB.combat end
 function GetBuildInfo() return "1.60.1", "70862", "Nov 4 2026", 16001 end
@@ -437,6 +440,7 @@ C_Item = {
   GetItemCount = function(id) return STUB.bags[id] or 0 end,
   GetItemInfo = function(id) return "Item " .. id, nil, 1, 1, STUB.itemLevels[id] or 0 end,
   GetItemIconByID = function(id) return 100000 + id end,
+  IsUsableItem = function(id) return not STUB.unusable[id], false end,
 }
 function GetMacroIndexByName(name)
   for i, m in pairs(STUB.macros) do if m.name == name then return i end end

@@ -104,7 +104,7 @@ function Spells.LayoutSlot(entry)
   -- A spell without a slot of its own stands in on another spell's slot until that spell is learned (Purify on
   -- Cleanse's mouse button); after that it lives where L.noSlot says.
   for _, s in ipairs(layout.slots) do
-    if s.standIn == entry.key and not Spells.IsKnown(Spells.Get(s.spell)) then return s end
+    if s.standIn == entry.key and not s.mirror and not Spells.IsKnown(Spells.Get(s.spell)) then return s end
   end
   return nil
 end

@@ -99,6 +99,22 @@ function ns.BuildLayout(L)
       end
     end
   end
+  -- L.stancePages (a warrior): Action Bar 1 shows another page of 12 slots in each stance (Battle 73-84, Defensive
+  -- 85-96, Berserker 97-108; research/warrior-arms.md part 2). Every planned Action Bar 1 slot gets a mirror slot
+  -- on each page with the same action and no key (ACTIONBUTTON1-12 follow the page), so the bar looks the same in
+  -- every stance. Mirrors come after all other slots in L.slots and are not in bySpell/byItem/byCombo.
+  local planned = #L.slots
+  for n, page in ipairs(L.stancePages or {}) do
+    for i = 1, planned do
+      local s = L.slots[i]
+      if s.bar == "main" then
+        table.insert(L.slots, {
+          bar = "main", button = s.button, slot = page.first + s.button - 1, mirror = true, page = n,
+          pageSpell = page.spell, spell = s.spell, item = s.item, combo = s.combo, standIn = s.standIn, after = s.after,
+        })
+      end
+    end
+  end
   local order = L.spareOrder or {}
   if #order == 0 then
     for _, bar in ipairs(L.bars) do table.insert(order, bar.id) end
@@ -258,3 +274,19 @@ ns.OnLogin(function()
   ns.char.packNote = note.key
   C_Timer.After(4, function() ns.UI.Toast(ns.PackNoteText(), 20) end)
 end)
+
+-- An English-only pack (## X-FS-Languages: en, no Locales/ja.lua; the warrior's): with Japanese chosen its texts show
+-- in English (ns.Raw falls back to the pack's en). Say so once per character, and again when the player switches to
+-- Japanese.
+local notePending = false
+local function enOnlyNote()
+  if notePending or not ns.class or ns.class.locales.ja or not ns.settings or ns.settings.language ~= "ja" then return end
+  notePending = true
+  ns.char.enOnlyNote = true
+  C_Timer.After(5, function()
+    notePending = false
+    if ns.settings.language == "ja" then ns.UI.Toast(ns.T("ui.pack.enonly"), 15) end
+  end)
+end
+ns.OnLogin(function() if not ns.char.enOnlyNote then enOnlyNote() end end)
+ns.OnLanguage(function(changed) if changed and ns.ready then enOnlyNote() end end)

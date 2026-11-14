@@ -1,5 +1,5 @@
--- Modules/Items.lua: the potion, elixir and Healthstone macros of the layout (FS_MANA, FS_HEALPOT, FS_ELIXIR,
--- FS_HEALTH).
+-- Modules/Items.lua: the potion, elixir, Healthstone and bandage macros of the layout (FS_MANA, FS_HEALPOT,
+-- FS_ELIXIR, FS_HEALTH, FS_BANDAGE).
 -- Each macro uses the best item of its kind in the bags that the player's level allows (Data/Items.lua, best first),
 -- else the best item of its fallback kind (FS_HEALTH: a Healthstone, else a Healing Potion).
 -- Macros can only be edited out of combat: bag changes in combat (drinking a potion) are handled silently when combat
@@ -61,31 +61,41 @@ function Items.KindOfMacro(name)
   end
 end
 
+-- Can the player use it now? Only asked for items that need a skill (bandages: First Aid); a missing API counts as yes.
+local function usable(item)
+  if not item.firstAid then return true end
+  local ok, yes = ns.Call("C_Item.IsUsableItem", item.id)
+  if not ok then ok, yes = ns.Call("IsUsableItem", item.id) end
+  return not ok or yes and true or false
+end
+
 -- The best usable item of a kind in the bags, else of its fallback kind. → item ({ id, name, level }) or nil
 function Items.Best(kind)
   local level = playerLevel()
   local d = data(kind)
   for _, item in ipairs(d.list) do
-    if count(item.id) > 0 and minLevel(item) <= level then return item end
+    if count(item.id) > 0 and minLevel(item) <= level and usable(item) then return item end
   end
   if d.fallback then return Items.Best(d.fallback) end
 end
 
 -- The best item of a kind the player could use now, in the bags or not (for the macro when the bags have none).
+-- A skill the addon can't read (First Aid) counts as the lowest: bandages fall back to the last one, Linen Bandage.
 function Items.ForLevel(kind)
   local level = playerLevel()
   local list = data(kind).list
   for _, item in ipairs(list) do
-    if (item.level or 0) <= level then return item end
+    if (item.level or 0) <= level and not item.firstAid then return item end
   end
   return list[#list]
 end
 
--- → body, icon
+-- → body, icon. A self kind (bandages) uses the item on yourself.
 function Items.MacroBody(kind)
   local best = Items.Best(kind)
-  if best then return "#showtooltip\n/use item:" .. best.id, "INV_MISC_QUESTIONMARK" end
-  return "/use item:" .. Items.ForLevel(kind).id, data(kind).icon
+  local use = data(kind).self and "/use [@player] item:" or "/use item:"
+  if best then return "#showtooltip\n" .. use .. best.id, "INV_MISC_QUESTIONMARK" end
+  return use .. Items.ForLevel(kind).id, data(kind).icon
 end
 
 local function macroIndex(name)

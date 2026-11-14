@@ -1,21 +1,23 @@
 # ForeverSensei
 
-A class coach addon for **World of Warcraft: Forever**, in Japanese or English. It covers the **Restoration Shaman** healer (made for a Skyborne / Horde player) and the **Protection Paladin** tank, from level 1 to 60.
+A class coach addon for **World of Warcraft: Forever**, in Japanese or English. It covers the **Restoration Shaman** healer (made for a Skyborne / Horde player), the **Protection Paladin** tank and the **Arms Warrior** melee DPS (made for a Tauren player; English only), from level 1 to 60.
 
 It comes as one core addon plus a pack per class, like the voice packs of WoW Forever Japanese:
 - `ForeverSensei`: the core (windows, cards, layout engine, talent advisor, guide, translation reports, settings);
 - `ForeverSensei_Shaman`: the Shaman class pack (skills, the Restoration key layout, talents and guide texts);
-- `ForeverSensei_Paladin`: the Paladin class pack (skills, the Protection key layout, talents and guide texts).
+- `ForeverSensei_Paladin`: the Paladin class pack (skills, the Protection key layout, talents and guide texts);
+- `ForeverSensei_Warrior`: the Warrior class pack (skills, the Arms key layout, talents and guide texts, in English only).
 
 A class pack loads only on characters of its class. Turn off packs you don't play in the AddOns list. On a character whose class has no pack, ForeverSensei shows one short note and stays idle; `/sensei` still opens the translation check and settings.
 
 - **Language (日本語 / English):** the first time the addon runs, a small window asks for the language with two buttons, **日本語** and **English**. Nothing else shows until you choose. The choice is saved for the whole account and kept through updates. Change it any time in the settings tab or with `/sensei ja` / `/sensei en`; open windows switch at once, no `/reload` needed. Players who used a version before 0.5.1 are not asked and keep their language.
 - **New skill cards (新しいスキル):** when you learn a skill, a card explains in the chosen language what it does, when to use it, where it goes on your bars, and which key presses it. A **配置する** button puts it there. Hover the icon to see the game's own tooltip. Any card can be opened again from the skill list (**カード** button or the icon), learned or not, and shows whether the skill is already in its slot with its key.
-- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot and key, planned for a level-60 dungeon healer (Shaman) or tank (Paladin), so a key never moves as you level. The Shaman examples below; the Paladin grid is in [Key layout: Protection Paladin](#key-layout-protection-paladin). Only keys near WASD are used: `1-5`, `Q E R F`, `Z X C`, the same keys with Shift or Ctrl, and the two mouse side buttons. The heals have keys without a modifier (`E`, `R`, `F`, Mouse 4, Mouse 5), and spells of one family sit together in one block of keys and buttons (e.g. the Fire totems on `Shift+Q/E/R/F`, the Paladin seals on `Shift+1-5`). Plain, Shift and Ctrl are Action Bars 1, 2 and 3 at the bottom of the screen; the mouse buttons are Action Bar 6. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them. **バーを空にする** first empties only the buttons the layout uses, so the full layout starts clean; your other buttons stay.
+- **Fixed bar layout and keys (キー配置):** every skill has a fixed slot and key, planned for a level-60 dungeon healer (Shaman), tank (Paladin) or melee DPS (Warrior), so a key never moves as you level. The Shaman examples below; the other grids are in [Key layout: Protection Paladin](#key-layout-protection-paladin) and [Key layout: Arms Warrior](#key-layout-arms-warrior). Only keys near WASD are used: `1-5`, `Q E R F`, `Z X C`, the same keys with Shift or Ctrl, and the two mouse side buttons. The heals have keys without a modifier (`E`, `R`, `F`, Mouse 4, Mouse 5), and spells of one family sit together in one block of keys and buttons (e.g. the Fire totems on `Shift+Q/E/R/F`, the Paladin seals on `Shift+1-5`). Plain, Shift and Ctrl are Action Bars 1, 2 and 3 at the bottom of the screen; the mouse buttons are Action Bar 6. Your current layout can be replaced in one step (**すべて配置**). You see a preview first, your old bars and keys are backed up, and **元に戻す** restores them. **バーを空にする** first empties only the buttons the layout uses, so the full layout starts clean; your other buttons stay.
 - **New ranks:** the game does not put a new rank on the bars, so the addon upgrades bar buttons to the highest rank automatically (after combat if you are fighting), with a toast and **元に戻す** to keep the old rank. It can be turned off in the settings. Healing macros are checked to cast the highest rank too.
 - **Healing targeting:** mouseover healing macros, or plain spells for click-target healing. One setting switches between them.
-- **Talent advisor (タレント):** when you have an unspent point, it shows the next talent with a short reason, plus the full order: the Mobalytics build for the Restoration Shaman, the Wowhead leveling path (0/32/19) for the Protection Paladin.
-- **Guide (`/sensei`):** for the Shaman: the healer role, healing tips, when to deal damage, totems and group manners. For the Paladin: the tank role and threat, the rotation, seals and Judgement, auras and blessings, cooldowns and group manners. Both: a skill list by level, the key layout, and the talent order.
+- **Talent advisor (タレント):** when you have an unspent point, it shows the next talent with a short reason, plus the full order: the Mobalytics build for the Restoration Shaman, the Wowhead leveling path (0/32/19) for the Protection Paladin, the Mobalytics leveling path (32/18/1) for the Arms Warrior.
+- **Guide (`/sensei`):** for the Shaman: the healer role, healing tips, when to deal damage, totems and group manners. For the Paladin: the tank role and threat, the rotation, seals and Judgement, auras and blessings, cooldowns and group manners. For the Warrior: the melee DPS role, the rotation, stances, rage, cooldowns and dungeon manners. All: a skill list by level, the key layout, and the talent order.
+- **English-only packs:** the Warrior pack has English texts only (`## X-FS-Languages: en` in its TOC). With Japanese chosen, the core's windows stay Japanese, the Warrior's cards, guide and talent texts show in English, and one message says so.
 - **Translation reports (翻訳の報告):** every Japanese line can be reported in-game. The player copies the reports into a chat message to the maintainer, and `make reports` applies them here.
 
 All game facts come from World of Warcraft: Forever sources only (client spell data, Wowhead Forever, Mobalytics Forever), never Classic or Retail. See [SOURCES.md](SOURCES.md), which also lists what can only be checked in the game.
@@ -29,20 +31,20 @@ ForeverSensei works with or without WFJ installed. Without it, ForeverSensei use
 
 ## Releases
 
-Download the newest zip from [Releases](https://github.com/oskar-v-karlsson/forever-sensei/releases/latest) (the asset `ForeverSensei-v<version>-<commit>.zip`). It holds every addon folder (`ForeverSensei/`, `ForeverSensei_Paladin/` and `ForeverSensei_Shaman/`) at its top level. Every push to `main` makes a release automatically (`.github/workflows/release.yml`). The workflow runs `make check`, builds the zip and publishes it, tagged `v<version>-<short commit>`, e.g. `v0.2.0-5f1a87c`. The newest release is marked **Latest**. If the checks fail, no release is made.
+Download the newest zip from [Releases](https://github.com/oskar-v-karlsson/forever-sensei/releases/latest) (the asset `ForeverSensei-v<version>-<commit>.zip`). It holds every addon folder (`ForeverSensei/`, `ForeverSensei_Paladin/`, `ForeverSensei_Shaman/` and `ForeverSensei_Warrior/`) at its top level. Every push to `main` makes a release automatically (`.github/workflows/release.yml`). The workflow runs `make check`, builds the zip and publishes it, tagged `v<version>-<short commit>`, e.g. `v0.2.0-5f1a87c`. The newest release is marked **Latest**. If the checks fail, no release is made.
 
 ## Install on Windows
 
 1. Get the addon:
    - **Release:** download the zip from [the latest release](https://github.com/oskar-v-karlsson/forever-sensei/releases/latest). On Windows, right-click it → **Extract All**.
    - **Zip:** or run `make zip` and use `dist/ForeverSensei-v<version>.zip`.
-   - **Copy:** or copy the `ForeverSensei`, `ForeverSensei_Paladin` and `ForeverSensei_Shaman` folders from this repo.
+   - **Copy:** or copy the `ForeverSensei`, `ForeverSensei_Paladin`, `ForeverSensei_Shaman` and `ForeverSensei_Warrior` folders from this repo.
 2. In the **Battle.net** app, choose **World of Warcraft**, then the **Forever** version in the version drop-down. Click the gear next to Play → **Show in Explorer**.
 3. Open the Forever game folder, `_forever_`, then `Interface\AddOns`. If `AddOns` (or `Interface`) is missing, create it.
-4. Put all three folders, `ForeverSensei`, `ForeverSensei_Paladin` and `ForeverSensei_Shaman`, there. The result must be `...\Interface\AddOns\ForeverSensei\ForeverSensei.toc`, `...\Interface\AddOns\ForeverSensei_Paladin\ForeverSensei_Paladin.toc` and `...\Interface\AddOns\ForeverSensei_Shaman\ForeverSensei_Shaman.toc`. The folders must keep exactly these names and not be nested twice (`ForeverSensei\ForeverSensei\...`), which happens easily with Extract All.
-5. Start the game. At character select, open **AddOns** (bottom left), make sure **ForeverSensei** and the pack for your class (**ForeverSensei - Shaman** or **ForeverSensei - Paladin**) are ticked, and turn on **Load out of date AddOns** if the game asks. A pack you don't play can be unticked, or its folder left out.
+4. Put all four folders, `ForeverSensei`, `ForeverSensei_Paladin`, `ForeverSensei_Shaman` and `ForeverSensei_Warrior`, there. The result must be `...\Interface\AddOns\ForeverSensei\ForeverSensei.toc`, `...\Interface\AddOns\ForeverSensei_Paladin\ForeverSensei_Paladin.toc`, `...\Interface\AddOns\ForeverSensei_Shaman\ForeverSensei_Shaman.toc` and `...\Interface\AddOns\ForeverSensei_Warrior\ForeverSensei_Warrior.toc`. The folders must keep exactly these names and not be nested twice (`ForeverSensei\ForeverSensei\...`), which happens easily with Extract All.
+5. Start the game. At character select, open **AddOns** (bottom left), make sure **ForeverSensei** and the pack for your class (**ForeverSensei - Shaman**, **ForeverSensei - Paladin** or **ForeverSensei - Warrior**) are ticked, and turn on **Load out of date AddOns** if the game asks. A pack you don't play can be unticked, or its folder left out.
 
-To update, delete the old `ForeverSensei`, `ForeverSensei_Paladin` and `ForeverSensei_Shaman` folders and put the new ones in their place. Your settings and saved reports are kept, because they are stored in `_forever_\WTF\Account\...\SavedVariables\ForeverSensei.lua`.
+To update, delete the old `ForeverSensei`, `ForeverSensei_Paladin`, `ForeverSensei_Shaman` and `ForeverSensei_Warrior` folders and put the new ones in their place. Your settings and saved reports are kept, because they are stored in `_forever_\WTF\Account\...\SavedVariables\ForeverSensei.lua`.
 
 ## First steps in the game
 
@@ -52,7 +54,7 @@ To update, delete the old `ForeverSensei`, `ForeverSensei_Paladin` and `ForeverS
 4. The preview lists every slot and key that changes. Press **適用** to apply. `/sensei undo` or the **元に戻す** button restores the old bars and keys.
    To start from empty bars, press **バーを空にする** first (`/sensei clean`). It asks first and empties only the buttons the addon configures: every planned slot (spells, item macros, and slots kept free for spells you haven't learned yet), the buttons 0.4.1-0.6.1 used on Action Bar 5 and the buttons 0.4.0 used on Action Bar 7. Spare buttons and every other button stay. It saves the bars first, so **元に戻す** puts them back.
 
-   Note: the full layout binds every key of the three rows, including `Q`/`E` (strafe by default), `Shift+1-4` (bar paging by default), `Ctrl+1-5` (stance-bar buttons: Ghost Wolf, the Paladin auras), `Ctrl+R` (framerate display) and the mouse side buttons. The preview warns about this.
+   Note: the full layout binds every key of the three rows, including `Q`/`E` (strafe by default), `Shift+1-4` (bar paging by default), `Ctrl+1-5` (stance-bar buttons: Ghost Wolf, the Paladin auras, the Warrior stances), `Ctrl+R` (framerate display) and the mouse side buttons. The preview warns about this.
 5. **Move Action Bar 6.** The layout uses Action Bar 6 for the mouse buttons and the spells you click in combat. The game puts it in the middle of the screen: press `Esc`, open **Edit Mode** and drag it next to your bottom bars. The game remembers where you put it.
 6. Play. New skills show a card out of combat. Cards wait until combat ends, and bar or key changes started in combat are applied when it ends.
 
@@ -170,6 +172,39 @@ The plan is in [research/keybind-layout-v4.md](research/keybind-layout-v4.md) (l
 - Character macros: `FS_FOL`, `FS_HL`, `FS_LOH`, `FS_CLEANSE` (`FS_PURIFY` before 42), `FS_BOF`, `FS_BOP`, `FS_BOS` (mouseover mode only), `FS_HOJ` and `FS_OPEN` (always), `FS_HEALTH` and `FS_MANA`: at most 12 of 30.
 - The source of truth is `ForeverSensei_Paladin/Data/Protection/Layout.lua`.
 
+### Key layout: Arms Warrior
+
+The plan is in [research/warrior-arms.md](research/warrior-arms.md) (part 4, approved for 0.9.0). It uses the same allowed keys, bars and family blocks as the other layouts. *(n)* is the level the spell becomes available; "stance" = a stance macro (below); MO = mouseover macro.
+
+| Key | Plain (Action Bar 1, every stance) | Shift (Action Bar 2) | Ctrl (Action Bar 3) |
+|---|---|---|---|
+| 1 | Rend *(4, stance)* | Battle Shout *(1)* | Battle Stance *(1)* |
+| 2 | Overpower *(12, stance)* | Demoralizing Shout *(14)* | Defensive Stance *(10)* |
+| 3 | Slam *(20)* | Intimidating Shout *(22)* | Berserker Stance *(30)* |
+| 4 | Mortal Strike *(39, talent)* | Challenging Shout *(26)* | – |
+| 5 | Execute *(24, stance)* | – | – |
+| Q | Heroic Strike *(1)* | Sweeping Strikes *(29, talent, stance)* | Taunt *(10, stance)* |
+| E | Sunder Armor *(10)* | Whirlwind *(36, stance)* | Mocking Blow *(16, stance)* |
+| R | Spearing Strike *(28, talent, stance)* | Cleave *(20)* | Revenge *(14, stance)* |
+| F | Hamstring *(8, stance)* | Thunder Clap *(6, stance)* | – |
+| Z | Bloodrage *(10)* | Retaliation *(20, stance)* | Shield Bash *(12, stance)* |
+| X | Reckless Swings *(56, talent)* | Recklessness *(50, stance)* | Shield Block *(16, stance)* |
+| C | Berserker Rage *(30, stance)* | Disarm *(18, stance)* | Shield Wall *(28, stance)* |
+| Mouse 4 | Pummel, MO enemy *(38, stance)* | Healthstone, else Healing Potion | Charge, MO enemy *(4, stance)* |
+| Mouse 5 | War Stomp *(Tauren only)* | Bandage on yourself | Intercept, MO enemy *(30, stance)* |
+
+- **Blocks:** plain `1-5` the strikes in priority order, `Q-F` the other strikes, `Z-C` the rage tools. Shift: shouts on `1-4`, the group attacks (Sweeping Strikes, Whirlwind, Cleave, Thunder Clap) on `Q-F`, the cooldowns on `Z-C`. Ctrl: stances on `1-3`, the emergency threat tools on `Q-R` (Taunt, Mocking Blow, Revenge: only to save the healer when the tank can't), the shield tools on `Z-C` (they need a shield equipped, which Arms rarely has). Mouse buttons in pairs on Action Bar 6 buttons 1-6: Pummel and War Stomp stop a cast, Shift the potion and the bandage, Ctrl the gap-closers (the modifier keeps a misclick from charging into a pack).
+- **Same bar in every stance:** a warrior's Action Bar 1 swaps to another page in each stance (Battle: slots 73-84, Defensive: 85-96, Berserker: 97-108). The addon writes the same buttons to all of them, so `1-5`, `Q-F` and `Z-C` do the same thing in every stance. **元に戻す**, **バーを空にする** and `/sensei verify` cover all pages.
+- **Stance macros:** a spell that only works in some stances is a macro that changes to its stance first, e.g. `/cast [nostance:3] Berserker Stance; Whirlwind`: from the wrong stance, the first press changes the stance and the second casts. A stance change keeps at most 10 rage (25 with Improved Tactical Mastery 3/3). Spells that work in every stance (Heroic Strike, Slam, Mortal Strike, the shouts, Cleave) are plain spells.
+- **Stances:** on Action Bar 3 buttons 1-3 with `Ctrl+1-3`, like the Paladin's auras. `Ctrl+1-3` no longer press the stance bar (the preview says so); the stance bar still shows your stances.
+- **Targeting:** in mouseover mode Pummel, Charge and Intercept go to the enemy under the mouse, else your target (Pummel also stops your own Slam first). In click mode they use your target. The stance macros stay macros in both modes.
+- **Race:** War Stomp (`Mouse 5`) and Cultivation (Action Bar 4 button 1) are Tauren racials; on another race their buttons stay empty.
+- Spare keys, bound to empty buttons for your own use: `Shift+5`, `Ctrl+4`, `Ctrl+5`, `Ctrl+F`. Action Bar 6 buttons 7-12 are free. Move Action Bar 6 down in Edit Mode.
+- Not planned: Victory Rush and Commanding Shout (in the game data only as Season of Discovery runes), Hearthstone. Action Bar 5 isn't used.
+- Character macros: 21 stance macros (`FS_REND`, `FS_OP`, `FS_EXEC`, `FS_WW`, `FS_PUMMEL`, `FS_CHARGE`, ...), `FS_HEALTH` and `FS_BANDAGE` (the best bandage in your bags, used on yourself): at most 23 of 30.
+- The texts are English only. With Japanese chosen, the Warrior's cards, guide and talents show in English.
+- The source of truth is `ForeverSensei_Warrior/Data/Arms/Layout.lua`.
+
 ## In-game test checklist
 
 These cannot be tested outside the game. Please go through them once, then paste the chat output of step 1 back to the repo owner.
@@ -255,6 +290,19 @@ These cannot be tested outside the game. Please go through them once, then paste
 61. [ ] **Portrait:** a middle click on a party portrait does what it did before (no spell is cast).
 62. [ ] **元に戻す:** puts buttons 9 and 10 and the old `BUTTON3` key back as they were before **適用**.
 
+**Arms Warrior (0.9.0).** On the Tauren warrior, with **ForeverSensei - Warrior** ticked:
+
+63. [ ] **Pack:** the addon list shows **ForeverSensei - Warrior**; `/sensei` opens the guide with the Role, Rotation, Stances, Rage, Cooldowns and Dungeon manners tabs, in English. With the language set to Japanese, one message says the class pack is English only; the core windows stay Japanese.
+64. [ ] **Stance pages:** `/run print(GetBonusBarOffset(), C_ActionBar.GetBonusBarIndex())` in Battle, Defensive and (from 30) Berserker Stance prints `1 7`, `2 8` and `3 9`. `/sensei verify` shows the same numbers in its `bonus bar offset` line. Report anything else.
+65. [ ] **Stance order:** `/run for i=1,GetNumShapeshiftForms() do print(i, select(4, GetShapeshiftFormInfo(i))) end` prints `1 2457`, `2 71` and (from 30) `3 2458`.
+66. [ ] **Apply:** **すべて配置** → the preview warns that `Ctrl+1` and `Ctrl+2` (and `Ctrl+3` from 30) no longer press the stance bar, and about `Ctrl+R`; **適用**. Action Bar 1 shows the same buttons in every stance; `Ctrl+1-3` change stance from Action Bar 3; the stance bar still works by clicking.
+67. [ ] **Stance macros:** in Defensive Stance press `1` (Rend): the first press changes to Battle Stance, the second casts Rend. From 36, `Shift+E` (Whirlwind) in Battle Stance changes to Berserker Stance, then casts. After the swap you have at most 10 rage (25 with Improved Tactical Mastery 3/3).
+68. [ ] **Mouse keys:** move Action Bar 6 down in Edit Mode. `Mouse 5` casts War Stomp. `Ctrl+Mouse 4` charges the enemy under the mouse out of combat. `Shift+Mouse 4` uses a Healthstone, else a Healing Potion; `Shift+Mouse 5` bandages you with the best bandage in your bags.
+69. [ ] **Victory Rush:** does the spellbook show Victory Rush or Commanding Shout? (The plan leaves them out.) Report either.
+70. [ ] **Mortal Strike:** the talent at 39 puts Mortal Strike in the spellbook, and **配置する** puts it on `4`. The talent advisor's next talent can be learned at each level (the game may gate a row by points spent; report any talent it refuses).
+71. [ ] **Other race:** on a non-Tauren warrior (if available) `Mouse 5` and Action Bar 4 button 1 stay empty, and the War Stomp card doesn't show.
+72. [ ] **元に戻す:** puts every stance page of Action Bar 1, Action Bars 2, 3, 4 and 6, the macros and the keys (also `Ctrl+1-3` → stance bar) back as they were before **適用**. **バーを空にする** empties the layout's buttons on every stance page.
+
 ## Translation reports
 
 ### For the player (日本語)
@@ -297,20 +345,21 @@ When the user pastes a report block (starting `[ForeverSensei v`) or asks you to
    - **Length:** keep it about as short as the current text. Card texts must fit the card.
    - **The player's note** says what was wrong; fix exactly that.
 3. Run `make check`. It checks the text rules, font glyphs, placeholders and length, and runs every screen in a fake client. Fix anything it reports.
-4. Delete the handled entries from `reports/open.md`. Bump the patch version in every TOC (`ForeverSensei/ForeverSensei.toc`, `ForeverSensei_Paladin/ForeverSensei_Paladin.toc`, `ForeverSensei_Shaman/ForeverSensei_Shaman.toc`; `## Version`) and `ForeverSensei/Core/Init.lua` (`ns.VERSION`) if `reports.py` has not already done so. The core and the packs share one version. Run `make zip`.
+4. Delete the handled entries from `reports/open.md`. Bump the patch version in every TOC (`ForeverSensei/ForeverSensei.toc`, `ForeverSensei_Paladin/ForeverSensei_Paladin.toc`, `ForeverSensei_Shaman/ForeverSensei_Shaman.toc`, `ForeverSensei_Warrior/ForeverSensei_Warrior.toc`; `## Version`) and `ForeverSensei/Core/Init.lua` (`ns.VERSION`) if `reports.py` has not already done so. The core and the packs share one version. Run `make zip`.
 5. Commit the addon changes, with no `Co-authored-by` trailer. Do not commit `reports/` (it is gitignored and stays local). Tell the user which zip to send.
 
 ## Development
 
-- `make check` runs all offline checks. It needs Python 3 and `pip install --user lupa`, which provides a real Lua 5.1. It loads the core and every class pack in a fake WoW client (`tools/wow_stub.lua`, packs loaded on demand like the game does) and drives every screen, button and command in Japanese and English (`tools/scenarios.lua` for the Shaman, `tools/scenarios_paladin.lua` for the Paladin). It also checks:
-  - **texts:** both languages of every locale file have every ID; each ID lives in one file; the core's texts are class-neutral; Japanese rules; font glyphs; placeholders; no raw IDs on screen;
+- `make check` runs all offline checks. It needs Python 3 and `pip install --user lupa`, which provides a real Lua 5.1. It loads the core and every class pack in a fake WoW client (`tools/wow_stub.lua`, packs loaded on demand like the game does) and drives every screen, button and command in Japanese and English (`tools/scenarios.lua` for the Shaman, `tools/scenarios_paladin.lua` for the Paladin, `tools/scenarios_warrior.lua` for the Warrior; an English-only pack runs in English, and with Japanese chosen only checks the fallback). It also checks:
+  - **texts:** both languages of every locale file have every ID (only English for a pack with `## X-FS-Languages: en`); each ID lives in one file; the core's texts are class-neutral; Japanese rules; font glyphs; placeholders; no raw IDs on screen;
   - **packs:** each pack registers exactly its class with the core's API version; TOC fields; a character without a pack (one note, idle) and a pack with another API version (refused, one note);
   - **data:** spell and talent IDs, names and levels against the Forever client dump in `research/`;
   - **layout:** unique slots and keys, allowed keys only, the exact approved key grid of each pack, every key of the three rows and the mouse bound, each family in its block (`1-5`, `Q-F`, `Z-C`, a mouse pair or the middle mouse button) with spill-overs on Action Bar 6, Action Bar 4 out-of-combat only, bar fields (only Action Bar 6 in Edit Mode), old-layout leftovers, macro kinds and bodies, macro count, item slots;
   - **items:** potion and elixir data (sources, ids, best-first order);
-  - **talents:** one point per level, row requirements, max ranks, final 0/5/46 (Shaman) and 0/32/19 (Paladin);
+  - **talents:** one point per level, row requirements (unless the path sets `noRowGate`), max ranks, final 0/5/46 (Shaman), 0/32/19 (Paladin) and 32/18/1 (Warrior);
   - **scenarios:** layout apply → undo round-trip, potion and Healthstone macros, the Lightning Shield stand-in, clearing old-layout leftovers, the update from layout 6 to 7 (notice, apply, undo with bar settings), the login card fix and the one-time layout notice;
   - **Paladin:** the Protection grid and families, the auras on Action Bar 3, the updates from layout 1 to 2 and 2 to 3 (notice, apply, undo), the help macros with and without the self fallback (each help button holds its macro, `/sensei verify` flags a plain spell there), the opener, the Purify stand-in, level 30 and 42 snapshots, and that unverified spells appear nowhere;
+  - **Warrior:** the Arms grid and families, the stance pages (every page of Action Bar 1 mirrors the plain row; a self-test breaks the layout four ways and expects each to fail), the stance macro kinds and bodies, levels 23 and 60, `FS_BANDAGE` (best usable bandage first), page slots fixed by apply, verify and macro refresh, **バーを空にする** and **元に戻す** on all pages, the race gate (no War Stomp or Cultivation for a non-Tauren), the spells left out (Victory Rush, Commanding Shout, Hearthstone), and that no Japanese text exists;
   - **reports:** round-trip of the report format (with the pack name), that each ID is written to the file of the pack the report names, and that the zip holds every addon folder at its top level.
 - `make zip` builds `dist/ForeverSensei-v<version>.zip` with every addon folder at its top level (unzip straight into `AddOns`).
 - Layout of the core (`ForeverSensei/`):
@@ -318,9 +367,9 @@ When the user pastes a report block (starting `[ForeverSensei v`) or asks you to
   - `Data/Items.lua`: potions, Healthstones and elixirs every class can use;
   - `Locales/`: `en.lua` is the source, `ja.lua` the translation (class-neutral texts only);
   - `Modules/`: cards, layout, talents, guide, feedback, verify, minimap.
-- Layout of a class pack (`ForeverSensei_Shaman/`, `ForeverSensei_Paladin/`):
+- Layout of a class pack (`ForeverSensei_Shaman/`, `ForeverSensei_Paladin/`, `ForeverSensei_Warrior/`):
   - `Data/Spells.lua`, `Data/Ranks.lua`: the class's spells and every rank, each with source and verified date;
-  - `Data/<Spec>/`: one folder per spec (`Restoration/`, `Protection/`: key layout, talents, guide);
+  - `Data/<Spec>/`: one folder per spec (`Restoration/`, `Protection/`, `Arms/`: key layout, talents, guide);
   - `Locales/`: the pack's own texts (skills, talents, guide, class-specific interface lines);
   - `Register.lua`: hands everything to the core.
 - The client is the 12.x API ("Camelot", `## Interface: 16001`). Use `C_*` namespaces and pcall-wrap anything that may not exist. Never touch bars or bindings in combat.
@@ -329,12 +378,12 @@ When the user pastes a report block (starting `[ForeverSensei v`) or asks you to
 
 A class pack is a separate addon folder, `ForeverSensei_<Class>`, named from the class file with only the first letter upper case (`WARRIOR` → `ForeverSensei_Warrior`). The core loads it at login with `C_AddOns.LoadAddOn` only on characters of that class. Copy `ForeverSensei_Shaman/` as the starting point.
 
-1. **TOC** (`ForeverSensei_<Class>.toc`): `## Interface: 16001`, `## Version:` the same as the core, `## Dependencies: ForeverSensei`, `## LoadOnDemand: 1`, `## X-ForeverSensei-API: 1` (the core's `ns.API_VERSION`; the core does not load a pack with another value and shows a note), Title, Notes and Notes-jaJP. List the files in this order: `Locales\en.lua`, `Locales\ja.lua`, `Data\*.lua`, `Data\<Spec>\*.lua`, `Register.lua`.
+1. **TOC** (`ForeverSensei_<Class>.toc`): `## Interface: 16001`, `## Version:` the same as the core, `## Dependencies: ForeverSensei`, `## LoadOnDemand: 1`, `## X-ForeverSensei-API: 1` (the core's `ns.API_VERSION`; the core does not load a pack with another value and shows a note), Title, Notes and Notes-jaJP. A pack with English texts only adds `## X-FS-Languages: en` and has no `Locales\ja.lua`; with Japanese chosen, its texts fall back to English and the core says so once. List the files in this order: `Locales\en.lua`, `Locales\ja.lua`, `Data\*.lua`, `Data\<Spec>\*.lua`, `Register.lua`.
 2. **Data** (in the addon's private table, `local _, P = ...`):
    - `P.sources`: source keys for the `src` fields (Forever sources only), added to the core's `wh_spell`, `wh_item`, `ui`;
    - `P.spells`: every class spell with `key`, `id`, `name`, `level`, `role`, `use`, `src` and `verified` (a date); `P.ranks` (generate it from the client dump with `tools/research/gen_ranks.py --class <class>`, after adding the class to its `CLASSES`) and `P.ranksSource`;
    - `P.specs.<SPEC>`: `layout` (bars, `plan`, `families`, allowed keys, `version`, macros, `noSlot`, `spareOrder`, `retired` bars, `old` leftovers; the core builds the slots with `ns.BuildLayout`), `talents` (path; the core builds the order with `ns.BuildTalents`), `guide` and `tabs` (the spec's own guide tabs, shown before the generic ones).
-   - Class-specific behaviour goes in the layout data, not in the core: macro kinds and bodies (`macroKind`, `macroBodies`, `macroVars`, e.g. the Shaman's Nature's Swiftness + Healing Wave macro, the Paladin's `help_nofb`), multi-spell macros (`combos`, `"!id"` in the plan, e.g. the Paladin opener), stand-ins (`{ "cleanse", standIn = "purify" }`), spells kept off the bars (`noSlot`, `noSlotLines`, e.g. the Totem Bar or the spellbook), `"x"` for a button the layout never uses, a bar that starts in the middle of the screen (`editMode`), preview warnings (`defaultWarn`), bars an older layout used (`retired`, with `assigned` buttons and `keepShown`), and spells an older layout put in buttons the plan no longer fills (`old`).
+   - Class-specific behaviour goes in the layout data, not in the core: macro kinds and bodies (`macroKind`, `macroBodies`, `macroVars`, e.g. the Shaman's Nature's Swiftness + Healing Wave macro, the Paladin's `help_nofb`), multi-spell macros (`combos`, `"!id"` in the plan, e.g. the Paladin opener), stand-ins (`{ "cleanse", standIn = "purify" }`), spells kept off the bars (`noSlot`, `noSlotLines`, e.g. the Totem Bar or the spellbook), `"x"` for a button the layout never uses, a bar that starts in the middle of the screen (`editMode`), preview warnings (`defaultWarn`), bars an older layout used (`retired`, with `assigned` buttons and `keepShown`), bars that page by stance or form (`stancePages`: the extra pages that mirror Action Bar 1, e.g. the Warrior's stances), and spells an older layout put in buttons the plan no longer fills (`old`).
 3. **Texts:** `Locales/en.lua` and `Locales/ja.lua` with every `spell.<key>.*`, `talent.<key>.*`, `guide.*` and `ui.tab.<tab>` text the pack uses, plus every ID in `ns.PackTexts` (`Core/Class.lua`): interface lines whose wording depends on the class. An ID must not also be in the core. The Japanese follows the rules in "For agents: processing translation reports".
 4. **Register.lua:** `ForeverSensei.RegisterClass("<CLASSFILE>", { api = 1, name = "ForeverSensei_<Class>", spells, ranks, ranksSource, sources, items = { ...item macro kinds from Data/Items.lua the layouts use }, locales, localeOrder, defaultSpec = "<SPEC>", specs })`. `defaultSpec` is the spec the core uses; there is no spec picker yet.
 5. **Checks:** add the pack's class-specific checks to `PACK_CHECKS` in `tools/check.py` (see `check_shaman` and `check_paladin`: client-dump ranks through `check_client_dump`, the approved key grid, macros), a runtime scenario like `tools/scenarios_paladin.lua` run from `check_runtime`, and its research sources to SOURCES.md. `make check` already loads every `ForeverSensei_*` folder, runs the generic text, data, layout, talent and guide checks on it, and checks its TOC. `make zip` adds it to the release zip.

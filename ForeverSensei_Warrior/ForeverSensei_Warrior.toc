@@ -1,0 +1,19 @@
+## Interface: 16001
+## Title: ForeverSensei - Warrior
+## Notes: Arms Warrior pack for ForeverSensei: skills, key layout, talents and guide (English only).
+## Author: oskar-v-karlsson
+## Version: 0.9.0
+## Dependencies: ForeverSensei
+## LoadOnDemand: 1
+## X-ForeverSensei-API: 1
+## X-FS-Languages: en
+## IconTexture: Interface\Icons\Ability_Warrior_SavageBlow
+## X-License: GPL-2.0-or-later
+
+Locales\en.lua
+Data\Spells.lua
+Data\Ranks.lua
+Data\Arms\Layout.lua
+Data\Arms\Talents.lua
+Data\Arms\Guide.lua
+Register.lua

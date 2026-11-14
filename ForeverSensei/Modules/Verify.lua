@@ -137,6 +137,12 @@ function Verify.Run()
     local ok, action = ns.Call("GetBindingAction", key)
     add(string.format("  key %s = %s", key, ok and tostring(action) or "?"))
   end
+  -- Stance pages (a warrior): which page Action Bar 1 shows now (research/warrior-arms.md, in-game check 1).
+  if layout.stancePages then
+    local okO, offset = ns.Call("GetBonusBarOffset")
+    local okI, index = ns.Call("C_ActionBar.GetBonusBarIndex")
+    add(string.format("  bonus bar offset %s, index %s", okO and tostring(offset) or "?", okI and tostring(index) or "?"))
+  end
   if ns.UnitFrames then
     for _, line in ipairs(ns.UnitFrames.Report()) do add(line) end
   end

@@ -16,6 +16,7 @@ ns.Locales.ja = {
   ["ui.verify.intro"] = "ゲームとのデータ照合の結果（英語）。Ctrl+Cでコピーして、アドオンの作者に送ろう。",
   ["ui.pack.missing"] = "このキャラクターのクラス用パックがないか、{folder}が入っていない・有効になっていない。このキャラクターではForeverSenseiは何もしない。",
   ["ui.pack.api"] = "{folder}は別のバージョンのForeverSensei用なので、読み込まなかった。同じzipからForeverSenseiと{folder}を一緒に更新しよう。",
+  ["ui.pack.enonly"] = "このクラスパックは英語だけなので、スキルカード、ガイド、タレントの文は英語で出る。ほかは日本語のまま。",
 
   ["ui.btn.apply"] = "適用",
   ["ui.btn.applyall"] = "すべて配置",
@@ -68,6 +69,7 @@ ns.Locales.ja = {
   ["ui.where.key"] = "{bar}の{button}番、キー{key}",
   ["ui.where.click"] = "{bar}の{button}番（マウスでクリック）",
   ["ui.where.short"] = "{bar}の{button}番",
+  ["ui.where.page"] = "{bar}（{page}）の{button}番",
   ["ui.where.spellbook"] = "バーには置かない。めったに使わないので、呪文書から使おう。",
   ["ui.where.passive"] = "パッシブ。自動で効果があるので、ボタンは要らない。",
   ["ui.bars.hidden"] = "{bar}を表示できなかった。設定のアクションバーの項目で表示しよう。",
