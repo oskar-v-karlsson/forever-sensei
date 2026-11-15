@@ -192,6 +192,16 @@ renderers.skills = function(frame)
   return y
 end
 
+-- The lower-rank slots on a bar, by button.
+local function lowerList(layout, barId)
+  local list = {}
+  for _, s in ipairs(layout.slots) do
+    if s.lower and s.bar == barId and not s.mirror then table.insert(list, s) end
+  end
+  table.sort(list, function(a, b) return a.button < b.button end)
+  return list
+end
+
 renderers.layout = function(frame)
   local layout = ns.spec.layout
   local y = paragraph(frame, 1, 0, "ui.layout.intro") + 8
@@ -219,7 +229,15 @@ renderers.layout = function(frame)
         local e = s and s.spell and Spells.Get(s.spell)
         if e and s.standIn and not Spells.IsKnown(e) then e = Spells.Get(s.standIn) end
         if s and s.combo then e = Spells.Get(layout.combos[s.combo].needs) end
-        icon(frame, n, x + (step - 46) / 2, rowY, 38, s and (s.item or e) or false)
+        if s and s.lower then e = Spells.Get(s.lower) end
+        local b = icon(frame, n, x + (step - 46) / 2, rowY, 38, s and (s.item or e) or false)
+        -- A lower-rank key: the rank it casts now (tooltip), grey while it is empty; a click opens its card.
+        if s and s.lower then
+          local _, id = ns.Layout.LowerRank(s.lower)
+          b.spellID = id
+          if not id and b.tex.SetDesaturated then b.tex:SetDesaturated(true) end
+          b.entry = ns.NewSkill.LowerEntry(s.lower)
+        end
         local keyText = pool(frame, "key", n, function() return UI.Text(frame, 10, "gold") end)
         keyText:SetWidth(step)
         keyText:SetJustifyH("CENTER")
@@ -229,6 +247,15 @@ renderers.layout = function(frame)
       end
     end
     y = y + (twoRows and 116 or 58)
+    -- The ranks the lower-rank keys cast now ("2: Healing Wave Rank 3"), and the ones an undo keeps.
+    for _, ls in ipairs(lowerList(layout, bar.id)) do
+      local rank, _, pinned = ns.Layout.LowerRank(ls.lower)
+      if rank then
+        local name = Spells.Get(ls.lower).name
+        local vars = { key = ns.KeyLabel(ls.key), name = name, n = rank }
+        y = y + label(frame, 20 + ls.button, y, ns.T(pinned and "ui.rank.kept" or "ui.layout.lower", vars), 12, "grey") + 4
+      end
+    end
     -- A bar that starts in the middle of the screen (Action Bar 6): how to move it next to the bottom bars.
     if bar.editMode then
       y = y + paragraph(frame, 7, y, "ui.layout.editmode") + 8
@@ -348,9 +375,9 @@ renderers.review = function(frame)
     li = li + 1
     y = y + label(frame, li, y, mark .. "  |cffa6a6a6" .. id .. "|r", 10) + 2
     li = li + 1
-    y = y + label(frame, li, y, ns.Raw(id, "ja"), 13) + 2
+    y = y + label(frame, li, y, ns.Template(id, "ja"), 13) + 2
     li = li + 1
-    y = y + label(frame, li, y, ns.Raw(id, "en"), 10, "grey") + 4
+    y = y + label(frame, li, y, ns.Template(id, "en"), 10, "grey") + 4
     bi = bi + 1
     button(frame, bi, 0, y, "OK", 80, function()
       ns.db.review[id] = "ok"

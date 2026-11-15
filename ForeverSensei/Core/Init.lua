@@ -1,7 +1,7 @@
 -- Core/Init.lua: namespace, safe event bus, combat queue, saved variables and the /sensei command.
 local ADDON, ns = ...
 ns.ADDON = ADDON
-ns.VERSION = "0.9.0"
+ns.VERSION = "0.10.0"
 do
   local getMeta = C_AddOns and C_AddOns.GetAddOnMetadata
   if getMeta then
@@ -122,6 +122,9 @@ local CHAR_DEFAULTS = {
   lastLevel = 0,
   keepRank = {},    -- action slot → spell id of an older rank the player chose to keep there (undo of a rank upgrade)
   macroRank = {},   -- spell key → "Rank N" when the macro has to name the rank (/cast <name> did not cast the highest)
+  rankPin = {},     -- lower-rank key (L.lower) → { id = kept rank id, top = top rank id then } (undo of a lower-rank change)
+  lowerRanks = {},  -- lower-rank key → rank id its key cast at the last check (the toast compares with it)
+  lowerSeen = {},   -- lower-rank key → true once its first card was offered (or the key was placed)
   -- backup = { slots = {...}, bindings = {...}, time = ... } once the full layout was applied
   -- layoutVersion = layout version this character last saw (nil: from before 0.3.0); see Modules/Layout.lua
   -- packNote = the class-pack note this character already saw (Core/Class.lua), so it shows once

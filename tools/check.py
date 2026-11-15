@@ -214,7 +214,8 @@ def check_shown(lua, lang):
     for t in set(shown):
         if not isinstance(t, str):
             continue
-        if re.search(r"\{\w+\}", t):
+        # Intended: the translation check and the report dialog show texts as written, placeholders in light blue.
+        if re.search(r"\{\w+\}", t.replace("|cff59c0ff{", "")):
             problem(f"runtime [{lang}] unfilled placeholder shown: {t[:80]!r}")
         m = bad_id.search(t)
         # Intended: the report dialog shows the bare id, review rows show it in grey.
@@ -810,11 +811,16 @@ def check_layout(pack, layout):
     def what(s):
         if s.get("combo"):
             return "!" + s["combo"]
+        if s.get("lower"):
+            return "~" + s["lower"]
         return s.get("spell") or "@" + str(s.get("item"))
 
+    lower = layout.get("lower") or {}
     for s in slots:
-        if sum(bool(s.get(f)) for f in ("spell", "item", "combo")) != 1:
-            problem(f"layout: slot {s['slot']} must hold exactly one spell, item or combo")
+        if sum(bool(s.get(f)) for f in ("spell", "item", "combo", "lower")) != 1:
+            problem(f"layout: slot {s['slot']} must hold exactly one spell, item, combo or lower-rank key")
+        if s.get("lower") and s["lower"] not in lower:
+            problem(f"layout: slot {s['slot']} lower-rank key {s['lower']} is not in L.lower")
         if s.get("combo") and s["combo"] not in combos:
             problem(f"layout: slot {s['slot']} combo {s['combo']} is not in L.combos")
         for kind, seen, val in (("slot", seen_slot, s["slot"]), ("key", seen_key, s.get("key")), ("entry", seen_spell, what(s))):
@@ -850,6 +856,25 @@ def check_layout(pack, layout):
         if placed == unslotted:
             problem(f"layout: spell {k} must be in exactly one of the plan or noSlot")
     stand_ins = {s["standIn"] for s in slots if s.get("standIn")}
+    # Lower-rank keys (L.lower): the heal has its own slot, and the lower key sits on the next button of the same bar.
+    by_slot = {s["slot"]: s for s in slots}
+    for k, lo in lower.items():
+        top = next((s for s in slots if s.get("spell") == k), None)
+        lo_slot = next((s for s in slots if s.get("lower") == k), None)
+        if not top or not lo_slot:
+            problem(f"layout: lower {k} needs the heal's slot and its own lower slot")
+        elif (lo_slot["bar"], lo_slot["button"]) != (top["bar"], top["button"] + 1):
+            problem(f"layout: lower {k} must be on the button right after {k}'s")
+        if k in (layout.get("lowerSlots") or {}).values() and by_slot.get(lo_slot and lo_slot["slot"]) is None:
+            problem(f"layout: lower {k} slot missing")
+        m = lo.get("macro") or ""
+        if not m.startswith("FS_") or len(m) > 16 or m in layout["macros"].values():
+            problem(f"layout: lower {k} bad or duplicate macro name {m}")
+        if not isinstance(lo.get("offset"), int) or lo["offset"] < 1:
+            problem(f"layout: lower {k} offset must be a positive number of ranks")
+        for t in ("what", "when"):
+            if not isinstance(lo.get(t), str):
+                problem(f"layout: lower {k} has no {t} text")
     for k, m in layout["macros"].items():
         if k not in seen_spell and k not in stand_ins:
             problem(f"layout: macro for unplaced spell {k}")
@@ -879,7 +904,7 @@ def check_layout(pack, layout):
             problem(f"layout: combo {cid} body longer than 255 characters")
     # Character macros: Forever allows 30 (MAX_CHARACTER_MACROS); leave most of them to the player (15, or the
     # layout's macroBudget: the warrior's stance macros need 23).
-    n_macros = len(layout["macros"]) + len(pack_items) + len(combos)
+    n_macros = len(layout["macros"]) + len(pack_items) + len(combos) + len(lower)
     budget = layout.get("macroBudget") or 15
     if n_macros > budget or budget > 25:
         problem(f"layout: {n_macros} addon macros (keep it at {budget} or fewer of the 30 character macros, budget at most 25)")
@@ -1046,10 +1071,29 @@ def check_client_dump(pack, cls, talents):
 # Edit Mode); out-of-combat clicks on Action Bar 4. Action Bars 5, 7 and 8 are never planned.
 ROW_KEYS = ["1", "2", "3", "4", "5", "Q", "E", "R", "F", "Z", "X", "C"]
 BLOCKS = {"1-5": ROW_KEYS[0:5], "QERF": ROW_KEYS[5:9], "ZXC": ROW_KEYS[9:12]}
+
+
+def block_keys(block):
+    """A family's block: a range of number keys ("1-4") or a run of neighbouring row keys ("QE", "RF5"). None if
+    the keys are not in the row or not in order (each must be the key after the one before, 5 → Q wrapping is not)."""
+    if not isinstance(block, str):
+        return None
+    if block in BLOCKS:
+        return BLOCKS[block]
+    m = re.fullmatch(r"(\d)-(\d)", block)
+    if m:
+        a, b = int(m.group(1)), int(m.group(2))
+        return ROW_KEYS[a - 1:b] if 1 <= a <= b <= 5 else None
+    keys = list(block)
+    if not keys or any(k not in ROW_KEYS for k in keys) or len(set(keys)) != len(keys):
+        return None
+    return keys
 MOUSE_KEYS = {"BUTTON4", "BUTTON5", "SHIFT-BUTTON4", "SHIFT-BUTTON5", "CTRL-BUTTON4", "CTRL-BUTTON5"}
 
 
 def slot_what(s):
+    if s.get("lower"):
+        return "~" + s["lower"]
     return s.get("spell") or ("!" + s["combo"] if s.get("combo") else "@" + str(s.get("item")))
 
 
@@ -1121,10 +1165,18 @@ def check_blocks(layout, label, grid, clicks, mouse_order, ooc, bar6_more=(), ra
     where = {slot_what(s): s for s in slots}
     for f in layout.get("families") or []:
         block, row, members = f.get("block"), f.get("row") or "", f.get("members") or []
-        if block in BLOCKS:
-            want = [row + k for k in BLOCKS[block][:len(members)]]
-            if len(members) > len(BLOCKS[block]):
-                problem(f"{label}: family {f['id']} is bigger than its block")
+        # A heal with a lower-rank key (family "lower" list) takes two neighbouring keys: the heal, then its lower rank.
+        flower = f.get("lower") or []
+        if any(m not in members for m in flower):
+            problem(f"{label}: family {f['id']} lower {flower} must be members")
+        seq = [x for m in members for x in ([m, "~" + m] if m in flower else [m])]
+        bkeys = block_keys(block) if block not in ("mouse", "BUTTON4", "BUTTON5", "BUTTON3") else None
+        if bkeys:
+            want = [row + k for k in bkeys[:len(seq)]]
+            # The v4 blocks (1-5, QERF, ZXC) may keep spare keys at their end; a split block ("1-4", "QE") is exact.
+            if len(seq) > len(bkeys) or (block not in BLOCKS and len(seq) != len(bkeys)):
+                problem(f"{label}: family {f['id']} must fit its block {block} ({len(seq)} keys)")
+            members = seq
         elif block == "mouse":
             # The mouse pairs in Action Bar 6 order, from the family's row on: Mouse4, Mouse5, Shift+Mouse4, ...
             pairs = [m + b for m in ("", "SHIFT-", "CTRL-") for b in ("BUTTON4", "BUTTON5")]
@@ -1140,10 +1192,17 @@ def check_blocks(layout, label, grid, clicks, mouse_order, ooc, bar6_more=(), ra
         got = [(where.get(m) or {}).get("key") for m in members]
         if got != want:
             problem(f"{label}: family {f['id']} must sit on {want}, is on {got}")
-        for m in f.get("spill") or []:
+        spill_keys = f.get("spillKeys") or []
+        for i, m in enumerate(f.get("spill") or []):
             s = where.get(m) or {}
-            if s.get("bar") != "bar6" or s.get("key"):
+            if i < len(spill_keys):
+                # Spill-over to the nearest spare keys (layout 9: Purge and Chain Lightning on Ctrl+4 / Ctrl+5).
+                if s.get("key") != spill_keys[i]:
+                    problem(f"{label}: {f['id']} spill-over {m} must be on {spill_keys[i]}, is on {s.get('key')}")
+            elif s.get("bar") != "bar6" or s.get("key"):
                 problem(f"{label}: {f['id']} spill-over {m} must be clicked on Action Bar 6")
+        if len(spill_keys) > len(f.get("spill") or []):
+            problem(f"{label}: {f['id']} has more spillKeys than spill-overs")
     # Retired bars and leftovers: L.old slots are off the plan (spare or on a retired bar).
     planned = {s["slot"] for s in slots if slot_what(s) not in raced}
     ranges = [(b["first"], b["first"] + 11) for b in layout["bars"] + (layout.get("retired") or [])]
@@ -1155,6 +1214,19 @@ def check_blocks(layout, label, grid, clicks, mouse_order, ooc, bar6_more=(), ra
         if r["first"] in (1, 61, 49, 145, 25):
             problem(f"{label}: retired bar {r['id']} is a planned bar")
     return by_key
+
+
+def plain_copy(v):
+    if isinstance(v, dict):
+        return {k: plain_copy(x) for k, x in v.items()}
+    if isinstance(v, list):
+        return [plain_copy(x) for x in v]
+    return v
+
+
+def check_help_click(kind, body):
+    if kind == "help_click" and ("@" in body or "[" in body):
+        problem("layout: macro body help_click (lower-rank keys in click mode) must target like a plain spell")
 
 
 # --- Shaman ---------------------------------------------------------------------------------------------------
@@ -1169,17 +1241,18 @@ def check_shaman(pack, sources):
         problem("shaman: the pack must have the Restoration spec, the default")
     check_client_dump(pack, "shaman", talents)
 
-    # --- layout: the approved grid (research/keybind-layout-v4.md S3, layout 7) ----------------------------------
+    # --- layout: the approved grid (research/shaman-downranking.md S3, layout 9) ----------------------------------
     slots = layout["slots"]
     grid = {
-        "1": "flame_shock", "2": "lightning_bolt", "3": "chain_lightning", "4": "purge", "5": "frost_shock",
-        "Q": "earth_shock", "E": "lesser_healing_wave", "R": "chain_heal", "F": "healing_wave",
+        "1": "healing_wave", "2": "~healing_wave", "3": "chain_heal", "4": "~chain_heal", "5": "frost_shock",
+        "Q": "earth_shock", "E": "lesser_healing_wave", "R": "flame_shock", "F": "lightning_bolt",
         "Z": "@mana", "X": "water_shield", "C": "@health",
         "SHIFT-1": "totemic_call", "SHIFT-2": "call_of_the_elements", "SHIFT-3": "call_of_the_ancestors",
         "SHIFT-4": "call_of_the_spirits", "SHIFT-5": "totemic_recall",
         "SHIFT-Q": "flametongue_totem", "SHIFT-E": "magma_totem", "SHIFT-R": "searing_totem", "SHIFT-F": "fire_nova",
         "SHIFT-Z": "mana_spring_totem", "SHIFT-X": "mana_tide_totem", "SHIFT-C": "healing_stream_totem",
-        "CTRL-1": "ghost_wolf", "CTRL-2": "water_walking", "CTRL-3": "water_breathing",
+        "CTRL-1": "ghost_wolf", "CTRL-2": "water_walking", "CTRL-3": "water_breathing", "CTRL-4": "purge",
+        "CTRL-5": "chain_lightning",
         "CTRL-Q": "earthbind_totem", "CTRL-E": "stoneclaw_totem", "CTRL-R": "stoneskin_totem", "CTRL-F": "tremor_totem",
         "CTRL-Z": "grounding_totem", "CTRL-X": "windfury_totem", "CTRL-C": "grace_of_air_totem",
         "BUTTON4": "riptide", "BUTTON5": "natures_swiftness",
@@ -1199,9 +1272,58 @@ def check_shaman(pack, sources):
     raced = {s["key"] for s in spells if s.get("races")}
     check_blocks(layout, "layout", grid, clicks, mouse, ooc, bar6_more=[None, None, "BUTTON3"], raced=raced)
     if [f["id"] for f in layout.get("families") or []] != [
-            "damage", "calls", "fire", "water", "travel", "earth", "air", "cursorheals", "cures", "cleansing", "racial"]:
-        problem("layout: families must be damage, calls, fire, water, travel, earth, air, the three mouse pairs and "
-                "the racials (Walk on Air on the middle mouse button, Skysight clicked)")
+            "healranks", "emergency", "enemy", "calls", "fire", "water", "travel", "earth", "air", "cursorheals", "cures",
+            "cleansing", "racial"]:
+        problem("layout: families must be the heal ranks (1-4), the emergency pair (Q/E), the enemy spells (R, F, 5; "
+                "Purge and Chain Lightning on Ctrl+4/5), calls, fire, water, travel, earth, air, the three mouse pairs "
+                "and the racials (Walk on Air on the middle mouse button, Skysight clicked)")
+    # Layout 9 (0.10.0, Erika's request): the lower-rank heal keys (research/shaman-downranking.md, approved option 1).
+    # Healing Wave: top-2 with the 90% step-up, from level 10; Chain Heal: top-1. Lesser Healing Wave has none.
+    lower = layout.get("lower") or {}
+    levels = rank_levels("ForeverSensei_Shaman")
+    want_lower = {
+        "healing_wave": ("FS_HW_LO", 2, 10, [lv for _, lv in levels.get("healing_wave", [])]),
+        "chain_heal": ("FS_CH_LO", 1, None, [lv for _, lv in levels.get("chain_heal", [])]),
+    }
+    got_lower = {k: (v.get("macro"), v.get("offset"), v.get("minLevel"), v.get("levels")) for k, v in lower.items()}
+    if got_lower != want_lower:
+        problem(f"layout: lower must be {want_lower} (levels from Data/Ranks.lua), is {got_lower}")
+    if want_lower["healing_wave"][3][:3] != [1, 6, 12] or want_lower["chain_heal"][3] != [40, 46, 54]:
+        problem("layout: Ranks.lua Healing Wave / Chain Heal levels do not match the simc dump")
+    for k, v in lower.items():
+        if v.get("what") != f"spell.{k}.lower" or v.get("when") != "guide.healing.p9":
+            problem(f"layout: lower {k} texts must be spell.{k}.lower and guide.healing.p9")
+    # Self-test: the lower-rank checks must catch a bad offset, a reused macro name, a lower key away from its heal,
+    # swapped heal-rank keys and a click-mode body that targets.
+    def bad_offset(lay):
+        lay["lower"]["healing_wave"]["offset"] = 0
+
+    def reused_macro(lay):
+        lay["lower"]["chain_heal"]["macro"] = lay["macros"]["chain_heal"]
+
+    def lower_away(lay):
+        lo = next(x for x in lay["slots"] if x.get("lower") == "healing_wave")
+        lo["button"] += 2
+
+    def swapped_ranks(lay):
+        a = next(x for x in lay["slots"] if x.get("key") == "2")
+        b = next(x for x in lay["slots"] if x.get("key") == "3")
+        a["key"], b["key"] = "3", "2"
+
+    def targeting_click(lay):
+        lay["macroBodies"]["help_click"] = lay["macroBodies"]["help"]
+
+    for mutate in (bad_offset, reused_macro, lower_away, swapped_ranks, targeting_click):
+        bad = plain_copy(layout)
+        mutate(bad)
+        before = len(problems)
+        check_layout(pack, bad)
+        check_blocks(bad, "self-test", grid, clicks, mouse, ooc, bar6_more=[None, None, "BUTTON3"], raced=raced)
+        check_help_click("help_click", bad["macroBodies"]["help_click"])
+        caught = len(problems) > before
+        del problems[before:]
+        if not caught:
+            problem(f"check.py self-test: the lower-rank checks miss {mutate.__name__}")
     # Layout 8 (0.8.1, Erika's request): the Skyborne racials, gated on race (simc-forever nonclass.txt race masks).
     racials = {s["key"]: (s.get("id"), s.get("races"), s.get("src")) for s in spells if s.get("races")}
     if racials != {"walk_on_air": (1259416, [33, 34], "simc_race"), "skysight": (1259686, [34], "simc_race")}:
@@ -1214,8 +1336,8 @@ def check_shaman(pack, sources):
     if spec.get("tabs") != ["role", "healing", "damage", "totems", "manners"]:
         problem(f"shaman: Restoration tabs must be role, healing, damage, totems, manners, are {spec.get('tabs')}")
     spare_keys = {x["key"] for x in layout["spare"] if x.get("key")}
-    if spare_keys != {"CTRL-4", "CTRL-5"}:
-        problem(f"layout: spare keys must be Ctrl+4 and Ctrl+5, are {sorted(spare_keys)}")
+    if spare_keys:
+        problem(f"layout: no spare keys since layout 9 (all 42 keys planned), are {sorted(spare_keys)}")
     # Lightning Shield stands in on X until Water Shield is learned, then moves to its own clickable button.
     x = next((s for s in slots if s.get("key") == "X"), {})
     ls = next((s for s in slots if s.get("spell") == "lightning_shield"), {})
@@ -1247,6 +1369,7 @@ def check_shaman(pack, sources):
             problem(f"layout: macro body {kind} has no {base}")
         if base == "nshw" and ("{heal}" not in body or layout.get("macroVars") != {"heal": "healing_wave"}):
             problem(f"layout: macro body {kind} must cast {{heal}} (macroVars heal = healing_wave)")
+        check_help_click(kind, body)
         if base == "interrupt" and "/stopcasting" not in body:
             problem(f"layout: macro body {kind} must /stopcasting")
         if kind in ("help", "nshw") and "@mouseover,help" not in body:
@@ -1256,12 +1379,12 @@ def check_shaman(pack, sources):
     kinds_used = {layout["macroKind"].get(k, "help") for k in layout["macros"]}
     if {"interrupt", "harm", "nshw", "help"} - kinds_used:
         problem("layout: earth_shock interrupt, purge harm and the NS + Healing Wave macro are required")
-    # Layout 8 (0.8.1) is the plan: characters with layout 7 or older get the one-time "apply all" notice. A full
+    # Layout 9 (0.10.0) is the plan: characters with layout 8 or older get the one-time "apply all" notice. A full
     # apply clears layout 6's Action Bar 5 spells, layout 4's Mana Tide on Ctrl+5, layout 3's bar 6 spares (buttons 9
     # and 10 only while they are spare: another race's racial) and layout 5's bar 4 Fire spells while they still hold
     # exactly that spell.
-    if layout.get("version") != 8:
-        problem(f"layout: version must be 8 (Skyborne racials, 0.8.1), is {layout.get('version')}")
+    if layout.get("version") != 9:
+        problem(f"layout: version must be 9 (lower heal ranks, 0.10.0), is {layout.get('version')}")
     old = {int(k): v for k, v in (layout.get("old") or {}).items()}
     for slot_, key in ((37, "totemic_recall"), (41, "mana_tide_totem"), (44, "fire_nova"), (48, "ghost_wolf"),
                        (153, "grounding_totem"), (154, "mana_tide_totem"), (156, "ghost_wolf")):

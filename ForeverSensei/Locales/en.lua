@@ -134,6 +134,10 @@ L["ui.targeting.click.done"] = "Switched to healing your target ({n} buttons cha
 
 L["ui.rank.learned"] = "New rank: {names}"
 L["ui.rank.upgraded"] = "Updated {n} bar button(s) to the new rank. To keep the older rank, press Undo."
+L["ui.rank.lower"] = "{key}: {name} Rank {old} → Rank {new}."
+L["ui.rank.kept"] = "{key}: {name} stays at Rank {n}."
+L["ui.lower.card"] = "Lower rank of {name}"
+L["ui.layout.lower"] = "{key}: {name} Rank {n}"
 
 L["ui.trainer.none"] = "No new skills at the trainer right now."
 

@@ -29,7 +29,10 @@ local function section(parent, labelId, reportId)
   text:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -3)
   local report
   if reportId then
-    report = UI.ReportButton(parent, function() return "spell." .. card.entry.key .. "." .. reportId end)
+    report = UI.ReportButton(parent, function()
+      if card.entry.lower then return card.entry.texts[reportId] end
+      return "spell." .. card.entry.key .. "." .. reportId
+    end)
     report:SetPoint("TOPLEFT", label, "TOPRIGHT", 8, 2)
   end
   return label, text, report
@@ -78,7 +81,7 @@ local function buildCard()
   card.place = UI.Button(card, ns.T("ui.btn.place"), 130, 24, function()
     local e = card.entry
     ns.char.postponed[e.key] = nil
-    ns.Layout.PlaceOne(e)
+    if e.lower then ns.Layout.PlaceLower(e.lower) else ns.Layout.PlaceOne(e) end
   end)
   card.place:SetPoint("BOTTOMLEFT", 16, 14)
   card.later = UI.Button(card, ns.T("ui.btn.later"), 130, 24, function()
@@ -101,12 +104,47 @@ local function buildCard()
   UI.AutoFit(card, fitCard)
 end
 
+-- A heal's lower-rank key (L.lower) as a card entry: key "~healing_wave", the heal itself in .base, and the text ids
+-- its report buttons use.
+local lowerEntries = {}
+function NewSkill.LowerEntry(key)
+  local base = Spells.Get(key)
+  if not base or not ns.spec.layout.lower[key] then return nil end
+  if not lowerEntries[key] then
+    lowerEntries[key] = { key = "~" .. key, lower = key, base = base,
+      texts = { what = ns.spec.layout.lower[key].what, when = ns.spec.layout.lower[key].when } }
+  end
+  return lowerEntries[key]
+end
+
+-- The level from which a lower-rank key has something to cast (its second rank, or minLevel if later).
+local function lowerLevel(key)
+  local lo = ns.spec.layout.lower[key]
+  return math.max(lo.minLevel or 1, lo.levels and lo.levels[2] or 1)
+end
+
+local function lowerLine(key)
+  local s = ns.spec.layout.byLower[key]
+  return ns.T(ns.spec.layout.lower[key].what, { key = s and s.key and ns.KeyLabel(s.key) or Spells.SlotText(s) })
+end
+
 -- Parts that change when bars change: icon rank, placement line, place button, queue count.
 local function fillState()
   local e = card.entry
-  card.icon:SetSpell(e)
-  card.where:SetText(Spells.WhereText(e))
-  local placed = ns.Layout.IsPlaced(e)
+  local placed
+  if e.lower then
+    card.icon:SetSpell(e.base)
+    local _, id = ns.Layout.LowerRank(e.lower)
+    if id then card.icon.spellID = id end
+    card.where:SetText(Spells.SlotText(ns.spec.layout.byLower[e.lower]))
+    if ns.Layout.LowerRank(e.lower) then placed = ns.Layout.LowerPlaced(e.lower) end
+  else
+    card.icon:SetSpell(e)
+    local where = Spells.WhereText(e)
+    if ns.spec.layout.lower[e.key] then where = where .. "\n" .. lowerLine(e.key) end
+    card.where:SetText(where)
+    placed = ns.Layout.IsPlaced(e)
+  end
   if card.place.SetEnabled then card.place:SetEnabled(placed ~= nil) end
   if placed == true then
     card.status:SetText(ns.T("ui.card.placed"))
@@ -130,13 +168,19 @@ function NewSkill.ShowCard(entry, fromList)
   end
   card.entry, card.fromList = entry, fromList
   card.title:SetText(ns.T(fromList and "ui.card.view" or "ui.card.title"))
-  card.name:SetText(entry.name)
-  local c = UI.COLORS[entry.role]
+  local base = entry.base or entry
+  card.name:SetText(entry.lower and ns.T("ui.lower.card", { name = base.name }) or entry.name)
+  local c = UI.COLORS[base.role]
   local color = string.format("|cff%02x%02x%02x", c[1] * 255, c[2] * 255, c[3] * 255)
-  card.tags:SetText(color .. ns.T("ui.role." .. entry.role) .. "|r   " .. ns.T("ui.use." .. entry.use)
-    .. "   " .. ns.T("ui.card.level", { level = entry.level }))
-  card.what:SetText(ns.T("spell." .. entry.key .. ".what"))
-  card.when:SetText(ns.T("spell." .. entry.key .. ".when"))
+  card.tags:SetText(color .. ns.T("ui.role." .. base.role) .. "|r   " .. ns.T("ui.use." .. base.use)
+    .. "   " .. ns.T("ui.card.level", { level = entry.lower and lowerLevel(entry.lower) or entry.level }))
+  if entry.lower then
+    card.what:SetText(lowerLine(entry.lower))
+    card.when:SetText(ns.T(entry.texts.when))
+  else
+    card.what:SetText(ns.T("spell." .. entry.key .. ".what"))
+    card.when:SetText(ns.T("spell." .. entry.key .. ".when"))
+  end
   card.later:SetShown(not fromList)
   card.guide:ClearAllPoints()
   card.guide:SetPoint("LEFT", fromList and card.place or card.later, "RIGHT", 8, 0)
@@ -197,12 +241,39 @@ function NewSkill.Scan(atLogin)
     end
   end
   if first then
+    NewSkill.CheckLower(true)
     ns.char.initialised = true
     ns.UI.Toast(ns.T("ui.welcome"), 15, ns.T("ui.btn.guide"), function() ns.Guide.Open() end)
     return
   end
+  NewSkill.CheckLower(true)
   showQueued()
   if #newRanks > 0 or atLogin then ns.Layout.ApplyNewRanks(newRanks) end
+end
+
+-- The first time a heal's lower-rank key has something to cast (Healing Wave at 10, Chain Heal at 46): a card that
+-- offers to place it, unless it is in its slot already. A new character only notes it (its first full apply places
+-- it); while the one-time layout notice is pending the key is left for that notice. noShow: only queue the card.
+function NewSkill.CheckLower(noShow)
+  if not ns.char or not ns.Active() then return end
+  local layout = ns.spec.layout
+  ns.char.lowerSeen = ns.char.lowerSeen or {}
+  local keys = {}
+  for key in pairs(layout.lower) do
+    if not ns.char.lowerSeen[key] and ns.Layout.LowerRank(key) then table.insert(keys, key) end
+  end
+  table.sort(keys, function(a, b) return layout.byLower[a].slot < layout.byLower[b].slot end)
+  local any = false
+  for _, key in ipairs(keys) do
+    if not ns.char.initialised or ns.Layout.LowerPlaced(key) then
+      ns.char.lowerSeen[key] = true
+    elseif (ns.char.layoutVersion or 1) >= layout.version then
+      ns.char.lowerSeen[key] = true
+      enqueue(NewSkill.LowerEntry(key))
+      any = true
+    end
+  end
+  if any and not noShow then showQueued() end
 end
 
 -- Skills the player can learn at their level but does not know yet (talents and racials excluded).
@@ -294,8 +365,10 @@ function NewSkill.PrunePostponed()
   if not ns.char or not ns.char.postponed then return 0 end
   local n = 0
   for key in pairs(ns.char.postponed) do
-    local e = Spells.Get(key)
-    if not e or ns.Layout.IsPlaced(e) == true then
+    local lowerKey = key:match("^~(.+)$")
+    local e = lowerKey and NewSkill.LowerEntry(lowerKey) or Spells.Get(key)
+    local placed = e and (e.lower and ns.Layout.LowerPlaced(e.lower) or not e.lower and ns.Layout.IsPlaced(e) == true)
+    if not e or placed then
       ns.char.postponed[key] = nil
     else
       n = n + 1
@@ -307,8 +380,12 @@ end
 function NewSkill.ShowPostponed()
   NewSkill.PrunePostponed()
   local list = {}
-  for key in pairs(ns.char.postponed) do table.insert(list, Spells.Get(key)) end
-  table.sort(list, function(a, b) return a.level < b.level or (a.level == b.level and a.key < b.key) end)
+  for key in pairs(ns.char.postponed) do
+    local lowerKey = key:match("^~(.+)$")
+    table.insert(list, lowerKey and NewSkill.LowerEntry(lowerKey) or Spells.Get(key))
+  end
+  local function level(e) return e.lower and lowerLevel(e.lower) or e.level end
+  table.sort(list, function(a, b) return level(a) < level(b) or (level(a) == level(b) and a.key < b.key) end)
   for _, e in ipairs(list) do enqueue(e) end
   if card and card:IsShown() then NewSkill.RefreshCard() else NewSkill.Next() end
 end

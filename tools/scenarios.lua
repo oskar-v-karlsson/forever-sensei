@@ -102,7 +102,21 @@ return function(ns, lang)
     for _, s in ipairs(L.slots) do
       local entry = s.spell and ns.Spells.Get(s.spell)
       local a = STUB.actions[s.slot]
-      if not a then
+      if s.lower then
+        -- A lower-rank key: the always-macro naming the rank the rule picks, mouseover only in mouseover mode.
+        local lo, rank = L.lower[s.lower], ns.Layout.LowerRank(s.lower)
+        local m = a and a[1] == "macro" and STUB.macros[a[2]]
+        local want = rank and (ns.Spells.Get(s.lower).name .. "(Rank " .. rank .. ")")
+        if not rank then
+          if a then fail(mode .. ": lower slot " .. s.slot .. " should be empty, holds " .. tostring(a[1]) .. ":" .. tostring(a[2])) end
+        elseif not m or m.name ~= lo.macro then
+          fail(mode .. ": slot " .. s.slot .. " should hold macro " .. lo.macro)
+        elseif (m.body:find("/cast [@mouseover,help,nodead][help,nodead][@player] " .. want, 1, true) ~= nil)
+          ~= (mode == "mouseover") or not m.body:find("#showtooltip " .. want .. "\n", 1, true)
+          or (mode ~= "mouseover" and m.body:find("[", 1, true)) then
+          fail(mode .. ": macro " .. m.name .. " body wrong: " .. m.body)
+        end
+      elseif not a then
         fail(mode .. ": slot " .. s.slot .. " empty, expected " .. (s.spell or ("@" .. s.item)))
       elseif s.item then
         local m = a[1] == "macro" and STUB.macros[a[2]]
@@ -774,7 +788,7 @@ return function(ns, lang)
   else
     confirm:Hide()
   end
-  if ns.char.layoutVersion ~= 8 then fail("layout 8: version not saved after the notice") end
+  if ns.char.layoutVersion ~= L.version then fail("layout 8: version not saved after the notice") end
   nA, nB = snapshot()
   if not same(v7A, nA) or not same(v7B, nB) then fail("layout 8: the notice moved something by itself") end
   local v8Plan = ns.Layout.BuildPlan()
@@ -800,17 +814,248 @@ return function(ns, lang)
   STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
   try("layout 8 items", ns.Items.Refresh)
 
+  -- Lower-rank heal keys (layout 9, 0.10.0; research/shaman-downranking.md): Healing Wave on 1 with a lower rank on 2,
+  -- Chain Heal on 3 with a lower rank on 4. The lower keys are FS_ macros naming the rank the rule picks (Healing Wave
+  -- top−2, one up while that rank keeps less than 90% of its healing bonus; Chain Heal top−1) and follow her level and
+  -- her ranks. The top keys and Nature's Swiftness stay unranked.
+  local savedTargeting = ns.settings.targeting
+  local hwE, chE = ns.Spells.Get("healing_wave"), ns.Spells.Get("chain_heal")
+  local hwRk, chRk = ns.Spells.Ranks(hwE), ns.Spells.Ranks(chE)
+  local hwLo, chLo = L.byLower.healing_wave, L.byLower.chain_heal
+  if not hwLo or hwLo.key ~= "2" or hwLo.slot ~= L.bySpell.healing_wave.slot + 1 or L.bySpell.healing_wave.key ~= "1"
+    or not chLo or chLo.key ~= "4" or chLo.slot ~= L.bySpell.chain_heal.slot + 1 or L.bySpell.chain_heal.key ~= "3" then
+    fail("lower: Healing Wave 1 with its lower rank on 2, Chain Heal 3 with its lower rank on 4 expected")
+  end
+  local function knowUpTo(lv)
+    STUB.level, STUB.known = lv, {}
+    for id, l in pairs(STUB.levels) do if l <= lv then STUB.known[id] = true end end
+  end
+  -- The saved state a playing character has: every known skill and its rank noted, the lower-rank cards seen.
+  local function settle()
+    ns.char.known, ns.char.ranks = {}, {}
+    for _, e in ipairs(ns.Spells.List()) do
+      if ns.Spells.IsKnown(e) then
+        ns.char.known[e.key] = true
+        ns.char.ranks[e.key] = ns.Spells.CurrentID(e)
+      end
+    end
+    ns.char.lowerSeen = { healing_wave = true, chain_heal = true }
+    ns.char.initialised, ns.char.layoutVersion = true, L.version
+  end
+  local function fresh(lv, mode)
+    knowUpTo(lv)
+    ns.settings.targeting = mode
+    STUB.actions, STUB.bindings = {}, {}
+    ns.char.rankPin, ns.char.keepRank, ns.char.lowerRanks = {}, {}, {}
+    settle()
+    try("lower apply " .. lv, ns.Layout.ApplyAll)
+  end
+  local function macroAt(slot)
+    local a = STUB.actions[slot]
+    return a and a[1] == "macro" and STUB.macros[a[2]] or nil
+  end
+  local function lowerIs(what, key, want, mode)
+    local s = L.byLower[key]
+    local rank = ns.Layout.LowerRank(key)
+    if rank ~= want then fail("lower " .. what .. ": " .. key .. " rank " .. tostring(rank) .. ", expected " .. tostring(want)) end
+    if want == nil then
+      if STUB.actions[s.slot] then fail("lower " .. what .. ": " .. key .. "'s lower key should be empty") end
+      return
+    end
+    local name = ns.Spells.Get(key).name .. "(Rank " .. want .. ")"
+    local body = mode == "mouseover" and ("#showtooltip " .. name .. "\n/cast [@mouseover,help,nodead][help,nodead][@player] " .. name)
+      or ("#showtooltip " .. name .. "\n/cast " .. name)
+    local m = macroAt(s.slot)
+    if not m or m.name ~= L.lower[key].macro or m.body ~= body then
+      fail("lower " .. what .. ": " .. key .. "'s lower key should hold " .. L.lower[key].macro .. " with " .. body .. ", has " ..
+        tostring(m and m.name) .. " " .. tostring(m and m.body))
+    end
+    if STUB.bindings[s.key] ~= s.binding then fail("lower " .. what .. ": key " .. s.key .. " not bound to " .. s.binding) end
+  end
+  local function toastHas(what, text)
+    local t = _G.ForeverSenseiToast
+    if not t or not t:IsShown() or not tostring(t.text:GetText()):find(text, 1, true) then
+      fail("lower " .. what .. ": toast should say " .. text .. ", says " .. tostring(t and t.text:GetText()))
+      return nil
+    end
+    fits("lower toast " .. what, t)
+    return t
+  end
+  local function hideToast() if _G.ForeverSenseiToast then _G.ForeverSenseiToast:Hide() end end
+
+  -- Her levels: Healing Wave R2/R3/R6/R8 on 2, Chain Heal none/none/R1/R2 on 4; mouseover macros by default.
+  for _, g in ipairs({ { 18, 2, nil }, { 26, 3, nil }, { 46, 6, 1 }, { 60, 8, 2 } }) do
+    fresh(g[1], "mouseover")
+    lowerIs("level " .. g[1], "healing_wave", g[2], "mouseover")
+    lowerIs("level " .. g[1], "chain_heal", g[3], "mouseover")
+    local top = macroAt(L.bySpell.healing_wave.slot)
+    if not top or top.name ~= L.macros.healing_wave or top.body:find("(Rank", 1, true) then
+      fail("lower level " .. g[1] .. ": Healing Wave's own key should hold its unranked macro")
+    end
+    if not ns.Layout.IsEmptyPlan(ns.Layout.BuildPlan()) then fail("lower level " .. g[1] .. ": plan not empty after apply") end
+  end
+  local nshw = macroAt(L.bySpell.natures_swiftness.slot)
+  if not nshw or nshw.body:find("(Rank", 1, true) then fail("lower: Nature's Swiftness + Healing Wave should cast the top rank") end
+  local fsMacros = 0
+  for _, m in pairs(STUB.macros) do if m.name:sub(1, 3) == "FS_" then fsMacros = fsMacros + 1 end end
+  if fsMacros > 15 then fail("lower: " .. fsMacros .. " FS_ macros at level 60, the budget is 15") end
+  -- Below level 10 the key stays empty; one known rank is not enough either.
+  knowUpTo(9)
+  if ns.Layout.LowerRank("healing_wave") then fail("lower: Healing Wave's lower key should be empty below level 10") end
+  -- A skipped rank: Healing Wave ranks 1-5 and 7 known at 40 → rank 5 (two below the top known one).
+  knowUpTo(40)
+  STUB.known[hwRk[6]] = nil
+  if ns.Layout.LowerRank("healing_wave") ~= 5 then fail("lower: with rank 6 skipped the lower key should cast rank 5") end
+
+  -- Click mode: the lower keys stay macros (a plain spell can't name a rank), no mouseover; the top key a plain spell.
+  fresh(60, "click")
+  lowerIs("click", "healing_wave", 8, "click")
+  lowerIs("click", "chain_heal", 2, "click")
+  local topA = STUB.actions[L.bySpell.healing_wave.slot]
+  if not topA or topA[1] ~= "spell" or topA[2] ~= hwRk[#hwRk] then fail("lower click: Healing Wave's key should hold the top rank spell") end
+  try("lower targeting mouseover", ns.Layout.SetTargeting, "mouseover")
+  lowerIs("targeting mouseover", "healing_wave", 8, "mouseover")
+  try("lower targeting click", ns.Layout.SetTargeting, "click")
+  lowerIs("targeting click", "healing_wave", 8, "click")
+  hideToast()
+
+  -- A new rank moves both keys up (click mode, so Healing Wave's own button upgrades too): rank 6 at 32 → 1 holds
+  -- rank 6, 2 rank 4; one toast for both, and 元に戻す puts back both and keeps rank 3 on 2 (a pin) ...
+  fresh(31, "click")
+  lowerIs("31", "healing_wave", 3, "click")
+  local hwSlot1 = L.bySpell.healing_wave.slot
+  STUB.level = 32
+  STUB.known[hwRk[6]] = true
+  STUB.fire("SPELLS_CHANGED")
+  STUB.runTimers()
+  lowerIs("32", "healing_wave", 4, "click")
+  if not (STUB.actions[hwSlot1] and STUB.actions[hwSlot1][2] == hwRk[6]) then fail("lower 32: key 1 not upgraded to rank 6") end
+  local lt = toastHas("32", ns.T("ui.rank.lower", { key = ns.KeyLabel("2"), name = hwE.name, old = 3, new = 4 }))
+  toastHas("32", ns.T("ui.rank.upgraded", { n = 1 }))
+  if lt and lt.button:IsShown() then try("lower rank undo", function() lt.button:Click() end) else fail("lower 32: no undo on the toast") end
+  lowerIs("32 undo", "healing_wave", 3, "click")
+  if not (STUB.actions[hwSlot1] and STUB.actions[hwSlot1][2] == hwRk[5]) then fail("lower 32 undo: key 1 not back on rank 5") end
+  if not (ns.char.rankPin.healing_wave and ns.char.rankPin.healing_wave.id == hwRk[3]) then fail("lower 32 undo: rank 3 not pinned") end
+  toastHas("32 undo", ns.T("ui.rank.kept", { key = ns.KeyLabel("2"), name = hwE.name, n = 3 }))
+  hideToast()
+  -- ... through level-ups (a login scan too) ...
+  for lv = 33, 39 do
+    STUB.level = lv
+    STUB.fire("PLAYER_LEVEL_UP", lv)
+    STUB.runTimers()
+  end
+  try("lower pin login", ns.NewSkill.Scan, true)
+  lowerIs("pin 39", "healing_wave", 3, "click")
+  -- ... until Healing Wave's next rank: rank 7 at 40 → the rule again (rank 5).
+  hideToast()
+  STUB.level = 40
+  STUB.known[hwRk[7]] = true
+  STUB.fire("SPELLS_CHANGED")
+  STUB.runTimers()
+  if ns.char.rankPin.healing_wave then fail("lower 40: the pin outlived Healing Wave's next rank") end
+  lowerIs("40", "healing_wave", 5, "click")
+  toastHas("40", ns.T("ui.rank.lower", { key = ns.KeyLabel("2"), name = hwE.name, old = 3, new = 5 }))
+  hideToast()
+  -- A full apply ends a pin too.
+  fresh(31, "mouseover")
+  ns.char.rankPin.healing_wave = { id = hwRk[2], top = hwRk[5] }
+  try("lower pin apply", ns.Layout.RefreshMacros)
+  lowerIs("pinned", "healing_wave", 2, "mouseover")
+  try("lower apply ends pin", ns.Layout.ApplyAll)
+  lowerIs("apply ends pin", "healing_wave", 3, "mouseover")
+
+  -- A level-up alone can step the lower key up: rank 4 keeps 90% of its bonus at 37, 85% at 38 → rank 5.
+  fresh(37, "mouseover")
+  lowerIs("37", "healing_wave", 4, "mouseover")
+  hideToast()
+  STUB.level = 38
+  STUB.fire("PLAYER_LEVEL_UP", 38)
+  STUB.runTimers()
+  lowerIs("38", "healing_wave", 5, "mouseover")
+  toastHas("38", ns.T("ui.rank.lower", { key = ns.KeyLabel("2"), name = hwE.name, old = 4, new = 5 }))
+  hideToast()
+
+  -- Chain Heal rank 2 at 46: key 4 gets something to cast → a card that offers to place it (once).
+  fresh(45, "mouseover")
+  lowerIs("45", "chain_heal", nil, "mouseover")
+  -- Close the new-skill cards left from the steps above so the next card is the lower key's.
+  for _ = 1, 60 do
+    if not (_G.ForeverSenseiCard and _G.ForeverSenseiCard:IsShown()) then break end
+    ns.NewSkill.Next()
+  end
+  ns.char.lowerSeen = { healing_wave = true }
+  STUB.level = 46
+  STUB.known[chRk[2]] = true
+  STUB.fire("SPELLS_CHANGED")
+  STUB.runTimers()
+  card = _G.ForeverSenseiCard
+  if not card or not card:IsShown() or not card.entry or card.entry.key ~= "~chain_heal" then
+    fail("lower 46: no card for Chain Heal's lower key")
+  else
+    fits("lower card", card)
+    try("lower card place", function() card.place:Click() end)
+    confirm = _G.ForeverSenseiConfirm
+    if confirm and confirm:IsShown() then try("lower card confirm", function() confirm.yes:Click() end) end
+    lowerIs("46 card", "chain_heal", 1, "mouseover")
+    card:Hide()
+  end
+  if not ns.char.lowerSeen.chain_heal then fail("lower 46: the card would come back") end
+  hideToast()
+
+  -- Update from layout 8 (0.8.1-0.9.0) to 9: one notice, nothing moves by itself; a full apply moves the heals to 1-4
+  -- (Healing Wave F→1, Chain Heal R→3), the damage to 5 and Q/E/R/F (Flame Shock 1→R, Lightning Bolt 2→F) and Purge
+  -- and Chain Lightning to Ctrl+4/5, and 元に戻す puts it all back.
+  fresh(60, "mouseover")
+  local A9 = {}
+  for k, v in pairs(STUB.actions) do A9[k] = v end
+  local function at(key) return L.bySpell[key].slot end
+  STUB.actions[at("healing_wave")] = A9[at("flame_shock")]
+  STUB.actions[hwLo.slot] = A9[at("lightning_bolt")]
+  STUB.actions[at("chain_heal")] = A9[at("chain_lightning")]
+  STUB.actions[chLo.slot] = A9[at("purge")]
+  STUB.actions[at("flame_shock")] = A9[at("chain_heal")]
+  STUB.actions[at("lightning_bolt")] = A9[at("healing_wave")]
+  STUB.actions[at("purge")], STUB.actions[at("chain_lightning")] = nil, nil
+  local v8A, v8B = snapshot()
+  ns.char.layoutVersion = 8
+  relogin()
+  confirm = _G.ForeverSenseiConfirm
+  if not confirm or not confirm:IsShown() or confirm.text:GetText() ~= ns.T("ui.layout.changed") then
+    fail("layout 9: no notice for a player with layout 8")
+  else
+    confirm:Hide()
+  end
+  if ns.char.layoutVersion ~= 9 then fail("layout 9: version not saved after the notice") end
+  nA, nB = snapshot()
+  if not same(v8A, nA) or not same(v8B, nB) then fail("layout 9: the notice moved something by itself") end
+  local v9Plan = ns.Layout.BuildPlan()
+  try("layout 9 apply", ns.Layout.Execute, v9Plan)
+  checkLayout("mouseover") -- (layout 9)
+  if not ns.Layout.IsEmptyPlan(ns.Layout.BuildPlan()) then fail("layout 9: plan not empty after apply") end
+  try("layout 9 undo", ns.Layout.Undo)
+  uA, uB = snapshot()
+  ok, why = same(v8A, uA)
+  if not ok then fail("layout 9 undo: action slots differ: " .. why) end
+  ok, why = same(v8B, uB)
+  if not ok then fail("layout 9 undo: key bindings differ: " .. why) end
+  hideToast()
+
+  ns.settings.targeting = savedTargeting
+  ns.char.rankPin, ns.char.keepRank = {}, {}
+  try("lower macros", ns.Layout.RefreshMacros)
+  STUB.bindings = savedBinds
+  STUB.level, STUB.known, STUB.actions, STUB.bags = saved.level, saved.known, saved.actions, saved.bags
+  try("lower items", ns.Items.Refresh)
+
   -- Translation reports: save two, send, format.
   ns.db.reports = {}
   try("report save 1", ns.Feedback.Save, "spell.chain_heal.when", "unnatural", "2人以上が傷ついている時に使おう。", nil)
   try("report save 2", ns.Feedback.Save, "guide.healing.p3", "unclear", nil, "line one\nline two | x")
-  -- The report dialog shows each text as written, placeholders included: not counted as shown text.
-  local shownBefore = #STUB.shown
+  -- The report dialog shows each text as written, its placeholders highlighted (check_shown allows those).
   for _, id in ipairs(ns.TextIds()) do
     try("report open " .. id, ns.Feedback.Open, id)
     fits("report " .. id, "ForeverSenseiReport")
   end
-  for i = #STUB.shown, shownBefore + 1, -1 do STUB.shown[i] = nil end
   try("report open", ns.Feedback.Open, "spell.healing_wave.what")
   try("report send", ns.Feedback.Send)
   fits("send", "ForeverSenseiCopy")

@@ -241,8 +241,10 @@ Z, X; side mouse buttons; Shift with any of these).
 - **Key strings** (`Blizzard_FrameXML/BindingUtil.lua`):
   - The mouse buttons are `BUTTON4` and `BUTTON5`.
   - Chords are written ALT-CTRL-SHIFT-key, e.g. `CTRL-Q` and `SHIFT-BUTTON4`.
-- **Related defaults:** `ModifiedClick` has SELFCAST=ALT, PICKUPACTION=SHIFT and STICKYCAMERA=CTRL. These only
-  affect mouse clicks on buttons, not key bindings.
+- **Related defaults:** `ModifiedClick` has SELFCAST=ALT, PICKUPACTION=SHIFT and STICKYCAMERA=CTRL.
+  *(Corrected in 0.10.0: this said they only affect mouse clicks. In the 12.x client Forever runs, key presses take the
+  same `SecureActionButton_OnClick` path, so Alt + a key holding a plain spell casts it on yourself; see
+  `research/shaman-downranking.md`, "Alt is the self-cast key, also for key presses".)*
 - **Verify in game:** a hidden action bar may not fire its key bindings, so the addon must turn on Action Bars 6
   and 7.
 

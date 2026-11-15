@@ -108,8 +108,9 @@ tier 5 Shift+5, Ctrl+X, Ctrl+1-5.
 
 | Family | Members *(level)* | Size |
 |---|---|---|
-| Heals (plain, core) | Healing Wave *(1)*, Lesser Healing Wave *(20)*, Chain Heal *(40)* | 3 |
-| Enemy spells (plain, core) | Flame Shock *(10)*, Lightning Bolt *(1)*, Chain Lightning *(32)*, Purge *(12)*, Frost Shock *(20)*; Earth Shock *(4)* is the interrupt | 6 |
+| **Heal ranks** (plain, core, 0.10.0) | Healing Wave *(1)* + its lower rank *(10)*, Chain Heal *(40)* + its lower rank *(46)* | 4 |
+| Emergency pair (plain, core, 0.10.0) | Earth Shock *(4)* (the interrupt), Lesser Healing Wave *(20)* | 2 |
+| Enemy spells (plain, core) | Flame Shock *(10)*, Lightning Bolt *(1)*, Frost Shock *(20)*; spill-over Purge *(12)*, Chain Lightning *(32)* (Ctrl+4/5 since 0.10.0) | 5 |
 | Consumables and shield (plain, core) | Mana Potion, Water Shield *(20)* / Lightning Shield *(8)*, Healthstone else Healing Potion | 3 |
 | **Totem calls** | Totemic Call *(22)*, Call of the Elements *(20)*, Call of the Ancestors *(30)*, Call of the Spirits *(40)*, Totemic Recall *(20)* | 5 |
 | **Fire** | Searing Totem *(10)*, Magma Totem *(26)*, Fire Nova *(12)*, Flametongue Totem *(28)*; (Frost Resistance Totem: Totem Bar) | 4 |
@@ -151,21 +152,21 @@ Runner-up (close): **Earth on Shift Q/E/R/F and Fire on Ctrl Q/E/R/F.** Tremor w
 Stoneskin Shift+E, but Searing (every pull) would go to Ctrl+R (tier 3) and Fire Nova to Ctrl+F (tier 4). Fire is
 pressed more often, and the rule is "frequency picks the block", so Fire wins Shift.
 
-## S3. Grid (Restoration layout 8 since 0.8.1; layout 7 in 0.7.0-0.8.0)
+## S3. Grid (Restoration layout 9 since 0.10.0; layout 8 in 0.8.1-0.9.0, layout 7 in 0.7.0-0.8.0)
 
 **MO** = mouseover macro, *(lvl)* = learned at, "–" = spare (bound, empty). Bar n button k = key k of that row.
 
 | Key | Plain (Action Bar 1) | Shift (Action Bar 2) | Ctrl (Action Bar 3) |
 |---|---|---|---|
-| 1 | Flame Shock *(10)* | Totemic Call *(22)* | Ghost Wolf *(20)* |
-| 2 | Lightning Bolt *(1)* | Call of the Elements *(20)* | Water Walking *(28)* |
-| 3 | Chain Lightning *(32)* | Call of the Ancestors *(30)* | Water Breathing *(22)* |
-| 4 | Purge, MO harm *(12)* | Call of the Spirits *(40)* | – |
-| 5 | Frost Shock *(20)* | Totemic Recall *(20)* | – |
+| 1 | Healing Wave, MO *(1)* | Totemic Call *(22)* | Ghost Wolf *(20)* |
+| 2 | Healing Wave lower rank, `FS_HW_LO` *(10)* | Call of the Elements *(20)* | Water Walking *(28)* |
+| 3 | Chain Heal, MO *(40)* | Call of the Ancestors *(30)* | Water Breathing *(22)* |
+| 4 | Chain Heal lower rank, `FS_CH_LO` *(46)* | Call of the Spirits *(40)* | Purge, MO harm *(12)* |
+| 5 | Frost Shock *(20)* | Totemic Recall *(20)* | Chain Lightning *(32)* |
 | Q | Earth Shock, `/stopcasting` + MO harm *(4)* | Flametongue Totem *(28)* | Earthbind Totem *(6)* |
 | E | Lesser Healing Wave, MO *(20)* | Magma Totem *(26)* | Stoneclaw Totem *(8)* |
-| R | Chain Heal, MO *(40)* | Searing Totem *(10)* | Stoneskin Totem *(4)* |
-| F | Healing Wave, MO *(1)* | Fire Nova *(12)* | Tremor Totem *(18)* |
+| R | Flame Shock *(10)* | Searing Totem *(10)* | Stoneskin Totem *(4)* |
+| F | Lightning Bolt *(1)* | Fire Nova *(12)* | Tremor Totem *(18)* |
 | Z | Mana Potion (`FS_MANA`) | Mana Spring Totem *(26)* | Grounding Totem *(30)* |
 | X | Water Shield *(20)*; Lightning Shield *(8)* until then | Mana Tide Totem *(25)* | Windfury Totem *(32)* |
 | C | Healthstone, else Healing Potion (`FS_HEALTH`) | Healing Stream Totem *(20)* | Grace of Air Totem *(42)* |
@@ -173,7 +174,8 @@ pressed more often, and the rule is "frequency picks the block", so Fire wins Sh
 | Mouse5 | NS + Healing Wave, MO *(30)* | Cure Disease, MO *(22)* | Disease Cleansing Totem *(38)* |
 | Mouse3 (middle) | Walk on Air *(Skyborne racial, 0.8.1)* | – (unbound) | – (unbound) |
 
-Spare keys: Ctrl+4, Ctrl+5. 40 of 42 keys hold a spell at 60, plus `BUTTON3` for a Skyborne.
+Spare keys: none since 0.10.0. 42 of 42 keys hold a spell at 60, plus `BUTTON3` for a Skyborne. The lower-rank keys
+(2 and 4) follow her level; see "Changed in 0.10.0" below.
 
 ## S4. Action Bar 6 (mouse block + in-combat clicks)
 
@@ -269,6 +271,28 @@ button, a new key outside the old allowed list (rule 5 gets this one exception).
   behaviour (Walk on Air has no target anyway).
 - `BUTTON3` has no default in `Bindings_Camelot.xml` (`ui`), but the player may have bound it; the preview warns, and
   元に戻す restores the old binding. Layout 7 → 8 shows the one-time すべて配置 notice and moves nothing by itself.
+
+### Changed in 0.10.0 (layout 9), at Erika's request
+
+Erika, relayed by Oskar: "For the restoration shaman profile, I think we need to consider lower ranks of the healing
+spells. When playing in group it's important to also have lower ranks of heals to conserve mana." Oskar then asked for
+each heal's ranks on **neighbouring keys** that follow her level (no Alt). Full research, sources and the per-level
+table: `research/shaman-downranking.md` (approved option 1, commit `06e3ae3`).
+
+- **Heal ranks on 1-4:** 1 Healing Wave (top rank), 2 Healing Wave's lower rank (`FS_HW_LO`, from level 10), 3 Chain
+  Heal (top rank), 4 Chain Heal's lower rank (`FS_CH_LO`, from level 46). Q (Earth Shock) and E (Lesser Healing Wave)
+  stay. Lesser Healing Wave has no lower key (it is the emergency heal).
+- **The rule:** Healing Wave's lower key is the top rank − 2, one rank higher while that rank would heal for less than
+  90% (the level penalty); Chain Heal's is the top rank − 1. The addon rewrites the lower macros when a rank is learned
+  or a level steps one up, out of combat, with a toast and an undo button. Undo keeps the old rank until that heal's
+  next rank.
+- The lower keys are always macros naming the rank (`Healing Wave(Rank 3)`): mouseover in the mouseover mode, the new
+  `help_click` body (plain `/cast`) in the click mode. The top keys keep naming the plain spell.
+- **Moved:** Flame Shock 1 → R, Lightning Bolt 2 → F, Purge 4 → Ctrl+4, Chain Lightning 3 → Ctrl+5 (the stance-bar
+  defaults on Ctrl+4/5 get the preview warning; 元に戻す restores them).
+- Portraits: unchanged. Mouse4/5 still cast Riptide / NS + Healing Wave (NS uses the top rank).
+- Layout 8 → 9 shows the one-time すべて配置 notice and moves nothing by itself. The Paladin and Warrior packs do not
+  change.
 
 ---
 

@@ -50,8 +50,12 @@ end
 -- L.old[slot] = a plan key (or a list of them) an earlier layout put in a button the plan no longer fills.
 -- L.gated = spell keys this character cannot have (another race's racial, set by applyRaces below): their buttons
 -- become unbound spare buttons (L.gatedSlots[slot] = true), so they leave no empty slot and bind no key.
+-- { key, lower = true } is the lower-rank key of a heal (L.lower[key], a shaman since layout 9): its slot has
+-- lower = key and no spell, is listed in L.lowerSlots[slot] = key and L.byLower[key], and bySpell keeps the heal's own slot.
 function ns.BuildLayout(L)
   L.slots, L.bySpell, L.byItem, L.byCombo, L.spare, L.gatedSlots = {}, {}, {}, {}, {}, {}
+  L.lowerSlots, L.byLower = {}, {}
+  L.lower = L.lower or {}
   local gated = L.gated or {}
   L.noSlot = L.noSlot or {}
   L.macros = L.macros or {}
@@ -85,11 +89,14 @@ function ns.BuildLayout(L)
         local combo = what:match("^!(%w+)$")
         local slot = {
           bar = bar.id, button = i, slot = slotNo, key = key, binding = binding,
-          spell = not item and not combo and what or nil, item = item, combo = combo,
-          standIn = opts.standIn, after = opts.after,
+          spell = not item and not combo and not opts.lower and what or nil, item = item, combo = combo,
+          standIn = opts.standIn, after = opts.after, lower = opts.lower and what or nil,
         }
         table.insert(L.slots, slot)
-        if item then
+        if slot.lower then
+          L.lowerSlots[slotNo] = what
+          L.byLower[what] = slot
+        elseif item then
           L.byItem[item] = slot
         elseif combo then
           L.byCombo[combo] = slot
@@ -111,6 +118,7 @@ function ns.BuildLayout(L)
         table.insert(L.slots, {
           bar = "main", button = s.button, slot = page.first + s.button - 1, mirror = true, page = n,
           pageSpell = page.spell, spell = s.spell, item = s.item, combo = s.combo, standIn = s.standIn, after = s.after,
+          lower = s.lower,
         })
       end
     end

@@ -14,6 +14,9 @@ P.sources = {
   wh_overview = "https://www.wowhead.com/forever/guide/classes/shaman/restoration/overview-pve-healer",
   wh_talents = "https://www.wowhead.com/forever/guide/classes/shaman/restoration/talent-builds-pve-healer",
   moba = "https://mobalytics.gg/wow-forever/classes/restoration-shaman-guide",
+  fc = "foreverchanges.pro/downranking (Vektor, updated 2026-10-16): the Forever downranking penalty",
+  dev1001 = "https://us.forums.blizzard.com/en/wow/t/2360696/4 (Blizzard, WoW Forever development notes, 2026-10-01: downranking penalty)",
+  f2371681 = "https://us.forums.blizzard.com/en/wow/t/2371681 (heals on party members of a different level)",
   simc_race = "simc-forever SpellDataDump, client 1.60.1.70938 (github.com/simulationcraft/simc-forever @1c895ad3, SpellDataDump/nonclass.txt: racials)",
 }
 

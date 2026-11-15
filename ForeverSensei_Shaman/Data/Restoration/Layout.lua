@@ -1,5 +1,6 @@
--- ForeverSensei_Shaman/Data/Restoration/Layout.lua: the fixed slot and key plan (layout version 8, since
--- ForeverSensei 0.8.1; "family blocks" since 0.7.0, layout 7). Spec: research/keybind-layout-v4.md (approved, commit 27b6754), which builds on
+-- ForeverSensei_Shaman/Data/Restoration/Layout.lua: the fixed slot and key plan (layout version 9, since
+-- ForeverSensei 0.10.0; "family blocks" since 0.7.0, layout 7). Spec: research/keybind-layout-v4.md (approved, commit
+-- 27b6754) and, for the heal-rank keys of layout 9, research/shaman-downranking.md (approved, option 1). Both build on
 -- research/keybind-layout.md (pull walkthroughs, reach tiers for small hands). The level-60 dungeon-healer layout
 -- comes first; lower levels use a subset of it, and a key never moves once its spell is learned (a reserved key stays
 -- empty until then).
@@ -7,21 +8,23 @@
 -- * Each modifier row splits into three blocks of neighbouring keys: 1-5, Q/E/R/F and Z/X/C. A family (spells for
 --   the same job) fills one block, so it sits together on the keyboard and, because button n is key n on bars 1-3,
 --   on screen. Frequency only picks a family's row and block and its order inside the block.
--- * The plain row is the core rotation and stays usage-driven: 1-5 the enemy spells (Flame Shock, Lightning Bolt,
---   Chain Lightning, Purge, Frost Shock), Q Earth Shock (interrupt), E/R/F the heals (Lesser Healing Wave, Chain
---   Heal, Healing Wave), Z Mana Potion, X Water Shield (Lightning Shield stands in until 20, then moves to Action
---   Bar 4), C Healthstone else Healing Potion.
+-- * The plain row is the core rotation. Layout 9 (0.10.0, Erika's request: lower heal ranks to save mana): 1-4 the
+--   heal ranks (1 Healing Wave, 2 a lower rank of it, 3 Chain Heal, 4 a lower rank of it; L.lower), 5 Frost Shock,
+--   Q/E the emergency pair (Earth Shock interrupt, Lesser Healing Wave), R/F Flame Shock and Lightning Bolt, Z Mana
+--   Potion, X Water Shield (Lightning Shield stands in until 20, then moves to Action Bar 4), C Healthstone else
+--   Healing Potion. Purge and Chain Lightning, the rare enemy spells, spill over to Ctrl+4 and Ctrl+5.
 -- * Shift 1-5 totem calls (Totemic Call, Call of the Elements, Call of the Ancestors, Call of the Spirits, Totemic
 --   Recall); Shift Q/E/R/F Fire (Flametongue Totem, Magma Totem, Searing Totem, Fire Nova: it only hits enemies near
 --   the active Fire totem); Shift Z/X/C Water (Mana Spring, Mana Tide, Healing Stream).
--- * Ctrl 1-3 travel (Ghost Wolf, Water Walking, Water Breathing; Ctrl+4 and Ctrl+5 spare); Ctrl Q/E/R/F Earth
+-- * Ctrl 1-3 travel (Ghost Wolf, Water Walking, Water Breathing; Ctrl+4 Purge and Ctrl+5 Chain Lightning since
+--   layout 9); Ctrl Q/E/R/F Earth
 --   (Earthbind, Stoneclaw, Stoneskin, Tremor); Ctrl Z/X/C Air (Grounding, Windfury Totem, Grace of Air).
 -- * Mouse pairs: Mouse4/5 Riptide and NS + Healing Wave; Shift the cures; Ctrl the cleansing totems.
 -- * Layout 8 (0.8.1, Erika's request): the Skyborne racials. Walk on Air on the middle mouse button (BUTTON3, no
 --   modifier; Shift and Ctrl+BUTTON3 stay unbound), Skysight clicked next to it. Both are race-gated (Data/Spells.lua
 --   races): for other races their buttons are unbound spare buttons (ns.BuildLayout L.gated).
--- * No key is the player's own any more (5, Shift+5 and Ctrl+5 are planned like every other key). Spare keys (Ctrl+4,
---   Ctrl+5) are bound to their empty buttons, so every key of the three rows works the same way.
+-- * No key is the player's own any more (5, Shift+5 and Ctrl+5 are planned like every other key). Since layout 9 no
+--   keyed button is spare; a spare key would be bound to its empty button, so every key works the same way.
 -- Bars (Blizzard_ActionBar in the Forever UI code; slot = (page - 1) * 12 + button):
 --   plain = Action Bar 1 ACTIONBUTTON (1-12); Shift = Action Bar 2 MULTIACTIONBAR1BUTTON (61-72); Ctrl = Action Bar 3
 --   MULTIACTIONBAR2BUTTON (49-60). All three sit at the bottom of the screen by default.
@@ -35,7 +38,8 @@
 --   clears what earlier layouts put there (L.old) and the clean-up button empties the buttons layout 6 filled
 --   (L.retired keepShown). Action Bar 7 (layout 3) stays retired: hidden and unbound.
 --   Things moved out of a planned slot go to the spare buttons (bar 4, bar 6, then bar 3) first.
--- Plan entries: a spell key; "@kind" an item macro (ForeverSensei/Data/Items.lua); "-" a spare button. The core builds
+-- Plan entries: a spell key; "@kind" an item macro (ForeverSensei/Data/Items.lua); "-" a spare button;
+-- { key, lower = true } the lower-rank key of a heal (L.lower). The core builds
 -- L.slots, L.bySpell, L.byItem and L.spare from L.plan (ns.BuildLayout in ForeverSensei/Core/Class.lua).
 local _, P = ...
 P.specs = P.specs or {}
@@ -74,7 +78,7 @@ L.retired = {
 }
 
 -- Bumped when slots or keys change: players who had the older layout get a one-time notice (Modules/Layout.lua).
-L.version = 8
+L.version = 9
 
 -- Every key the plan binds: the planned buttons' keys and the spare keyed buttons' keys.
 L.allowedKeys = {
@@ -89,8 +93,8 @@ L.allowedKeys = {
 -- One row per bar, button 1..12 left to right (button n = key n on the keyed bars).
 L.plan = {
   main = {
-    "flame_shock", "lightning_bolt", "chain_lightning", "purge", "frost_shock",
-    "earth_shock", "lesser_healing_wave", "chain_heal", "healing_wave",
+    "healing_wave", { "healing_wave", lower = true }, "chain_heal", { "chain_heal", lower = true }, "frost_shock",
+    "earth_shock", "lesser_healing_wave", "flame_shock", "lightning_bolt",
     "@mana", { "water_shield", standIn = "lightning_shield" }, "@health",
   },
   bar2 = {
@@ -99,7 +103,7 @@ L.plan = {
     "mana_spring_totem", "mana_tide_totem", "healing_stream_totem",
   },
   bar3 = {
-    "ghost_wolf", "water_walking", "water_breathing", "-", "-",
+    "ghost_wolf", "water_walking", "water_breathing", "purge", "chain_lightning",
     "earthbind_totem", "stoneclaw_totem", "stoneskin_totem", "tremor_totem",
     "grounding_totem", "windfury_totem", "grace_of_air_totem",
   },
@@ -114,9 +118,14 @@ L.plan = {
 }
 
 -- Families (research/keybind-layout-v4.md S1/S2): each keyed family fills one block of one row, or one mouse pair;
--- spill-overs are clicked on Action Bar 6. tools/check.py checks the plan against this list.
+-- spill-overs are clicked on Action Bar 6 or take the nearest spare keys (spillKeys). block "1-4", "QE", "RF5": the
+-- keys of a block that a family shares with another (layout 9's plain row). lower: members whose lower-rank key sits
+-- right after their own key. tools/check.py checks the plan against this list.
 L.families = {
-  { id = "damage", block = "1-5", row = "", members = { "flame_shock", "lightning_bolt", "chain_lightning", "purge", "frost_shock" } },
+  { id = "healranks", block = "1-4", row = "", lower = { "healing_wave", "chain_heal" }, members = { "healing_wave", "chain_heal" } },
+  { id = "emergency", block = "QE", row = "", members = { "earth_shock", "lesser_healing_wave" } },
+  { id = "enemy", block = "RF5", row = "", spill = { "purge", "chain_lightning" }, spillKeys = { "CTRL-4", "CTRL-5" },
+    members = { "flame_shock", "lightning_bolt", "frost_shock" } },
   { id = "calls", block = "1-5", row = "SHIFT-",
     members = { "totemic_call", "call_of_the_elements", "call_of_the_ancestors", "call_of_the_spirits", "totemic_recall" } },
   { id = "fire", block = "QERF", row = "SHIFT-", members = { "flametongue_totem", "magma_totem", "searing_totem", "fire_nova" } },
@@ -181,8 +190,24 @@ L.macroBodies = {
   interrupt_click = "#showtooltip {spell}\n/stopcasting\n/cast {spell}",
   nshw = "#showtooltip {spell}\n/cast {spell}\n/cast [@mouseover,help,nodead][help,nodead][@player] {heal}",
   nshw_click = "#showtooltip {spell}\n/cast {spell}\n/cast [help,nodead][@player] {heal}",
+  -- The lower-rank keys in click mode: targets exactly like a plain spell (your target, else Auto Self Cast).
+  help_click = "#showtooltip {spell}\n/cast {spell}",
 }
 L.macroVars = { heal = "healing_wave" }
+
+-- Lower-rank keys (layout 9, research/shaman-downranking.md Part 2): an always-macro naming "Name(Rank N)" (body help,
+-- or help_click in click mode), on the key right after the heal's own. The rank follows the known ranks: offset ranks
+-- below the highest known one, then one rank up while that rank keeps less than 90% of its Spell Healing bonus
+-- (full bonus for 17 levels after its learn level, then 5% less per level: Part 1). No rank (key empty) below
+-- minLevel, with fewer than two known ranks, or when that reaches the top rank. levels: the learn level of each rank
+-- (Data/Ranks.lua, from the simc dump; tools/check.py compares them). Nature's Swiftness (FS_NSHW) keeps the top rank.
+-- what / when: the texts of the lower-rank card (what also follows the heal's own card and the key page).
+L.lower = {
+  healing_wave = { macro = "FS_HW_LO", offset = 2, minLevel = 10, levels = { 1, 6, 12, 18, 24, 32, 40, 48, 56, 60 },
+    what = "spell.healing_wave.lower", when = "guide.healing.p9" },
+  chain_heal = { macro = "FS_CH_LO", offset = 1, levels = { 40, 46, 54 },
+    what = "spell.chain_heal.lower", when = "guide.healing.p9" },
+}
 
 -- Earlier layouts put these spells in buttons the plan no longer fills (spare now, or on Action Bar 5, which left the
 -- plan). A full apply clears such a button only while it still holds exactly that spell (or item macro) and it has
@@ -192,8 +217,8 @@ L.macroVars = { heal = "healing_wave" }
 -- 5-6 (2, 3, 4, 11) and on button 5 (Mana Tide Totem on Ctrl+5's button).
 -- Action Bar 6 (145-156): layout 3 (0.4.0) buttons 9, 10 and 12 (buttons 1-8 are planned again). Buttons 9 and 10
 -- hold the Skyborne racials since layout 8; for other races they are spare, so these entries still clear them there.
--- Action Bar 4 buttons 9-12 and Action Bar 3 buttons 4-5: layout 6's clicked spells there (and layout 4's Sentry
--- Totem).
+-- Action Bar 4 buttons 9-12: layout 6's clicked spells there (and layout 4's Sentry Totem). Action Bar 3 buttons 4-5
+-- (layout 6's Windfury Weapon and elixir) hold Purge and Chain Lightning since layout 9, so the plan replaces them.
 L.old = {
   [37] = "totemic_recall",
   [38] = "earthbind_totem",
@@ -214,8 +239,6 @@ L.old = {
   [34] = "call_of_the_spirits",
   [35] = "flametongue_totem",
   [36] = "sentry_totem",
-  [52] = "windfury_weapon",
-  [53] = "@elixir",
 }
 
 -- Keys whose default binding the preview explains (expected defaults, research/keybind-layout.md Q4).

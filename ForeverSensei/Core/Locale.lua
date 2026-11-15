@@ -56,6 +56,12 @@ end
 -- Ids of every text in source order, for the review tab: the class pack's (skills, guide, talents) first, then the
 -- core's. An English-only pack (no ja texts) has nothing to check.
 local ids
+-- A text as written, for the translation check and the report dialog: its placeholders ({key}) in light blue, so they
+-- are easy to see and to keep in a suggestion.
+function ns.Template(id, language)
+  return (ns.Raw(id, language):gsub("{(%w+)}", "|cff59c0ff{%1}|r"))
+end
+
 function ns.TextIds()
   if not ids then
     ids = {}

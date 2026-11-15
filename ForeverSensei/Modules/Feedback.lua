@@ -171,8 +171,8 @@ function Feedback.Open(id)
   local old = existing(id)
   dlg.id = id
   dlg.idText:SetText(id)
-  dlg.now:SetText(ns.Raw(id, "ja"))
-  dlg.en:SetText(ns.Raw(id, "en"))
+  dlg.now:SetText(ns.Template(id, "ja"))
+  dlg.en:SetText(ns.Template(id, "en"))
   dlg.reason = old and old.reason or Feedback.DEFAULT_REASON
   for _, b in ipairs(dlg.reasonButtons) do b:Refresh() end
   dlg.suggest.edit:SetText(old and old.suggestion or "")

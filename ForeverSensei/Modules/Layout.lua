@@ -47,11 +47,12 @@ Layout.SLOTS = {}
 for i = 1, 120 do table.insert(Layout.SLOTS, i) end
 for i = 145, 180 do table.insert(Layout.SLOTS, i) end
 
-local macroKeys -- macro name → spell key, "@kind" for the item macros, "!id" for the multi-spell macros
+local macroKeys -- macro name → spell key, "@kind" for the item macros, "!id" for the multi-spell macros, "~key" lower-rank keys
 local function macroKeyOf(name)
   if not macroKeys then
     macroKeys = {}
     for key, m in pairs(L().macros) do macroKeys[m] = key end
+    for key, lo in pairs(L().lower) do macroKeys[lo.macro] = "~" .. key end
     for id, c in pairs(L().combos) do macroKeys[c.macro] = "!" .. id end
     for kind, d in pairs(ns.ItemData.kinds) do macroKeys[d.macro] = "@" .. kind end
   end
@@ -123,10 +124,76 @@ function Layout.DesiredCombo(id)
   return { kind = "macro", combo = id, macro = c.macro, name = ns.T(c.label) }
 end
 
+-- Lower-rank keys (L.lower, a shaman's heals since layout 9; research/shaman-downranking.md Part 2).
+-- Share of a rank's Spell Healing bonus at the player's level: full for 17 levels after its learn level, then 5% less
+-- per level (Forever's rule, Part 1).
+function Layout.RankShare(learnLevel, level)
+  local share = 1 - (level - 17 - learnLevel) * 0.05
+  if share > 1 then return 1 end
+  if share < 0 then return 0 end
+  return share
+end
+
+-- The rank a heal's lower key casts. → rank number, spell id, pinned (true when an undo keeps it), or nil (key empty)
+function Layout.LowerRank(key)
+  local lo = L().lower[key]
+  local entry = lo and Spells.Get(key)
+  if not entry then return nil end
+  local level = Spells.PlayerLevel()
+  if lo.minLevel and level < lo.minLevel then return nil end
+  local known = Spells.KnownRanks(entry)
+  if #known < 2 then return nil end
+  local top = known[#known]
+  local pins = ns.char and ns.char.rankPin
+  local pin = pins and pins[key]
+  if pin then
+    if pin.top ~= top.id then
+      pins[key] = nil
+    else
+      for _, k in ipairs(known) do
+        if k.id == pin.id and k.id ~= top.id then return k.rank, k.id, true end
+      end
+      pins[key] = nil
+    end
+  end
+  local i = math.max(1, #known - lo.offset)
+  while i < #known do
+    local learn = lo.levels and lo.levels[known[i].rank]
+    if not learn or Layout.RankShare(learn, level) >= 0.9 then break end
+    i = i + 1
+  end
+  if i >= #known then return nil end
+  return known[i].rank, known[i].id, false
+end
+
+-- "Healing Wave(Rank 3)", as a lower macro names it.
+function Layout.LowerSpellName(key)
+  local rank = Layout.LowerRank(key)
+  return rank and (Spells.Get(key).name .. "(Rank " .. rank .. ")")
+end
+
+-- The lower macro's text: the help body in mouseover mode, help_click in click mode. nil while the key is empty.
+function Layout.LowerBody(key)
+  local name = Layout.LowerSpellName(key)
+  if not name then return nil end
+  local layout = L()
+  local kind = ns.settings.targeting == "mouseover" and "help" or "help_click"
+  return (layout.macroBodies[kind]:gsub("{(%w+)}", function(k) return k == "spell" and name or nil end))
+end
+
+function Layout.DesiredLower(key)
+  local rank, id = Layout.LowerRank(key)
+  if not rank then return nil end
+  local entry = Spells.Get(key)
+  return { kind = "macro", macro = L().lower[key].macro, lower = key, lowerKey = "~" .. key, id = id, rank = rank,
+    name = entry.name .. " (Rank " .. rank .. ")" }
+end
+
 -- The desired action of a planned slot. → desired or nil
 -- standIn: the spell this slot holds until its own spell is learned (Lightning Shield on X before Water Shield).
 -- after: the slot is only used once that spell is known (Lightning Shield's clickable slot after Water Shield).
 function Layout.DesiredFor(s)
+  if s.lower then return Layout.DesiredLower(s.lower) end
   if s.item then return Layout.DesiredItem(s.item) end
   if s.combo then return Layout.DesiredCombo(s.combo) end
   if s.after and not Spells.IsKnown(Spells.Get(s.after)) then return nil end
@@ -161,7 +228,11 @@ end
 function Layout.MacroBody(entry)
   local layout = L()
   local kind = layout.macroKind[entry.key] or "help"
-  if ns.settings.targeting ~= "mouseover" and layout.macroBodies[kind .. "_click"] then kind = kind .. "_click" end
+  -- Only an always-macro uses a _click body (in click mode the other spells are plain spells, and an existing macro
+  -- of theirs keeps its mouseover body).
+  if ns.settings.targeting ~= "mouseover" and layout.macroAlways[entry.key] and layout.macroBodies[kind .. "_click"] then
+    kind = kind .. "_click"
+  end
   -- {spell} is the spell itself; the spec's macroVars name the other spells a body casts ({heal} = healing_wave).
   local vars = { spell = Layout.MacroSpellName(entry) }
   for var, key in pairs(layout.macroVars) do
@@ -224,6 +295,10 @@ function Layout.RefreshMacros()
   end
   for key, name in pairs(L().macros) do refresh(name, Layout.MacroBody(Spells.Get(key))) end
   for id, c in pairs(L().combos) do refresh(c.macro, Layout.ComboBody(id)) end
+  for key, lo in pairs(L().lower) do
+    local body = Layout.LowerBody(key)
+    if body then refresh(lo.macro, body) end
+  end
   return n
 end
 
@@ -247,6 +322,17 @@ local function placeDesired(slot, d)
       put(slot)
     end
     return true, "item"
+  end
+  if d.lower then
+    local idx = writeMacro(L().lower[d.lower].macro, Layout.LowerBody(d.lower))
+    if idx then
+      call(API.pickupMacro, idx)
+      put(slot)
+      return true, false
+    end
+    call(API.pickupSpell, d.id)
+    put(slot)
+    return true, "spell"
   end
   if d.combo then
     local idx = Layout.EnsureComboMacro(d.combo)
@@ -328,9 +414,10 @@ local function slotWhere(s)
 end
 Layout.SlotWhere = slotWhere
 
--- A planned spell slot that has nothing to hold yet (its spell is not learned; item slots are always in use).
+-- A planned spell slot that has nothing to hold yet (its spell is not learned, or a lower-rank key with no rank yet;
+-- item slots are always in use).
 local function reservedUnknown(s)
-  return s.spell ~= nil and not Layout.DesiredFor(s)
+  return (s.spell ~= nil or s.lower ~= nil) and not Layout.DesiredFor(s)
 end
 
 -- Is this plan key a known spell with its own planned slot? Only those are cleared as duplicates.
@@ -370,7 +457,7 @@ local function retiredButtons(bar)
   return all
 end
 
--- Work out every change. onlyKey limits it to one spell (the card's 配置する button).
+-- Work out every change. onlyKey limits it to one spell (the card's 配置する button), or "~key" to a heal's lower-rank key.
 -- → plan { place, moves, clears, lost, binds, bars, hide }
 function Layout.BuildPlan(onlyKey)
   local layout = L()
@@ -380,7 +467,7 @@ function Layout.BuildPlan(onlyKey)
     local d = Layout.DesiredFor(s)
     -- A spell learned "after" another (Lightning Shield after Water Shield) moves with it, so it is not lost.
     -- A multi-spell macro comes with the spell it needs (the opener with Swift Judgement).
-    if d and (not onlyKey or (d.entry and d.entry.key == onlyKey) or s.after == onlyKey
+    if d and (not onlyKey or (d.entry and d.entry.key == onlyKey) or d.lowerKey == onlyKey or s.after == onlyKey
       or (s.combo and layout.combos[s.combo].needs == onlyKey)) then
       targets[s.slot] = d
     end
@@ -635,10 +722,24 @@ function Layout.Undo(record)
       b = table.remove(ns.char.backups)
     end
     -- Undoing a rank upgrade means the player wants the older rank in those slots: do not upgrade them again.
+    -- A lower-rank key keeps its old rank (a pin) until that heal's next rank or the next full apply.
+    local kept = {}
     if b.kind == "ranks" then
       for slot, saved in pairs(b.slots) do
         if saved and saved.type == "spell" then ns.char.keepRank[slot] = saved.id end
       end
+      for key, old in pairs(b.lower or {}) do
+        local entry = Spells.Get(key)
+        local _, top = Spells.KnownRank(entry)
+        local n = Spells.RankOf(entry, old)
+        if top and n and old ~= top then
+          ns.char.rankPin[key] = { id = old, top = top }
+          ns.char.lowerRanks[key] = old
+          local s = L().byLower[key]
+          table.insert(kept, ns.T("ui.rank.kept", { key = s and ns.KeyLabel(s.key) or "?", name = entry.name, n = n }))
+        end
+      end
+      if #kept > 0 then Layout.RefreshMacros() end
     end
     local skip = {}
     for i = #b.moves, 1, -1 do
@@ -661,10 +762,12 @@ function Layout.Undo(record)
       call(API.saveBindings, ok and set or 2)
     end
     for setting, old in pairs(b.bars) do call(API.setSetting, setting, old) end
+    local text = ns.T("ui.layout.undone")
+    if #kept > 0 then text = text .. "\n" .. table.concat(kept, "\n") end
     if #failed > 0 then
-      ns.UI.Toast(ns.T("ui.layout.undone") .. "\n" .. ns.T("ui.layout.unrestorable", { list = table.concat(failed, ", ") }), 15)
+      ns.UI.Toast(text .. "\n" .. ns.T("ui.layout.unrestorable", { list = table.concat(failed, ", ") }), 15)
     else
-      ns.UI.Toast(ns.T("ui.layout.undone"))
+      ns.UI.Toast(text)
     end
     if ns.UnitFrames then ns.UnitFrames.Refresh() end
     if ns.Guide and ns.Guide.Refresh then ns.Guide.Refresh() end
@@ -758,6 +861,17 @@ function Layout.Describe(plan)
   return lines
 end
 
+-- The full apply (the preview's すべて配置). It also ends the kept lower ranks (undone rank toasts): every lower-rank
+-- key goes back to the rank the rule picks. → backup record
+function Layout.ApplyAll()
+  local pinned = ns.char.rankPin and next(ns.char.rankPin) ~= nil
+  if pinned then ns.char.rankPin = {} end
+  local backup = Layout.Execute(Layout.BuildPlan())
+  if pinned then Layout.RefreshMacros() end
+  Layout.NoteLowerRanks()
+  return backup
+end
+
 -- Preview window for the full layout.
 local preview
 function Layout.Preview()
@@ -795,7 +909,7 @@ function Layout.Preview()
   preview.apply:SetScript("OnClick", function()
     preview:Hide()
     ns.OutOfCombat("layout", function()
-      Layout.Execute(Layout.BuildPlan())
+      Layout.ApplyAll()
       ns.UI.Toast(ns.T("ui.layout.applied"), 12)
       if ns.Guide and ns.Guide.Refresh then ns.Guide.Refresh() end
     end)
@@ -918,12 +1032,13 @@ function Layout.PlaceOne(entry)
 end
 
 -- Slots holding an older rank than the highest one the player knows, as a plain spell (macros are checked by
--- CheckMacroRank). Slots where the player undid an upgrade keep their rank. → { { slot, entry, old, new } }
+-- CheckMacroRank; a lower-rank key's slot holds a lower rank on purpose). Slots where the player undid an upgrade keep
+-- their rank. → { { slot, entry, old, new } }
 function Layout.OutdatedRanks()
   local list = {}
   local keep = ns.char and ns.char.keepRank or {}
   for _, slot in ipairs(Layout.SLOTS) do
-    local cur = Layout.Current(slot)
+    local cur = not L().lowerSlots[slot] and Layout.Current(slot)
     if cur and cur.type == "spell" and cur.planKey then
       if keep[slot] and keep[slot] ~= cur.id then keep[slot] = nil end
       local e = Spells.Get(cur.planKey)
@@ -991,8 +1106,30 @@ function Layout.CheckMacroRank(entry)
   return "failed"
 end
 
--- After learning a rank (and at login): upgrade the bar buttons and the macros, then confirm with a toast.
--- learned = entries with a new rank (nil at login: only a toast when buttons changed). Queued in combat.
+-- Remember the rank each lower-rank key casts now (ApplyNewRanks compares with it). → { key = { old, new } } changed keys
+function Layout.NoteLowerRanks()
+  local changed = {}
+  ns.char.lowerRanks = ns.char.lowerRanks or {}
+  for key in pairs(L().lower) do
+    local _, id = Layout.LowerRank(key)
+    local old = ns.char.lowerRanks[key]
+    if old and id and old ~= id then changed[key] = { old = old, new = id } end
+    ns.char.lowerRanks[key] = id
+  end
+  return changed
+end
+
+-- Does the lower-rank key's button hold its macro?
+local function lowerPlaced(key)
+  local s = L().byLower[key]
+  local cur = s and Layout.Current(s.slot)
+  return cur ~= nil and cur.type == "macro" and cur.macroName == L().lower[key].macro
+end
+Layout.LowerPlaced = lowerPlaced
+
+-- After learning a rank, a level-up of a class with lower-rank keys, and at login: upgrade the bar buttons and the
+-- macros, then confirm with a toast. learned = entries with a new rank (nil: only a toast when buttons or lower-rank
+-- keys changed). Queued in combat.
 function Layout.ApplyNewRanks(learned)
   ns.OutOfCombat("ranks", function()
     local n, backup = 0, nil
@@ -1012,6 +1149,26 @@ function Layout.ApplyNewRanks(learned)
       table.insert(lines, ns.T("ui.rank.learned", { names = table.concat(names, ", ") }))
     end
     if n > 0 then table.insert(lines, ns.T("ui.rank.upgraded", { n = n })) end
+    -- Lower-rank keys whose rank changed (a new rank moves them up one; a level-up can step them up): one line each,
+    -- under the same 元に戻す (it keeps the old rank on that key).
+    local changed, keys = Layout.NoteLowerRanks(), {}
+    for key in pairs(changed) do table.insert(keys, key) end
+    table.sort(keys, function(x, y) return L().byLower[x].slot < L().byLower[y].slot end)
+    for _, key in ipairs(keys) do
+      if lowerPlaced(key) then
+        local c = changed[key]
+        local entry = Spells.Get(key)
+        backup = backup or (function()
+          local b = { kind = "ranks", time = time and time() or 0, moves = {}, slots = {}, binds = {}, bars = {} }
+          pushBackup(b)
+          return b
+        end)()
+        backup.lower = backup.lower or {}
+        backup.lower[key] = c.old
+        table.insert(lines, ns.T("ui.rank.lower", { key = ns.KeyLabel(L().byLower[key].key), name = entry.name,
+          old = Spells.RankOf(entry, c.old), new = Spells.RankOf(entry, c.new) }))
+      end
+    end
     if #lines == 0 then return end
     if backup then
       ns.UI.Toast(table.concat(lines, "\n"), 15, ns.T("ui.btn.undo"), function() Layout.Undo(backup) end)
@@ -1020,6 +1177,59 @@ function Layout.ApplyNewRanks(learned)
     end
     if ns.Guide and ns.Guide.Refresh then ns.Guide.Refresh() end
   end)
+end
+
+-- The lower-rank card's 配置する button: the heal's lower-rank key (its macro), out of combat, asking before it
+-- replaces something else.
+function Layout.PlaceLower(key)
+  local s = L().byLower[key]
+  local entry = Spells.Get(key)
+  if not s or not entry then return end
+  local name = ns.T("ui.lower.card", { name = entry.name })
+  local where = Spells.SlotText(s)
+  if not Layout.LowerRank(key) then
+    ns.UI.Toast(ns.T("ui.place.unknown", { name = name }))
+    return
+  end
+  if ns.InCombat() then
+    ns.UI.Toast(ns.T("ui.combat.later"))
+    return
+  end
+  local plan = Layout.BuildPlan("~" .. key)
+  if Layout.IsEmptyPlan(plan) then
+    ns.UI.Toast(ns.T("ui.place.already", { name = name, where = where }))
+    return
+  end
+  local function go()
+    ns.OutOfCombat("place-~" .. key, function()
+      Layout.Execute(Layout.BuildPlan("~" .. key))
+      Layout.NoteLowerRanks()
+      ns.UI.Toast(ns.T("ui.place.done", { name = name, where = where }), 10)
+      if ns.Guide and ns.Guide.Refresh then ns.Guide.Refresh() end
+    end)
+  end
+  local warn = {}
+  for _, p in ipairs(plan.place) do
+    if p.old and not (p.old.type == "macro" and p.old.macroName == L().lower[key].macro) then
+      table.insert(warn, ns.T("ui.place.occupied", { where = slotWhere(p.where), old = Layout.Label(p.old) }))
+    end
+  end
+  for _, m in ipairs(plan.moves) do
+    table.insert(warn, ns.T("ui.place.moveto", { old = m.label, dest = slotWhere(m.toSlot) }))
+  end
+  for _, l in ipairs(plan.lost) do
+    table.insert(warn, ns.T("ui.place.lost", { old = l.label }))
+  end
+  for _, b in ipairs(plan.binds) do
+    if b.old and b.old ~= "" then
+      table.insert(warn, ns.T("ui.place.keybusy", { key = ns.KeyLabel(b.key), action = bindingName(b.old) }))
+    end
+  end
+  if #warn == 0 then
+    go()
+  else
+    ns.UI.Confirm(ns.T("ui.place.confirm", { name = name }) .. "\n\n" .. table.concat(warn, "\n"), ns.T("ui.btn.place"), go)
+  end
 end
 
 -- Switch between mouseover macros and plain spells, swapping what is on the bars in place.
@@ -1066,5 +1276,16 @@ ns.OnLogin(function()
       if Layout.IsEmptyPlan(Layout.BuildPlan()) then return end
       ns.UI.Confirm(ns.T("ui.layout.changed"), ns.T("ui.btn.applyall"), Layout.Preview)
     end)
+  end)
+end)
+
+-- A level-up can step a lower-rank key up (a rank far below the level loses its healing bonus): rewrite its macro and
+-- tell the player, and offer the lower-rank card the first time a key has something to cast. Inert for a class
+-- without lower-rank keys. UnitLevel can lag behind the event, so wait a moment.
+ns.On("PLAYER_LEVEL_UP", function()
+  if not ns.ready or not ns.Active() or not next(L().lower) then return end
+  C_Timer.After(1, function()
+    Layout.ApplyNewRanks()
+    if ns.NewSkill and ns.NewSkill.CheckLower then ns.NewSkill.CheckLower() end
   end)
 end)

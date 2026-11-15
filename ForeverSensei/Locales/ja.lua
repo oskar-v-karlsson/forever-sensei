@@ -126,6 +126,10 @@ ns.Locales.ja = {
 
   ["ui.rank.learned"] = "新しいランク：{names}",
   ["ui.rank.upgraded"] = "バーのボタン{n}個を新しいランクに入れ替えた。古いランクのままにしたい時は「元に戻す」を押そう。",
+  ["ui.rank.lower"] = "{key}：{name}はRank {old}からRank {new}になった。",
+  ["ui.rank.kept"] = "{key}：{name}はRank {n}のままにする。",
+  ["ui.lower.card"] = "{name}の低いランク",
+  ["ui.layout.lower"] = "{key}：{name} Rank {n}",
 
   ["ui.trainer.none"] = "今トレーナーで覚えられる新しいスキルはない。",
 

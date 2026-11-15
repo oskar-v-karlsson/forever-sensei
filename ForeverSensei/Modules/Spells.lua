@@ -70,6 +70,15 @@ function Spells.KnownRank(entry)
   return nil
 end
 
+-- Every known rank, lowest first. → { { rank = n, id = id }, ... }
+function Spells.KnownRanks(entry)
+  local out = {}
+  for i, id in ipairs(Spells.Ranks(entry)) do
+    if knownId(id) then table.insert(out, { rank = i, id = id }) end
+  end
+  return out
+end
+
 -- Known by the player (any rank)?
 function Spells.IsKnown(entry)
   if Spells.KnownRank(entry) then return true end
@@ -110,16 +119,18 @@ function Spells.LayoutSlot(entry)
 end
 
 -- "メインバー・キー 1" / "アクションバー 3（クリック）" / Totem Bar / passive
+function Spells.SlotText(slot)
+  local bar = ns.T("ui.bar." .. slot.bar)
+  if slot.key then
+    return ns.T("ui.where.key", { bar = bar, button = slot.button, key = ns.KeyLabel(slot.key) })
+  end
+  return ns.T("ui.where.click", { bar = bar, button = slot.button })
+end
+
 function Spells.WhereText(entry)
   local layout = ns.spec.layout
   local slot = Spells.LayoutSlot(entry)
-  if slot then
-    local bar = ns.T("ui.bar." .. slot.bar)
-    if slot.key then
-      return ns.T("ui.where.key", { bar = bar, button = slot.button, key = ns.KeyLabel(slot.key) })
-    end
-    return ns.T("ui.where.click", { bar = bar, button = slot.button })
-  end
+  if slot then return Spells.SlotText(slot) end
   local kind = layout.noSlot[entry.key]
   if kind then return ns.T("ui.where." .. kind) end
   return "?"

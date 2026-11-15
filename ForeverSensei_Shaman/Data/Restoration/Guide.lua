@@ -19,7 +19,7 @@ spec.guide = {
     { src = { "moba" } },
     { src = { "simc_race" } },
   } },
-  { id = "healing", verified = "2026-11-11", paragraphs = {
+  { id = "healing", verified = "2026-11-15", paragraphs = {
     { src = { "moba", "simc" } },
     { src = { "moba" } },
     { src = { "moba" } },
@@ -28,6 +28,10 @@ spec.guide = {
     { src = { "moba", "simc" } },
     { src = { "moba" } },
     { src = { "moba" } },
+    { src = { "moba", "simc" } },
+    { src = { "moba", "simc" } },
+    { src = { "fc", "dev1001" } },
+    { src = { "f2371681" } },
   } },
   { id = "damage", paragraphs = {
     { src = { "moba" } },

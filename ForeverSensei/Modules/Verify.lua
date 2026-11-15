@@ -121,7 +121,7 @@ function Verify.Run()
     local cur = ns.Layout.Current(slot.slot)
     local okB, action = false, nil
     if slot.key then okB, action = ns.Call("GetBindingAction", slot.key) end
-    add(string.format("  slot %3d %-24s now: %-28s %s", slot.slot, slot.spell or (slot.item and ("@" .. slot.item)) or ("!" .. slot.combo), ns.Layout.Label(cur),
+    add(string.format("  slot %3d %-24s now: %-28s %s", slot.slot, slot.spell or (slot.item and ("@" .. slot.item)) or (slot.lower and ("~" .. slot.lower)) or ("!" .. slot.combo), ns.Layout.Label(cur),
       slot.key and (slot.key .. "=" .. tostring(okB and action or "?")) or ""))
   end
   for _, bar in ipairs(layout.bars) do
@@ -178,6 +178,29 @@ function Verify.Run()
       end
     end
     if line then add(line) end
+  end
+  -- Lower-rank keys (research/shaman-downranking.md, "Verify in game" 1-3): the rank the rule picks, the rank the macro
+  -- casts (GetMacroSpell), and whether its button holds the macro.
+  local lowerKeys = {}
+  for key in pairs(layout.lower) do table.insert(lowerKeys, key) end
+  table.sort(lowerKeys, function(a, b) return layout.byLower[a].slot < layout.byLower[b].slot end)
+  for _, key in ipairs(lowerKeys) do
+    local lo, s = layout.lower[key], layout.byLower[key]
+    local rank, id, pinned = ns.Layout.LowerRank(key)
+    local head = string.format("  lower %s %s (%s):", tostring(s.key or "click"), lo.macro, key)
+    if not rank then
+      add(string.format("%s empty until level %d or the next rank", head, math.max(lo.minLevel or 1, lo.levels and lo.levels[2] or 1)))
+    else
+      local ok, idx = ns.Call("GetMacroIndexByName", lo.macro)
+      local casts
+      if ok and type(idx) == "number" and idx > 0 then
+        local okM, c = ns.Call("GetMacroSpell", idx)
+        casts = okM and c or nil
+      end
+      local line = string.format("%s Rank %d (%d)%s  casts %s  placed %s", head, rank, id, pinned and " kept" or "",
+        tostring(casts), tostring(ns.Layout.LowerPlaced(key)))
+      if casts and casts ~= id then bad(line .. "  (wrong rank)") else add(line .. (casts and "  ok" or "")) end
+    end
   end
   -- A planned macro button that holds the plain spell instead (left from click mode, or placed when the macro could
   -- not be made, e.g. no free character macro): the mouseover and self fallback don't work there. すべて配置 fixes it.

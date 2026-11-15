@@ -1,7 +1,10 @@
 # Downranked heals for Restoration (proposal v2, shaman pack)
 
-Status: **proposal for approval, revision 2**. Nothing here is built. Once Oskar approves it, a build task turns it
-into Restoration layout 9 (`ForeverSensei_Shaman`). The Paladin and Warrior packs do not change.
+Status: **approved, option 1** (commit `06e3ae3`; approved for Oskar while he was away), with the proposed answers
+to all open questions (see the answers at the end). Built in **0.10.0** as Restoration layout 9 (`ForeverSensei_Shaman`):
+`FS_HW_LO` and `FS_CH_LO`, the `help_click` body and the core lower-key paths. The source of truth for the grid is now
+`ForeverSensei_Shaman/Data/Restoration/Layout.lua`; the README has the grid and the in-game checklist. The Paladin and
+Warrior packs do not change.
 
 ## Why
 
@@ -578,6 +581,17 @@ key label from the layout, so the text follows the grid.
 7. Undo on a rank toast **pins** the lower key until the next rank of that heal (proposed), or only until the next
    level-up?
 8. The top keys keep naming the plain spell (proposed, today's tested path), or name their rank too?
+
+## Answers (approved for 0.10.0)
+
+1. **Option 1**: heal ranks on 1-4, Q/E unchanged, damage on R/F and 5.
+2. **Two** Healing Wave keys.
+3. **Top − 2 with the 90% step-up** for Healing Wave, **top − 1** for Chain Heal.
+4. Lesser Healing Wave keeps **one key** (no lower key).
+5. Healing Wave's lower key starts at level **10**.
+6. Purge on **Ctrl+4**, Chain Lightning on **Ctrl+5**.
+7. Undo on a rank toast **pins** the lower key until that heal's next rank.
+8. The top keys stay **unranked** (they name the plain spell).
 
 # (日本語) Erika へのまとめ
 
